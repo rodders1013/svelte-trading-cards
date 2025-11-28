@@ -1,0 +1,259 @@
+<script lang="ts">
+	import { CardCanvas } from '$lib';
+	import type { CardTemplate } from '$lib/types';
+	import type { ContainerState, ResizeHandle } from '../types';
+	import { getResizeCursor } from '../state.svelte';
+
+	let {
+		template,
+		previewData,
+		containers,
+		selectedContainerId = $bindable<string | null>(null),
+		zoomLevel,
+		showGrid,
+		canvasInteraction,
+		interactionContainerId,
+		activeResizeHandle,
+		isTransitioning,
+		canvasScale,
+		onStartDrag,
+		onStartResize
+	}: {
+		template: CardTemplate;
+		previewData: Record<string, unknown>;
+		containers: ContainerState[];
+		selectedContainerId: string | null;
+		zoomLevel: number;
+		showGrid: boolean;
+		canvasInteraction: 'idle' | 'dragging' | 'resizing';
+		interactionContainerId: string | null;
+		activeResizeHandle: ResizeHandle | null;
+		isTransitioning: boolean;
+		canvasScale: number;
+		onStartDrag: (e: PointerEvent, containerId: string) => void;
+		onStartResize: (e: PointerEvent, containerId: string, handle: ResizeHandle) => void;
+	} = $props();
+
+	const zoomScale = $derived(zoomLevel / 100);
+	const canvasWidth = $derived(375 * zoomScale);
+</script>
+
+<!-- Canvas Container (scrollable only when zoomed above 150%) -->
+<div class="{zoomLevel > 150 ? 'max-h-[calc(100vh-220px)] overflow-auto' : ''} rounded-xl border border-border bg-white p-4">
+	<div
+		class="relative overflow-hidden rounded-xl"
+		style="width: {canvasWidth}px; cursor: {canvasInteraction === 'dragging' ? 'grabbing' : canvasInteraction === 'resizing' && activeResizeHandle ? getResizeCursor(activeResizeHandle) : 'default'};"
+	>
+		<div class="aspect-[750/1050] w-full">
+			<CardCanvas {template} data={previewData} />
+		</div>
+
+		<!-- Grid Overlay -->
+		{#if showGrid}
+			<div class="pointer-events-none absolute inset-0">
+				<svg class="h-full w-full" viewBox="0 0 750 1050" preserveAspectRatio="none">
+					<defs>
+						<!-- 25px small grid (375/25=15, 525/25=21 - aligns with center) -->
+						<pattern id="grid-small" width="25" height="25" patternUnits="userSpaceOnUse">
+							<path d="M 25 0 L 0 0 0 25" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="0.5" />
+						</pattern>
+						<!-- 75px large grid (375/75=5, 525/75=7 - aligns with center) -->
+						<pattern id="grid-large" width="75" height="75" patternUnits="userSpaceOnUse">
+							<rect width="75" height="75" fill="url(#grid-small)" />
+							<path d="M 75 0 L 0 0 0 75" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="1" />
+						</pattern>
+					</defs>
+					<rect width="100%" height="100%" fill="url(#grid-large)" />
+					<!-- Center lines (more prominent) -->
+					<line x1="375" y1="0" x2="375" y2="1050" stroke="rgba(59,130,246,0.5)" stroke-width="1.5" />
+					<line x1="0" y1="525" x2="750" y2="525" stroke="rgba(59,130,246,0.5)" stroke-width="1.5" />
+				</svg>
+			</div>
+		{/if}
+
+		<!-- Selection overlay with drag/resize support -->
+		<div class="pointer-events-none absolute inset-0">
+			{#each containers as container (container.id)}
+				{@const scale = canvasScale}
+				{@const isSelected = selectedContainerId === container.id}
+				{@const isLocked = container.locked}
+				{@const isDraggingThis = canvasInteraction === 'dragging' && interactionContainerId === container.id}
+				{#if container.visible}
+					<!-- Zone overlay -->
+					<div
+						class="pointer-events-auto absolute {isSelected ? 'ring-1 ring-blue-400/50' : 'hover:ring-1 hover:ring-blue-300/40'} {isDraggingThis ? 'opacity-80' : ''}"
+						style="
+							left: {container.x * scale}px;
+							top: {container.y * scale}px;
+							width: {container.width * scale}px;
+							height: {container.height * scale}px;
+							cursor: {isLocked ? 'not-allowed' : isSelected ? 'grab' : 'pointer'};
+						"
+						role="button"
+						tabindex="0"
+						onpointerdown={(e) => {
+							if (isSelected && !isLocked) {
+								onStartDrag(e, container.id);
+							} else {
+								selectedContainerId = container.id;
+							}
+						}}
+						onkeydown={(e) => {
+							if (e.key === 'Enter' || e.key === ' ') {
+								selectedContainerId = container.id;
+							}
+						}}
+					>
+						<!-- Corner indicators for selected container -->
+						{#if isSelected}
+							<span class="absolute -left-px -top-px h-1.5 w-1.5 border-l border-t border-blue-400/70"></span>
+							<span class="absolute -right-px -top-px h-1.5 w-1.5 border-r border-t border-blue-400/70"></span>
+							<span class="absolute -bottom-px -left-px h-1.5 w-1.5 border-b border-l border-blue-400/70"></span>
+							<span class="absolute -bottom-px -right-px h-1.5 w-1.5 border-b border-r border-blue-400/70"></span>
+						{/if}
+						<span class="sr-only">Select {container.name}</span>
+					</div>
+
+					<!-- Resize handles (only for selected, unlocked containers, hidden while dragging/resizing/transitioning) -->
+					{#if isSelected && !isLocked && canvasInteraction === 'idle' && !isTransitioning}
+						{@const handleSize = 12}
+						{@const halfHandle = handleSize / 2}
+						<!-- Corner handles -->
+						<div
+							class="pointer-events-auto absolute rounded-full border-2 border-white bg-blue-500 transition-all hover:scale-110 hover:bg-blue-400"
+							style="
+								left: {container.x * scale - halfHandle}px;
+								top: {container.y * scale - halfHandle}px;
+								width: {handleSize}px;
+								height: {handleSize}px;
+								cursor: nwse-resize;
+							"
+							role="slider"
+							tabindex="0"
+							aria-label="Resize northwest"
+							aria-valuenow={container.width}
+							onpointerdown={(e) => onStartResize(e, container.id, 'nw')}
+						></div>
+						<div
+							class="pointer-events-auto absolute rounded-full border-2 border-white bg-blue-500 transition-all hover:scale-110 hover:bg-blue-400"
+							style="
+								left: {(container.x + container.width) * scale - halfHandle}px;
+								top: {container.y * scale - halfHandle}px;
+								width: {handleSize}px;
+								height: {handleSize}px;
+								cursor: nesw-resize;
+							"
+							role="slider"
+							tabindex="0"
+							aria-label="Resize northeast"
+							aria-valuenow={container.width}
+							onpointerdown={(e) => onStartResize(e, container.id, 'ne')}
+						></div>
+						<div
+							class="pointer-events-auto absolute rounded-full border-2 border-white bg-blue-500 transition-all hover:scale-110 hover:bg-blue-400"
+							style="
+								left: {container.x * scale - halfHandle}px;
+								top: {(container.y + container.height) * scale - halfHandle}px;
+								width: {handleSize}px;
+								height: {handleSize}px;
+								cursor: nesw-resize;
+							"
+							role="slider"
+							tabindex="0"
+							aria-label="Resize southwest"
+							aria-valuenow={container.width}
+							onpointerdown={(e) => onStartResize(e, container.id, 'sw')}
+						></div>
+						<div
+							class="pointer-events-auto absolute rounded-full border-2 border-white bg-blue-500 transition-all hover:scale-110 hover:bg-blue-400"
+							style="
+								left: {(container.x + container.width) * scale - halfHandle}px;
+								top: {(container.y + container.height) * scale - halfHandle}px;
+								width: {handleSize}px;
+								height: {handleSize}px;
+								cursor: nwse-resize;
+							"
+							role="slider"
+							tabindex="0"
+							aria-label="Resize southeast"
+							aria-valuenow={container.width}
+							onpointerdown={(e) => onStartResize(e, container.id, 'se')}
+						></div>
+						<!-- Edge handles -->
+						<div
+							class="pointer-events-auto absolute rounded-full border-2 border-white bg-blue-500 transition-all hover:scale-110 hover:bg-blue-400"
+							style="
+								left: {(container.x + container.width / 2) * scale - halfHandle}px;
+								top: {container.y * scale - halfHandle}px;
+								width: {handleSize}px;
+								height: {handleSize}px;
+								cursor: ns-resize;
+							"
+							role="slider"
+							tabindex="0"
+							aria-label="Resize north"
+							aria-valuenow={container.height}
+							onpointerdown={(e) => onStartResize(e, container.id, 'n')}
+						></div>
+						<div
+							class="pointer-events-auto absolute rounded-full border-2 border-white bg-blue-500 transition-all hover:scale-110 hover:bg-blue-400"
+							style="
+								left: {(container.x + container.width / 2) * scale - halfHandle}px;
+								top: {(container.y + container.height) * scale - halfHandle}px;
+								width: {handleSize}px;
+								height: {handleSize}px;
+								cursor: ns-resize;
+							"
+							role="slider"
+							tabindex="0"
+							aria-label="Resize south"
+							aria-valuenow={container.height}
+							onpointerdown={(e) => onStartResize(e, container.id, 's')}
+						></div>
+						<div
+							class="pointer-events-auto absolute rounded-full border-2 border-white bg-blue-500 transition-all hover:scale-110 hover:bg-blue-400"
+							style="
+								left: {container.x * scale - halfHandle}px;
+								top: {(container.y + container.height / 2) * scale - halfHandle}px;
+								width: {handleSize}px;
+								height: {handleSize}px;
+								cursor: ew-resize;
+							"
+							role="slider"
+							tabindex="0"
+							aria-label="Resize west"
+							aria-valuenow={container.width}
+							onpointerdown={(e) => onStartResize(e, container.id, 'w')}
+						></div>
+						<div
+							class="pointer-events-auto absolute rounded-full border-2 border-white bg-blue-500 transition-all hover:scale-110 hover:bg-blue-400"
+							style="
+								left: {(container.x + container.width) * scale - halfHandle}px;
+								top: {(container.y + container.height / 2) * scale - halfHandle}px;
+								width: {handleSize}px;
+								height: {handleSize}px;
+								cursor: ew-resize;
+							"
+							role="slider"
+							tabindex="0"
+							aria-label="Resize east"
+							aria-valuenow={container.width}
+							onpointerdown={(e) => onStartResize(e, container.id, 'e')}
+						></div>
+					{/if}
+				{/if}
+			{/each}
+		</div>
+	</div>
+</div>
+
+<style>
+	:global(.aspect-\[750\/1050\]) {
+		display: block;
+	}
+	:global(.aspect-\[750\/1050\] svg) {
+		display: block;
+		width: 100%;
+		height: 100%;
+	}
+</style>

@@ -1,0 +1,81 @@
+{
+	"name": "Cosmic Voyagers",
+	"description": "Different data set for testing gallery rendering - Space theme",
+	"cards": [
+		{
+			"id": "gallery-1",
+			"title": "Phoenix Rising",
+			"subtitle": "Rebirth Champion",
+			"description": "Born from the ashes of a dying star, this entity represents eternal renewal.",
+			"imageUrl": "https://picsum.photos/seed/phoenix/400/300",
+			"category": "Cosmic",
+			"rarity": "epic",
+			"date": "2024-05-12",
+			"stats": [
+				{ "label": "PWR", "value": "88" },
+				{ "label": "RES", "value": "75" },
+				{ "label": "INT", "value": "92" }
+			]
+		},
+		{
+			"id": "gallery-2",
+			"title": "Ice Wizard",
+			"subtitle": "Frost Master",
+			"description": "Commands the frozen winds of the polar vortex with absolute precision.",
+			"imageUrl": "https://picsum.photos/seed/ice/400/300",
+			"category": "Mage",
+			"rarity": "uncommon",
+			"date": "2024-06-18",
+			"stats": [
+				{ "label": "PWR", "value": "72" },
+				{ "label": "RES", "value": "55" },
+				{ "label": "INT", "value": "85" }
+			]
+		},
+		{
+			"id": "gallery-3",
+			"title": "Nebula Knight",
+			"subtitle": "Star Guardian",
+			"description": "Armored in condensed starlight, defending galaxies from the void.",
+			"imageUrl": "https://picsum.photos/seed/nebula/400/300",
+			"category": "Guardian",
+			"rarity": "legendary",
+			"date": "2024-07-22",
+			"stats": [
+				{ "label": "PWR", "value": "90" },
+				{ "label": "RES", "value": "95" },
+				{ "label": "INT", "value": "78" }
+			]
+		},
+		{
+			"id": "gallery-4",
+			"title": "Void Walker",
+			"subtitle": "Space Drifter",
+			"description": "Traverses the emptiness between stars, seeking lost civilizations.",
+			"imageUrl": "https://picsum.photos/seed/void/400/300",
+			"category": "Explorer",
+			"rarity": "rare",
+			"date": "2024-08-30",
+			"stats": [
+				{ "label": "PWR", "value": "65" },
+				{ "label": "RES", "value": "60" },
+				{ "label": "INT", "value": "88" }
+			]
+		},
+		{
+			"id": "gallery-5",
+			"title": "Asteroid Miner",
+			"subtitle": "Resource Gatherer",
+			"description": "A hardworking soul extracting precious minerals from space rocks.",
+			"imageUrl": "https://picsum.photos/seed/asteroid/400/300",
+			"category": "Worker",
+			"rarity": "common",
+			"date": "2024-09-14",
+			"stats": [
+				{ "label": "PWR", "value": "45" },
+				{ "label": "RES", "value": "70" },
+				{ "label": "INT", "value": "50" }
+			]
+		}
+	]
+}

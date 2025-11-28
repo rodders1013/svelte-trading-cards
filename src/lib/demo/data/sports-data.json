@@ -1,0 +1,51 @@
+{
+	"name": "Sports Legends",
+	"description": "Third data set to prove flexibility - Sports theme",
+	"cards": [
+		{
+			"id": "sports-1",
+			"title": "Thunder Striker",
+			"subtitle": "Goal Machine",
+			"description": "Holds the record for most goals scored in a single season.",
+			"imageUrl": "https://picsum.photos/seed/soccer/400/300",
+			"category": "Forward",
+			"rarity": "legendary",
+			"date": "2024-10-01",
+			"stats": [
+				{ "label": "GOL", "value": "98" },
+				{ "label": "PAS", "value": "75" },
+				{ "label": "STA", "value": "85" }
+			]
+		},
+		{
+			"id": "sports-2",
+			"title": "Iron Wall",
+			"subtitle": "Defensive Rock",
+			"description": "Has never let an opponent pass in over 50 matches.",
+			"imageUrl": "https://picsum.photos/seed/defense/400/300",
+			"category": "Defender",
+			"rarity": "epic",
+			"date": "2024-10-15",
+			"stats": [
+				{ "label": "GOL", "value": "20" },
+				{ "label": "PAS", "value": "65" },
+				{ "label": "STA", "value": "95" }
+			]
+		},
+		{
+			"id": "sports-3",
+			"title": "Swift Runner",
+			"subtitle": "Speed Demon",
+			"description": "Fastest player on the field with incredible acceleration.",
+			"imageUrl": "https://picsum.photos/seed/runner/400/300",
+			"category": "Midfielder",
+			"rarity": "rare",
+			"date": "2024-11-01",
+			"stats": [
+				{ "label": "GOL", "value": "55" },
+				{ "label": "PAS", "value": "80" },
+				{ "label": "STA", "value": "90" }
+			]
+		}
+	]
+}
