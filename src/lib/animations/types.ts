@@ -16,7 +16,8 @@ export const AnimationType = z.enum([
 	'shake',
 	'float',
 	'glow',
-	'ping'
+	'ping',
+	'trace'
 ]);
 export type AnimationType = z.infer<typeof AnimationType>;
 

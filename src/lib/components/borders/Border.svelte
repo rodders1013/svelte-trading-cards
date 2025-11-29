@@ -1,6 +1,7 @@
 <script lang="ts" module>
 	import { z } from 'zod';
 	import { AnimationConfigSchema } from '$lib/animations/types.js';
+	import { EffectConfigSchema } from '$lib/effects/types.js';
 
 	const GlowEffectSchema = z.object({
 		color: z.string().optional(),
@@ -24,7 +25,8 @@
 		layers: z.number().min(1).max(5).optional(),
 		layerColors: z.array(z.string()).optional(),
 		layerSpacing: z.number().default(4),
-		animation: AnimationConfigSchema.optional()
+		animation: AnimationConfigSchema.optional(),
+		effect: EffectConfigSchema.optional()
 	});
 
 	export type BorderProps = z.infer<typeof BorderPropsSchema>;
@@ -35,6 +37,7 @@
 <script lang="ts">
 	import type { ContainerContext, CardData } from '$lib/types';
 	import { AnimationWrapper } from '$lib/animations/index.js';
+	import { EffectWrapper } from '$lib/effects/index.js';
 
 	let {
 		color = '#ffffff',
@@ -46,6 +49,7 @@
 		layerColors,
 		layerSpacing = 4,
 		animation,
+		effect,
 		container,
 		data
 	}: BorderProps & {
@@ -290,34 +294,36 @@
 	{/if}
 {/snippet}
 
-<AnimationWrapper {animation} transformOrigin="{centerX}px {centerY}px">
-	<!-- Glow layer (rendered behind main border) -->
-	{#if glow}
-		{@render borderShape(
-			borderData,
-			glowColor,
-			glowAnimated ? 1 : glowIntensity,
-			{
-				filter: `url(#${filterId})`,
-				class: glowAnimated ? 'glow-pulse' : undefined,
-				style: glowAnimated ? `--glow-intensity: ${glowIntensity}; --glow-speed: ${glowSpeed}s;` : undefined
-			}
-		)}
-	{/if}
+<EffectWrapper {effect} transformOrigin="{centerX}px {centerY}px">
+	<AnimationWrapper {animation} transformOrigin="{centerX}px {centerY}px">
+		<!-- Glow layer (rendered behind main border) -->
+		{#if glow}
+			{@render borderShape(
+				borderData,
+				glowColor,
+				glowAnimated ? 1 : glowIntensity,
+				{
+					filter: `url(#${filterId})`,
+					class: glowAnimated ? 'glow-pulse' : undefined,
+					style: glowAnimated ? `--glow-intensity: ${glowIntensity}; --glow-speed: ${glowSpeed}s;` : undefined
+				}
+			)}
+		{/if}
 
-	<!-- Multi-layer borders (mythic effect) -->
-	{#if layerCount > 1}
-		{#each Array(layerCount) as _, i (i)}
-			{@const layerData = getBorderPathData(i * layerSpacing)}
-			{@const layerColor = effectiveLayerColors[i] ?? color}
-			{@const layerOpacity = opacity * (1 - i * 0.15)}
-			{@render borderShape(layerData, layerColor, layerOpacity)}
-		{/each}
-	{:else}
-		<!-- Single border -->
-		{@render borderShape(borderData, holographic ? `url(#${gradientId})` : color, opacity)}
-	{/if}
-</AnimationWrapper>
+		<!-- Multi-layer borders (mythic effect) -->
+		{#if layerCount > 1}
+			{#each Array(layerCount) as _, i (i)}
+				{@const layerData = getBorderPathData(i * layerSpacing)}
+				{@const layerColor = effectiveLayerColors[i] ?? color}
+				{@const layerOpacity = opacity * (1 - i * 0.15)}
+				{@render borderShape(layerData, layerColor, layerOpacity)}
+			{/each}
+		{:else}
+			<!-- Single border -->
+			{@render borderShape(borderData, holographic ? `url(#${gradientId})` : color, opacity)}
+		{/if}
+	</AnimationWrapper>
+</EffectWrapper>
 
 <style>
 	@keyframes glow-pulse {

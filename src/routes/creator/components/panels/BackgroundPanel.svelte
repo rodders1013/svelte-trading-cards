@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { Button } from '$lib/components/ui/button';
 	import AnimationControls from '../AnimationControls.svelte';
+	import EffectsControls from '../EffectsControls.svelte';
 	import type { BackgroundComponent } from '../../types';
 
 	let {
@@ -61,7 +62,7 @@
 							<input
 								type="color"
 								value={component.solidColor ?? '#1e293b'}
-								onchange={(e) => onUpdate('solidColor', (e.target as HTMLInputElement).value)}
+								oninput={(e) => onUpdate('solidColor', (e.target as HTMLInputElement).value)}
 								class="h-8 w-full cursor-pointer rounded"
 							/>
 						</div>
@@ -96,7 +97,7 @@
 								<input
 									type="color"
 									value={component.gradientColors?.[0] ?? '#1e293b'}
-									onchange={(e) => onUpdate('gradientColors', [(e.target as HTMLInputElement).value, component.gradientColors?.[1] ?? '#0f172a'])}
+									oninput={(e) => onUpdate('gradientColors', [(e.target as HTMLInputElement).value, component.gradientColors?.[1] ?? '#0f172a'])}
 									class="h-8 w-full cursor-pointer rounded"
 								/>
 							</div>
@@ -105,7 +106,7 @@
 								<input
 									type="color"
 									value={component.gradientColors?.[1] ?? '#0f172a'}
-									onchange={(e) => onUpdate('gradientColors', [component.gradientColors?.[0] ?? '#1e293b', (e.target as HTMLInputElement).value])}
+									oninput={(e) => onUpdate('gradientColors', [component.gradientColors?.[0] ?? '#1e293b', (e.target as HTMLInputElement).value])}
 									class="h-8 w-full cursor-pointer rounded"
 								/>
 							</div>
@@ -151,7 +152,7 @@
 							<input
 								type="color"
 								value={component.patternColor ?? '#ffffff'}
-								onchange={(e) => onUpdate('patternColor', (e.target as HTMLInputElement).value)}
+								oninput={(e) => onUpdate('patternColor', (e.target as HTMLInputElement).value)}
 								class="h-8 w-full cursor-pointer rounded"
 							/>
 						</div>
@@ -172,6 +173,7 @@
 			</div>
 
 			<AnimationControls bind:animation={component.animation} />
+			<EffectsControls bind:effect={component.effect} />
 		</div>
 	{/if}
 </div>

@@ -1,6 +1,7 @@
 <script lang="ts" module>
 	import { z } from 'zod';
 	import { AnimationConfigSchema } from '$lib/animations/types.js';
+	import { EffectConfigSchema } from '$lib/effects/types.js';
 
 	// IconifyIcon data format
 	export const IconDataSchema = z.object({
@@ -20,7 +21,8 @@
 		rotation: z.number().default(0), // Degrees
 		flipHorizontal: z.boolean().default(false),
 		flipVertical: z.boolean().default(false),
-		animation: AnimationConfigSchema.optional()
+		animation: AnimationConfigSchema.optional(),
+		effect: EffectConfigSchema.optional()
 	});
 
 	export type IconData = z.infer<typeof IconDataSchema>;
@@ -30,6 +32,7 @@
 <script lang="ts">
 	import type { ContainerContext, CardData } from '$lib/types';
 	import { AnimationWrapper } from '$lib/animations/index.js';
+	import { EffectWrapper } from '$lib/effects/index.js';
 
 	let {
 		iconData,
@@ -41,6 +44,7 @@
 		flipHorizontal = false,
 		flipVertical = false,
 		animation,
+		effect,
 		container,
 		data
 	}: IconProps & {
@@ -90,23 +94,25 @@
 </script>
 
 {#if iconData?.body}
-	<AnimationWrapper {animation} transformOrigin="{centerX}px {centerY}px">
-		<g transform={transform} opacity={opacity}>
-			<svg
-				x={x}
-				y={y}
-				width={iconSize}
-				height={iconSize}
-				viewBox={viewBox}
-				fill="none"
-				xmlns="http://www.w3.org/2000/svg"
-			>
-				<g fill={color} style="color: {color}">
-					{@html iconData.body}
-				</g>
-			</svg>
-		</g>
-	</AnimationWrapper>
+	<EffectWrapper {effect} transformOrigin="{centerX}px {centerY}px">
+		<AnimationWrapper {animation} transformOrigin="{centerX}px {centerY}px">
+			<g transform={transform} opacity={opacity}>
+				<svg
+					x={x}
+					y={y}
+					width={iconSize}
+					height={iconSize}
+					viewBox={viewBox}
+					fill="none"
+					xmlns="http://www.w3.org/2000/svg"
+				>
+					<g fill={color} style="color: {color}">
+						{@html iconData.body}
+					</g>
+				</svg>
+			</g>
+		</AnimationWrapper>
+	</EffectWrapper>
 {:else}
 	<!-- Placeholder when no icon selected -->
 	<g opacity={0.3}>

@@ -175,6 +175,17 @@
 - [x] CSS embedded in SVG `<defs>` for portability
 - [x] Animated in preview and SVG export, static on PNG export
 
+### Effects System - COMPLETE
+- [x] Reusable SVG filter effects utility (EffectWrapper component)
+- [x] Effect types: glow, shadow, neon, innerGlow, lift, outline
+- [x] All effects support animation (pulsing) via existing animation system
+- [x] Speed control for animated effects: slow, normal, fast
+- [x] Effect-specific controls (color, blur, intensity, spread, offset, elevation, width)
+- [x] All components with effect support (Icon, TextField, Image, Border, GradientBackground, PatternBackground)
+- [x] EffectsControls panel for visual creator
+- [x] Color presets for each effect type
+- [x] Effects embedded in SVG via inline filters
+
 ### Field Components
 - [ ] TitleField (styled presets)
 - [ ] DetailRow (label/value pairs)
@@ -183,7 +194,7 @@
 ### Decoration Components
 - [ ] RarityBadge (common/rare/epic/legendary/mythic)
 - [ ] Emblem (star/crown/shield/diamond)
-- [ ] GlowEffect (radial glow overlay)
+- [x] GlowEffect (replaced by Effects System with glow, neon, shadow, etc.)
 
 ### Layer Features
 - [ ] Blend modes support (multiply, screen, overlay)
@@ -240,6 +251,11 @@ src/lib/
 │   ├── presets.ts          # Animation presets (spin, pulse, bounce, etc.)
 │   ├── styles.ts           # CSS keyframes & classes for SVG injection
 │   └── AnimationWrapper.svelte # Wrapper component for animated SVG elements
+├── effects/
+│   ├── index.ts            # Effect exports
+│   ├── types.ts            # Effect types & schemas (glow, shadow, neon, etc.)
+│   ├── presets.ts          # Effect presets & color options
+│   └── EffectWrapper.svelte # Wrapper component for SVG filter effects
 ├── core/
 │   ├── index.ts            # Core exports
 │   ├── CardCanvas.svelte   # Main renderer
@@ -293,6 +309,7 @@ src/routes/
         ├── PropertiesPanel.svelte      # Right sidebar wrapper
         ├── ZoneProperties.svelte       # Zone position/size/shape settings
         ├── AnimationControls.svelte    # Reusable animation panel
+        ├── EffectsControls.svelte      # Reusable effects panel
         ├── HelpModal.svelte            # Keyboard shortcuts modal
         └── panels/
             ├── TextPanel.svelte        # Text component properties

@@ -1,12 +1,14 @@
 <script lang="ts" module>
 	import { z } from 'zod';
 	import { AnimationConfigSchema } from '$lib/animations/types.js';
+	import { EffectConfigSchema } from '$lib/effects/types.js';
 
 	export const GradientBackgroundPropsSchema = z.object({
 		colors: z.array(z.string()).min(2).max(4),
 		opacity: z.number().min(0).max(1).default(1),
 		direction: z.enum(['vertical', 'horizontal', 'diagonal']).default('vertical'),
-		animation: AnimationConfigSchema.optional()
+		animation: AnimationConfigSchema.optional(),
+		effect: EffectConfigSchema.optional()
 	});
 
 	export type GradientBackgroundProps = z.infer<typeof GradientBackgroundPropsSchema>;
@@ -15,12 +17,14 @@
 <script lang="ts">
 	import type { ContainerContext, CardData } from '$lib/types';
 	import { AnimationWrapper } from '$lib/animations/index.js';
+	import { EffectWrapper } from '$lib/effects/index.js';
 
 	let {
 		colors,
 		opacity = 1,
 		direction = 'vertical',
 		animation,
+		effect,
 		container,
 		data
 	}: GradientBackgroundProps & {
@@ -56,14 +60,16 @@
 	</linearGradient>
 </defs>
 
-<AnimationWrapper {animation} transformOrigin="{centerX}px {centerY}px">
-	<rect
-		x="0"
-		y="0"
-		width={container.width}
-		height={container.height}
-		rx={container.radius}
-		fill="url(#{gradientId})"
-		{opacity}
-	/>
-</AnimationWrapper>
+<EffectWrapper {effect} transformOrigin="{centerX}px {centerY}px">
+	<AnimationWrapper {animation} transformOrigin="{centerX}px {centerY}px">
+		<rect
+			x="0"
+			y="0"
+			width={container.width}
+			height={container.height}
+			rx={container.radius}
+			fill="url(#{gradientId})"
+			{opacity}
+		/>
+	</AnimationWrapper>
+</EffectWrapper>

@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { Button } from '$lib/components/ui/button';
 	import AnimationControls from '../AnimationControls.svelte';
+	import EffectsControls from '../EffectsControls.svelte';
 	import type { TextComponent } from '../../types';
 	import { dataFields, fontFamilies } from '../../types';
 
@@ -139,23 +140,16 @@
 
 			<div>
 				<label class="text-sm text-muted-foreground">Color</label>
-				<div class="flex gap-2">
-					<input
-						type="color"
-						value={component.fill}
-						onchange={(e) => onUpdate('fill', (e.target as HTMLInputElement).value)}
-						class="h-8 w-12 cursor-pointer rounded"
-					/>
-					<input
-						type="text"
-						value={component.fill}
-						onchange={(e) => onUpdate('fill', (e.target as HTMLInputElement).value)}
-						class="flex-1 rounded border border-input bg-background px-2 py-1 font-mono text-sm"
-					/>
-				</div>
+				<input
+					type="color"
+					value={component.fill}
+					oninput={(e) => onUpdate('fill', (e.target as HTMLInputElement).value)}
+					class="h-8 w-full cursor-pointer rounded"
+				/>
 			</div>
 
 			<AnimationControls bind:animation={component.animation} />
+			<EffectsControls bind:effect={component.effect} />
 		</div>
 	{/if}
 </div>

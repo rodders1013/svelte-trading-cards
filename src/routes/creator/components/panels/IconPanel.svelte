@@ -3,6 +3,7 @@
 	import { IconPicker } from '$lib/components/icons';
 	import type { IconData } from '$lib/components/icons';
 	import AnimationControls from '../AnimationControls.svelte';
+	import EffectsControls from '../EffectsControls.svelte';
 	import type { IconComponent } from '../../types';
 
 	let {
@@ -54,20 +55,12 @@
 					<!-- Color -->
 					<div>
 						<label class="text-sm text-muted-foreground">Color</label>
-						<div class="flex gap-2">
-							<input
-								type="color"
-								value={component.color}
-								onchange={(e) => onUpdate('color', (e.target as HTMLInputElement).value)}
-								class="h-8 w-12 cursor-pointer rounded"
-							/>
-							<input
-								type="text"
-								value={component.color}
-								onchange={(e) => onUpdate('color', (e.target as HTMLInputElement).value)}
-								class="flex-1 rounded border border-input bg-background px-2 py-1 text-sm"
-							/>
-						</div>
+						<input
+							type="color"
+							value={component.color}
+							oninput={(e) => onUpdate('color', (e.target as HTMLInputElement).value)}
+							class="h-8 w-full cursor-pointer rounded"
+						/>
 					</div>
 
 					<!-- Size & Opacity -->
@@ -133,6 +126,7 @@
 					</div>
 
 					<AnimationControls bind:animation={component.animation} />
+					<EffectsControls bind:effect={component.effect} />
 				</div>
 			{/if}
 		</div>

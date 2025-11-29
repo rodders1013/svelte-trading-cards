@@ -90,7 +90,7 @@
 					</select>
 				</div>
 
-				{#if animation.type === 'spin'}
+				{#if animation.type === 'spin' || animation.type === 'trace'}
 					<div>
 						<span class="text-sm text-muted-foreground">Direction</span>
 						<select

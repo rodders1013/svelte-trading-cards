@@ -137,6 +137,9 @@ export function buildTemplate(templateName: string, containers: ContainerState[]
 					if (comp.animation && comp.animation.type !== 'none') {
 						solidProps.animation = comp.animation;
 					}
+					if (comp.effect) {
+						solidProps.effect = comp.effect;
+					}
 					children.push({
 						id: `${comp.id}-fill`,
 						type: 'SolidBackground',
@@ -150,6 +153,9 @@ export function buildTemplate(templateName: string, containers: ContainerState[]
 					};
 					if (comp.animation && comp.animation.type !== 'none') {
 						gradientProps.animation = comp.animation;
+					}
+					if (comp.effect) {
+						gradientProps.effect = comp.effect;
 					}
 					children.push({
 						id: `${comp.id}-fill`,
@@ -167,6 +173,9 @@ export function buildTemplate(templateName: string, containers: ContainerState[]
 					if (comp.animation && comp.animation.type !== 'none') {
 						patternProps.animation = comp.animation;
 					}
+					if (comp.effect) {
+						patternProps.effect = comp.effect;
+					}
 					children.push({
 						id: `${comp.id}-pattern`,
 						type: 'PatternBackground',
@@ -181,6 +190,9 @@ export function buildTemplate(templateName: string, containers: ContainerState[]
 				};
 				if (comp.animation && comp.animation.type !== 'none') {
 					imageProps.animation = comp.animation;
+				}
+				if (comp.effect) {
+					imageProps.effect = comp.effect;
 				}
 				children.push({
 					id: comp.id,
@@ -200,6 +212,9 @@ export function buildTemplate(templateName: string, containers: ContainerState[]
 				};
 				if (comp.animation && comp.animation.type !== 'none') {
 					textProps.animation = comp.animation;
+				}
+				if (comp.effect) {
+					textProps.effect = comp.effect;
 				}
 				children.push({
 					id: comp.id,
@@ -237,6 +252,9 @@ export function buildTemplate(templateName: string, containers: ContainerState[]
 				if (comp.animation && comp.animation.type !== 'none') {
 					borderProps.animation = comp.animation;
 				}
+				if (comp.effect) {
+					borderProps.effect = comp.effect;
+				}
 				children.push({
 					id: comp.id,
 					type: 'Border',
@@ -256,6 +274,9 @@ export function buildTemplate(templateName: string, containers: ContainerState[]
 					};
 					if (comp.animation && comp.animation.type !== 'none') {
 						iconProps.animation = comp.animation;
+					}
+					if (comp.effect) {
+						iconProps.effect = comp.effect;
 					}
 					children.push({
 						id: comp.id,

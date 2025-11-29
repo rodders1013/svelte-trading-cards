@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { Button } from '$lib/components/ui/button';
 	import AnimationControls from '../AnimationControls.svelte';
+	import EffectsControls from '../EffectsControls.svelte';
 	import type { BorderComponent } from '../../types';
 
 	let {
@@ -49,7 +50,7 @@
 					<input
 						type="color"
 						value={component.color}
-						onchange={(e) => onUpdate('color', (e.target as HTMLInputElement).value)}
+						oninput={(e) => onUpdate('color', (e.target as HTMLInputElement).value)}
 						class="h-8 w-full cursor-pointer rounded"
 					/>
 				</div>
@@ -93,7 +94,7 @@
 							<input
 								type="color"
 								value={component.glow.color}
-								onchange={(e) => onUpdateGlow('color', (e.target as HTMLInputElement).value)}
+								oninput={(e) => onUpdateGlow('color', (e.target as HTMLInputElement).value)}
 								class="h-7 w-full cursor-pointer rounded"
 							/>
 						</div>
@@ -149,7 +150,7 @@
 							<input
 								type="color"
 								value={component.holographic.secondaryColor}
-								onchange={(e) => onUpdateHolographic('secondaryColor', (e.target as HTMLInputElement).value)}
+								oninput={(e) => onUpdateHolographic('secondaryColor', (e.target as HTMLInputElement).value)}
 								class="h-7 w-full cursor-pointer rounded"
 							/>
 						</div>
@@ -199,6 +200,7 @@
 			</div>
 
 			<AnimationControls bind:animation={component.animation} />
+			<EffectsControls bind:effect={component.effect} />
 		</div>
 	{/if}
 </div>

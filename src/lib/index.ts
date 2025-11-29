@@ -26,6 +26,28 @@ export type {
 } from './animations/index.js';
 export { AnimationConfigSchema } from './animations/index.js';
 
+// Effects
+export {
+	EffectWrapper,
+	getEffectOptions,
+	getDefaultEffectConfig,
+	EFFECT_PRESETS,
+	EFFECT_COLOR_PRESETS,
+	LIFT_ELEVATIONS
+} from './effects/index.js';
+export type {
+	EffectType,
+	EffectConfig,
+	GlowEffect,
+	ShadowEffect,
+	NeonEffect,
+	InnerGlowEffect,
+	LiftEffect,
+	OutlineEffect,
+	EffectPreset
+} from './effects/index.js';
+export { EffectConfigSchema } from './effects/index.js';
+
 // Types
 export type {
 	CardTemplate,

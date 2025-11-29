@@ -104,6 +104,23 @@ export const ANIMATION_PRESETS: Record<Exclude<AnimationType, 'none'>, Animation
 		`,
 		defaultEasing: 'ease-out',
 		supportsDirection: false
+	},
+	trace: {
+		name: 'trace',
+		label: 'Trace',
+		description: 'Neon sign drawing effect (works on stroked elements)',
+		keyframes: `
+			@keyframes tc-trace {
+				0% { stroke-dashoffset: 2000; }
+				100% { stroke-dashoffset: 0; }
+			}
+			@keyframes tc-trace-reverse {
+				0% { stroke-dashoffset: 0; }
+				100% { stroke-dashoffset: 2000; }
+			}
+		`,
+		defaultEasing: 'linear',
+		supportsDirection: true
 	}
 };
 
@@ -131,6 +148,9 @@ export function getAnimationName(type: AnimationType, direction: 'clockwise' | '
 	if (type === 'none') return 'none';
 	if (type === 'spin' && direction === 'counterclockwise') {
 		return 'tc-spin-reverse';
+	}
+	if (type === 'trace' && direction === 'counterclockwise') {
+		return 'tc-trace-reverse';
 	}
 	return `tc-${type}`;
 }

@@ -1,6 +1,7 @@
 <script lang="ts" module>
 	import { z } from 'zod';
 	import { AnimationConfigSchema } from '$lib/animations/types.js';
+	import { EffectConfigSchema } from '$lib/effects/types.js';
 
 	export const TextFieldPropsSchema = z.object({
 		text: z.string().optional(),
@@ -13,7 +14,8 @@
 		alignment: z.enum(['left', 'center', 'right']).default('left'),
 		verticalAlign: z.enum(['top', 'center', 'bottom']).default('center'),
 		lineHeight: z.number().optional(),
-		animation: AnimationConfigSchema.optional()
+		animation: AnimationConfigSchema.optional(),
+		effect: EffectConfigSchema.optional()
 	});
 
 	export type TextFieldProps = z.infer<typeof TextFieldPropsSchema>;
@@ -23,6 +25,7 @@
 	import FitText from '$lib/utils/FitText.svelte';
 	import type { ContainerContext, CardData } from '$lib/types';
 	import { AnimationWrapper } from '$lib/animations/index.js';
+	import { EffectWrapper } from '$lib/effects/index.js';
 
 	let {
 		text,
@@ -35,6 +38,7 @@
 		alignment = 'left',
 		verticalAlign = 'center',
 		animation,
+		effect,
 		container,
 		data
 	}: TextFieldProps & {
@@ -51,19 +55,21 @@
 	const centerY = $derived(container.height / 2);
 </script>
 
-<AnimationWrapper {animation} transformOrigin="{centerX}px {centerY}px">
-	<FitText
-		text={resolvedText}
-		x={0}
-		y={0}
-		width={container.width}
-		height={container.height}
-		minSize={minFontSize}
-		maxSize={maxFontSize}
-		{fontFamily}
-		{fontWeight}
-		horizontalAlign={alignment}
-		{verticalAlign}
-		fill={color}
-	/>
-</AnimationWrapper>
+<EffectWrapper {effect} transformOrigin="{centerX}px {centerY}px">
+	<AnimationWrapper {animation} transformOrigin="{centerX}px {centerY}px">
+		<FitText
+			text={resolvedText}
+			x={0}
+			y={0}
+			width={container.width}
+			height={container.height}
+			minSize={minFontSize}
+			maxSize={maxFontSize}
+			{fontFamily}
+			{fontWeight}
+			horizontalAlign={alignment}
+			{verticalAlign}
+			fill={color}
+		/>
+	</AnimationWrapper>
+</EffectWrapper>

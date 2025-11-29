@@ -1,13 +1,15 @@
 <script lang="ts" module>
 	import { z } from 'zod';
 	import { AnimationConfigSchema } from '$lib/animations/types.js';
+	import { EffectConfigSchema } from '$lib/effects/types.js';
 
 	export const ImagePropsSchema = z.object({
 		imageUrl: z.string().optional(),
 		dataField: z.string().optional(),
 		opacity: z.number().min(0).max(1).default(1),
 		preserveAspectRatio: z.string().default('xMidYMid slice'),
-		animation: AnimationConfigSchema.optional()
+		animation: AnimationConfigSchema.optional(),
+		effect: EffectConfigSchema.optional()
 	});
 
 	export type ImageProps = z.infer<typeof ImagePropsSchema>;
@@ -16,6 +18,7 @@
 <script lang="ts">
 	import type { ContainerContext, CardData } from '$lib/types';
 	import { AnimationWrapper } from '$lib/animations/index.js';
+	import { EffectWrapper } from '$lib/effects/index.js';
 
 	let {
 		imageUrl,
@@ -23,6 +26,7 @@
 		opacity = 1,
 		preserveAspectRatio = 'xMidYMid slice',
 		animation,
+		effect,
 		container,
 		data
 	}: ImageProps & {
@@ -66,16 +70,18 @@
 		</defs>
 	{/if}
 
-	<AnimationWrapper {animation} transformOrigin="{centerX}px {centerY}px">
-		<image
-			href={resolvedImageUrl}
-			x="0"
-			y="0"
-			width={container.width}
-			height={container.height}
-			{preserveAspectRatio}
-			{opacity}
-			clip-path={needsClip ? `url(#${clipId})` : undefined}
-		/>
-	</AnimationWrapper>
+	<EffectWrapper {effect} transformOrigin="{centerX}px {centerY}px">
+		<AnimationWrapper {animation} transformOrigin="{centerX}px {centerY}px">
+			<image
+				href={resolvedImageUrl}
+				x="0"
+				y="0"
+				width={container.width}
+				height={container.height}
+				{preserveAspectRatio}
+				{opacity}
+				clip-path={needsClip ? `url(#${clipId})` : undefined}
+			/>
+		</AnimationWrapper>
+	</EffectWrapper>
 {/if}

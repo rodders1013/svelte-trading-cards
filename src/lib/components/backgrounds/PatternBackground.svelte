@@ -1,13 +1,15 @@
 <script lang="ts" module>
 	import { z } from 'zod';
 	import { AnimationConfigSchema } from '$lib/animations/types.js';
+	import { EffectConfigSchema } from '$lib/effects/types.js';
 
 	export const PatternBackgroundPropsSchema = z.object({
 		pattern: z.enum(['dots', 'grid', 'diagonal', 'hexagons']),
 		color: z.string().default('#ffffff'),
 		opacity: z.number().min(0).max(1).default(0.1),
 		size: z.number().min(4).max(200).default(32),
-		animation: AnimationConfigSchema.optional()
+		animation: AnimationConfigSchema.optional(),
+		effect: EffectConfigSchema.optional()
 	});
 
 	export type PatternBackgroundProps = z.infer<typeof PatternBackgroundPropsSchema>;
@@ -16,6 +18,7 @@
 <script lang="ts">
 	import type { ContainerContext, CardData } from '$lib/types';
 	import { AnimationWrapper } from '$lib/animations/index.js';
+	import { EffectWrapper } from '$lib/effects/index.js';
 
 	let {
 		pattern,
@@ -23,6 +26,7 @@
 		opacity = 0.1,
 		size = 32,
 		animation,
+		effect,
 		container,
 		data
 	}: PatternBackgroundProps & {
@@ -94,14 +98,16 @@
 	{/if}
 </defs>
 
-<AnimationWrapper {animation} transformOrigin="{centerX}px {centerY}px">
-	<rect
-		x="0"
-		y="0"
-		width={container.width}
-		height={container.height}
-		fill="url(#{patternId})"
-		{opacity}
-		clip-path={needsClip ? `url(#${clipId})` : undefined}
-	/>
-</AnimationWrapper>
+<EffectWrapper {effect} transformOrigin="{centerX}px {centerY}px">
+	<AnimationWrapper {animation} transformOrigin="{centerX}px {centerY}px">
+		<rect
+			x="0"
+			y="0"
+			width={container.width}
+			height={container.height}
+			fill="url(#{patternId})"
+			{opacity}
+			clip-path={needsClip ? `url(#${clipId})` : undefined}
+		/>
+	</AnimationWrapper>
+</EffectWrapper>

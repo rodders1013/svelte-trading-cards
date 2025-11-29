@@ -74,6 +74,16 @@ export const ANIMATION_KEYFRAMES = `
   0%, 100% { opacity: var(--tc-glow-intensity, 0.5); }
   50% { opacity: calc(var(--tc-glow-intensity, 0.5) * 0.3); }
 }
+
+/* Trace - neon sign drawing effect with multiple segments */
+@keyframes tc-trace {
+  0% { stroke-dashoffset: 0; }
+  100% { stroke-dashoffset: 5000; }
+}
+@keyframes tc-trace-reverse {
+  0% { stroke-dashoffset: 5000; }
+  100% { stroke-dashoffset: 0; }
+}
 `;
 
 /**
@@ -140,6 +150,18 @@ export const ANIMATION_CLASSES = `
 /* Glow pulse animation (for glowing borders) */
 .tc-glow-pulse {
   animation: tc-glow-pulse var(--tc-duration, 2s) var(--tc-easing, ease-in-out) var(--tc-delay, 0s) var(--tc-iterations, infinite) normal both;
+  animation-play-state: var(--tc-play-state, running);
+}
+
+/* Trace animation (neon sign drawing effect with multiple segments) */
+.tc-trace {
+  stroke-dasharray: 150;
+  animation: tc-trace var(--tc-duration, 15s) var(--tc-easing, linear) var(--tc-delay, 0s) var(--tc-iterations, infinite) normal both;
+  animation-play-state: var(--tc-play-state, running);
+}
+.tc-trace-reverse {
+  stroke-dasharray: 150;
+  animation: tc-trace-reverse var(--tc-duration, 15s) var(--tc-easing, linear) var(--tc-delay, 0s) var(--tc-iterations, infinite) normal both;
   animation-play-state: var(--tc-play-state, running);
 }
 `;

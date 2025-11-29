@@ -1,4 +1,5 @@
 import type { AnimationConfig } from '$lib/animations';
+import type { EffectConfig } from '$lib/effects';
 import type { IconData } from '$lib/components/icons';
 
 // Component type definitions for the visual creator
@@ -16,6 +17,7 @@ export interface TextComponent {
 	alignment: 'left' | 'center' | 'right';
 	verticalAlign: 'top' | 'center' | 'bottom';
 	animation?: AnimationConfig;
+	effect?: EffectConfig;
 }
 
 export interface ImageComponent {
@@ -26,6 +28,7 @@ export interface ImageComponent {
 	opacity: number;
 	preserveAspectRatio: string;
 	animation?: AnimationConfig;
+	effect?: EffectConfig;
 }
 
 export interface BackgroundComponent {
@@ -41,6 +44,7 @@ export interface BackgroundComponent {
 	patternColor?: string;
 	patternOpacity?: number;
 	animation?: AnimationConfig;
+	effect?: EffectConfig;
 }
 
 export interface BorderComponent {
@@ -67,6 +71,7 @@ export interface BorderComponent {
 	layerColors?: string[];
 	layerSpacing?: number;
 	animation?: AnimationConfig;
+	effect?: EffectConfig;
 }
 
 export interface IconComponent {
@@ -82,6 +87,7 @@ export interface IconComponent {
 	flipHorizontal: boolean;
 	flipVertical: boolean;
 	animation?: AnimationConfig;
+	effect?: EffectConfig;
 }
 
 export type ComponentItem =

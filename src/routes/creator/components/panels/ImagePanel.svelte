@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { Button } from '$lib/components/ui/button';
 	import AnimationControls from '../AnimationControls.svelte';
+	import EffectsControls from '../EffectsControls.svelte';
 	import type { ImageComponent } from '../../types';
 	import { dataFields } from '../../types';
 
@@ -82,6 +83,7 @@
 			</div>
 
 			<AnimationControls bind:animation={component.animation} />
+			<EffectsControls bind:effect={component.effect} />
 		</div>
 	{/if}
 </div>
