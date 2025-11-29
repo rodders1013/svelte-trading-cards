@@ -121,6 +121,7 @@ src/routes/creator/
     ├── CanvasPreview.svelte
     ├── PropertiesPanel.svelte
     ├── AnimationControls.svelte  # Reusable (shared by all panels)
+    ├── EffectsControls.svelte    # Reusable (shared by all panels)
     └── panels/*.svelte           # Component property panels
 ```
 

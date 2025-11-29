@@ -3,7 +3,7 @@
 **Package:** `svelte-trading-cards`
 **Version:** 0.1.0
 **Last Updated:** 2025-11-28
-**Status:** In Development (~81% complete)
+**Status:** In Development (~89% complete)
 
 ---
 
@@ -14,10 +14,11 @@
 3. [Architecture](#architecture)
 4. [Components](#components)
 5. [Animation System](#animation-system)
-6. [Visual Creator](#visual-creator)
-7. [Type System](#type-system)
-8. [Export System](#export-system)
-9. [Extensibility](#extensibility)
+6. [Effects System](#effects-system)
+7. [Visual Creator](#visual-creator)
+8. [Type System](#type-system)
+9. [Export System](#export-system)
+10. [Extensibility](#extensibility)
 
 ---
 
@@ -31,7 +32,8 @@ A Svelte 5 component library for building animated trading cards with a visual c
 - **Group Architecture:** Container-based positioning with shape clipping (circle, hexagon, shield, etc.)
 - **Visual Creator:** Zone-based template builder with hierarchy panel and property controls
 - **Auto-Fit Text:** Text automatically scales between min/max sizes to fit containers
-- **Animation System:** CSS animations that auto-strip for static PNG exports
+- **Animation System:** CSS animations including trace (neon sign drawing effect)
+- **Effects System:** SVG filter effects (glow, shadow, neon, innerGlow, lift, outline)
 - **Generic Data Model:** Domain-agnostic - works for games, employees, products, anything
 - **Client-Side Export:** SVG/PNG download directly from browser
 - **Server-Side Export:** Trusted PNG rendering with resvg-js (pixel-perfect)
@@ -97,6 +99,7 @@ src/routes/
         ├── PropertiesPanel.svelte
         ├── ZoneProperties.svelte
         ├── AnimationControls.svelte
+        ├── EffectsControls.svelte
         ├── HelpModal.svelte
         └── panels/          # Component property panels
             ├── TextPanel.svelte
@@ -286,9 +289,9 @@ All visual components support CSS animations that are embedded directly in the S
 
 ```typescript
 interface AnimationConfig {
-  type: 'none' | 'spin' | 'pulse' | 'bounce' | 'shake' | 'float' | 'glow' | 'ping';
-  speed: 'slow' | 'normal' | 'fast';      // 3s, 1.5s, 0.75s
-  direction: 'clockwise' | 'counterclockwise';  // spin only
+  type: 'none' | 'spin' | 'pulse' | 'bounce' | 'shake' | 'float' | 'glow' | 'ping' | 'trace';
+  speed: 'slow' | 'normal' | 'fast';      // 3s, 1.5s, 0.75s (trace: 18s, 9s, 4.5s)
+  direction: 'clockwise' | 'counterclockwise';  // spin & trace only
   easing: 'linear' | 'ease' | 'ease-in' | 'ease-out' | 'ease-in-out';
   delay: number;                           // seconds
   iterationCount: number | 'infinite';
@@ -307,6 +310,18 @@ interface AnimationConfig {
 | `float` | Gentle floating | Dreamy, ambient effects |
 | `glow` | Pulsing opacity | Ethereal, mystical elements |
 | `ping` | Scale + fade out | Notifications, highlights |
+| `trace` | Neon sign drawing effect | Borders, stroked elements |
+
+### Trace Animation
+
+The `trace` animation creates a neon sign drawing effect using stroke-dasharray:
+
+- Renders the solid content underneath
+- Adds a larger glowing traced layer on top with blur filter
+- Multiple flowing segments animate around the stroke
+- Best used on borders and stroked elements
+- Slower speeds: slow=18s, normal=9s, fast=4.5s
+- Supports direction control (clockwise/counterclockwise)
 
 ### Components with Animation Support
 
@@ -340,6 +355,99 @@ All visual components accept the optional `animation` prop:
 
 ---
 
+## Effects System
+
+All visual components support SVG filter-based effects that can be combined with animations.
+
+### Architecture
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                     Component                                │
+│  ┌─────────────────────────────────────────────────────┐   │
+│  │ <EffectWrapper effect={config}>                      │   │
+│  │   <defs>                                             │   │
+│  │     <filter id="effect-glow-xyz">...</filter>        │   │
+│  │   </defs>                                            │   │
+│  │   <g filter="url(#effect-glow-xyz)">                 │   │
+│  │     <AnimationWrapper>                               │   │
+│  │       <Content ... />                                │   │
+│  │     </AnimationWrapper>                              │   │
+│  │   </g>                                               │   │
+│  │ </EffectWrapper>                                     │   │
+│  └─────────────────────────────────────────────────────┘   │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Effect Config
+
+```typescript
+type EffectConfig =
+  | { type: 'glow'; color: string; blur: number; intensity: number; animated?: boolean; speed?: AnimationSpeed }
+  | { type: 'shadow'; color: string; blur: number; offsetX: number; offsetY: number; animated?: boolean; speed?: AnimationSpeed }
+  | { type: 'neon'; color: string; intensity: number; spread: number; animated?: boolean; speed?: AnimationSpeed }
+  | { type: 'innerGlow'; color: string; blur: number; intensity: number; animated?: boolean; speed?: AnimationSpeed }
+  | { type: 'lift'; elevation: 'sm' | 'md' | 'lg' | 'xl'; animated?: boolean; speed?: AnimationSpeed }
+  | { type: 'outline'; color: string; width: number; animated?: boolean; speed?: AnimationSpeed };
+```
+
+### Available Effects
+
+| Effect | Description | Controls |
+|--------|-------------|----------|
+| `glow` | Soft outer glow | color, blur, intensity |
+| `shadow` | Drop shadow | color, blur, offsetX, offsetY |
+| `neon` | Multi-layer neon glow (overrides component color) | color, intensity, spread |
+| `innerGlow` | Inward glow effect | color, blur, intensity |
+| `lift` | Paper elevation shadow | elevation (sm/md/lg/xl) |
+| `outline` | Stroke outline around content | color, width |
+
+### Neon Effect
+
+The neon effect creates an intense neon sign look:
+
+- Overrides component color (white core + colored glow)
+- Multiple layered blurs for realistic neon tube appearance
+- Curated color presets: Hot Pink, Electric Blue, Neon Green, Purple, Orange, Red, Yellow, Cyan
+
+### Components with Effect Support
+
+All visual components accept the optional `effect` prop:
+
+- **Icon** - Glowing icons, neon icons
+- **TextField** - Glowing text, neon text
+- **Image** - Images with glow, shadow, lift effects
+- **Border** - Glowing borders, neon borders
+- **GradientBackground** - Backgrounds with effects
+- **PatternBackground** - Patterns with effects
+
+### Animation Integration
+
+All effects support pulsing animation via the `animated` and `speed` props:
+
+```typescript
+{
+  effect: {
+    type: 'glow',
+    color: '#3b82f6',
+    blur: 10,
+    intensity: 0.7,
+    animated: true,    // Enable pulsing
+    speed: 'normal'    // slow, normal, fast
+  }
+}
+```
+
+### Key Files
+
+| File | Purpose |
+|------|---------|
+| `src/lib/effects/types.ts` | Effect types & Zod schemas |
+| `src/lib/effects/presets.ts` | Effect presets & color options |
+| `src/lib/effects/EffectWrapper.svelte` | Wrapper component with SVG filters |
+
+---
+
 ## Visual Creator
 
 The visual creator (`/creator`) provides a full template editing interface with a modular component architecture.
@@ -357,6 +465,7 @@ The creator is built from modular Svelte components for maintainability:
 | `CanvasPreview.svelte` | Center - live preview with selection overlays |
 | `PropertiesPanel.svelte` | Right sidebar - zone & component settings |
 | `AnimationControls.svelte` | Reusable animation panel (used by all component panels) |
+| `EffectsControls.svelte` | Reusable effects panel (used by all component panels) |
 | `panels/*.svelte` | Individual property panels for each component type |
 
 ### Layout
@@ -402,17 +511,17 @@ The creator is built from modular Svelte components for maintainability:
 
 ### Component Property Panels
 
-Each component has a dedicated property panel. All components include an **Animation** section with type, speed, direction, easing, and pause controls.
+Each component has a dedicated property panel. All components include an **Animation** section (type, speed, direction, easing, pause) and an **Effects** section (type, color, blur, intensity, etc.).
 
-**Text:** Data field, font family, min/max size range, weight, alignment (H+V), color, animation
+**Text:** Data field, font family, min/max size range, weight, alignment (H+V), color, animation, effects
 
-**Image:** Data field, fit mode (cover/contain/stretch), opacity, animation
+**Image:** Data field, fit mode (cover/contain/stretch), opacity, animation, effects
 
-**Background:** Fill type (none/solid/gradient), direction, colors, pattern overlay, opacity, animation
+**Background:** Fill type (none/solid/gradient), direction, colors, pattern overlay, opacity, animation, effects
 
-**Border:** Color, width, opacity, glow effect, holographic effect, multi-layer, animation
+**Border:** Color, width, opacity, glow effect, holographic effect, multi-layer, animation, effects
 
-**Icon:** Icon picker with search, icon set filter, color, size, rotation, flip (H/V), opacity, animation
+**Icon:** Icon picker with search, icon set filter, color, size, rotation, flip (H/V), opacity, animation, effects
 
 ---
 

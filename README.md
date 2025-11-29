@@ -166,9 +166,9 @@ All components support CSS animations that are embedded in the SVG for portabili
 ```typescript
 {
   animation: {
-    type: 'spin',              // spin, pulse, bounce, shake, float, glow, ping
+    type: 'spin',              // spin, pulse, bounce, shake, float, glow, ping, trace
     speed: 'normal',           // slow (3s), normal (1.5s), fast (0.75s)
-    direction: 'clockwise',    // clockwise, counterclockwise (spin only)
+    direction: 'clockwise',    // clockwise, counterclockwise (spin & trace)
     easing: 'ease-in-out',     // linear, ease, ease-in, ease-out, ease-in-out
     delay: 0,                  // Delay in seconds
     iterationCount: 'infinite', // Number or 'infinite'
@@ -188,10 +188,55 @@ All components support CSS animations that are embedded in the SVG for portabili
 | `float` | Gentle floating motion |
 | `glow` | Pulsing opacity |
 | `ping` | Attention-grabbing scale + fade |
+| `trace` | Neon sign drawing effect (best for borders) |
 
-### Components with Animation Support
+### Trace Animation
 
-All visual components support the `animation` prop:
+The `trace` animation creates a neon sign drawing effect:
+- Renders solid content + larger glowing traced layer
+- Multiple flowing segments animate around the stroke
+- Best used on borders and stroked elements
+- Slower speeds: slow=18s, normal=9s, fast=4.5s
+
+## Effects System
+
+All components support SVG filter-based effects that can be combined with animations.
+
+### Effect Config
+
+```typescript
+{
+  effect: {
+    type: 'glow',          // glow, shadow, neon, innerGlow, lift, outline
+    color: '#3b82f6',
+    blur: 10,
+    intensity: 0.7,
+    animated: true,        // Optional: enable pulsing
+    speed: 'normal'        // slow, normal, fast
+  }
+}
+```
+
+### Available Effects
+
+| Type | Description | Controls |
+|------|-------------|----------|
+| `glow` | Soft outer glow | color, blur, intensity |
+| `shadow` | Drop shadow | color, blur, offsetX, offsetY |
+| `neon` | Neon sign effect (overrides color) | color, intensity, spread |
+| `innerGlow` | Inward glow | color, blur, intensity |
+| `lift` | Paper elevation shadow | elevation (sm/md/lg/xl) |
+| `outline` | Stroke outline | color, width |
+
+### Neon Effect
+
+The neon effect creates an intense neon sign look:
+- Overrides component color (white core + colored glow)
+- Curated presets: Hot Pink, Electric Blue, Neon Green, Purple, Orange, Red, Yellow, Cyan
+
+### Components with Animation & Effect Support
+
+All visual components support both `animation` and `effect` props:
 - Icon
 - TextField
 - Image

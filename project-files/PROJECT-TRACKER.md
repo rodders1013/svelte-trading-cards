@@ -1,7 +1,7 @@
 # svelte-trading-cards Project Tracker
 
-**Last Updated:** 2025-11-28
-**Current Progress:** ~85% (Animation system complete)
+**Last Updated:** 2025-11-29
+**Current Progress:** ~88% (Effects system & trace animation complete)
 
 ---
 
@@ -165,15 +165,20 @@
 
 ### Animation System - COMPLETE
 - [x] Reusable CSS animation utility (AnimationWrapper component)
-- [x] Animation presets: spin, pulse, bounce, shake, float, glow, ping
+- [x] Animation presets: spin, pulse, bounce, shake, float, glow, ping, trace
 - [x] Speed control: slow, normal, fast
 - [x] Direction control for rotation animations (clockwise/counterclockwise)
+- [x] Direction control for trace animation (clockwise/counterclockwise)
 - [x] Easing options: linear, ease, ease-in, ease-out, ease-in-out
 - [x] Pause control for animations
 - [x] All components with animation support (Icon, TextField, Image, Border, GradientBackground, PatternBackground)
 - [x] Animation panel in visual creator for all components (type, speed, direction, easing, pause)
 - [x] CSS embedded in SVG `<defs>` for portability
 - [x] Animated in preview and SVG export, static on PNG export
+- [x] Trace animation: neon sign drawing effect using stroke-dasharray
+  - Renders solid content + larger glowing traced layer
+  - Multiple flowing segments with blur/glow filter
+  - Slower speeds (18s/9s/4.5s for slow/normal/fast)
 
 ### Effects System - COMPLETE
 - [x] Reusable SVG filter effects utility (EffectWrapper component)
@@ -183,7 +188,9 @@
 - [x] Effect-specific controls (color, blur, intensity, spread, offset, elevation, width)
 - [x] All components with effect support (Icon, TextField, Image, Border, GradientBackground, PatternBackground)
 - [x] EffectsControls panel for visual creator
-- [x] Color presets for each effect type
+- [x] Neon effect: multi-layer glow that overrides component color (white core + colored glow)
+- [x] Neon color presets: Hot Pink, Electric Blue, Neon Green, Purple, Orange, Red, Yellow, Cyan
+- [x] Real-time color picker updates (oninput instead of onchange)
 - [x] Effects embedded in SVG via inline filters
 
 ### Field Components
@@ -232,11 +239,11 @@
 |-------|--------|----------|
 | Phase 1: Core Package | Complete | 28/28 |
 | Phase 2: Visual Creator | Complete | 46/46 |
-| Phase 3: Additional Components | In Progress | 17/21 |
+| Phase 3: Additional Components | In Progress | 21/24 |
 | Phase 4: Theming | Not Started | 0/3 |
 | Phase 5: Testing & Docs | Not Started | 0/4 |
 | Phase 6: Publish | In Progress | 1/3 |
-| **Total** | | **92/105 (~88%)** |
+| **Total** | | **96/108 (~89%)** |
 
 ---
 
