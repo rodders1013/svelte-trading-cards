@@ -7,7 +7,7 @@
 		downloadPNGClient,
 		serializeSVG
 	} from '$lib';
-	import { GradientBackground, Image, PatternBackground } from '$lib/components/backgrounds';
+	import { GradientBackground, Image, PatternBackground, SolidBackground } from '$lib/components/backgrounds';
 	import { Border } from '$lib/components/borders';
 	import { TextField } from '$lib/components/fields';
 	import type { CardTemplate } from '$lib/types';
@@ -21,6 +21,7 @@
 	// Register all components
 	registerComponent('Group', Group);
 	registerComponent('GradientBackground', GradientBackground);
+	registerComponent('SolidBackground', SolidBackground);
 	registerComponent('Image', Image);
 	registerComponent('PatternBackground', PatternBackground);
 	registerComponent('Border', Border);
