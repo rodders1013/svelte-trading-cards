@@ -4,8 +4,8 @@
 	import { EffectConfigSchema } from '$lib/effects/types.js';
 
 	export const TextFieldPropsSchema = z.object({
-		text: z.string().optional(),
-		dataField: z.string().optional(),
+		// Text must come from data - no free text input allowed
+		dataField: z.string(),
 		maxFontSize: z.number().default(48),
 		minFontSize: z.number().default(12),
 		fontFamily: z.string().default('Arial, sans-serif'),
@@ -28,7 +28,6 @@
 	import { EffectWrapper } from '$lib/effects/index.js';
 
 	let {
-		text,
 		dataField,
 		maxFontSize = 48,
 		minFontSize = 12,
@@ -46,8 +45,9 @@
 		data?: CardData;
 	} = $props();
 
+	// Text must come from data field - no free text allowed
 	const resolvedText = $derived(
-		text || (dataField && data ? String(data[dataField] ?? '') : '')
+		dataField && data ? String(data[dataField] ?? '') : ''
 	);
 
 	// Calculate center point for animation transform-origin

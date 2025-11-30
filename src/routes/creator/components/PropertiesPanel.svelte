@@ -2,6 +2,9 @@
 	import * as Card from '$lib/components/ui/card';
 	import { Button } from '$lib/components/ui/button';
 	import { Separator } from '$lib/components/ui/separator';
+	import * as Collapsible from '$lib/components/ui/collapsible';
+	import { ScrollArea } from '$lib/components/ui/scroll-area';
+	import ChevronDown from '@lucide/svelte/icons/chevron-down';
 	import type { IconData } from '$lib/components/icons';
 	import ZoneProperties from './ZoneProperties.svelte';
 	import TextPanel from './panels/TextPanel.svelte';
@@ -9,13 +12,27 @@
 	import BackgroundPanel from './panels/BackgroundPanel.svelte';
 	import BorderPanel from './panels/BorderPanel.svelte';
 	import IconPanel from './panels/IconPanel.svelte';
+	import BadgePanel from './panels/BadgePanel.svelte';
+	import StatPanelPanel from './panels/StatPanelPanel.svelte';
+	import DividerPanel from './panels/DividerPanel.svelte';
+	import ProgressBarPanel from './panels/ProgressBarPanel.svelte';
+	import RibbonPanel from './panels/RibbonPanel.svelte';
+	import FramePanel from './panels/FramePanel.svelte';
+	import StampPanel from './panels/StampPanel.svelte';
 	import type {
 		ContainerState,
 		TextComponent,
 		ImageComponent,
 		BackgroundComponent,
 		BorderComponent,
-		IconComponent
+		IconComponent,
+		BadgeComponent,
+		StatPanelComponent,
+		DividerComponent,
+		ProgressBarComponent,
+		RibbonComponent,
+		FrameComponent,
+		StampComponent
 	} from '../types';
 	import { getComponentByType } from '../state.svelte';
 
@@ -36,6 +53,13 @@
 		onAddBackgroundComponent,
 		onAddBorderComponent,
 		onAddIconComponent,
+		onAddBadgeComponent,
+		onAddStatPanelComponent,
+		onAddDividerComponent,
+		onAddProgressBarComponent,
+		onAddRibbonComponent,
+		onAddFrameComponent,
+		onAddStampComponent,
 		onUpdateTextComponent,
 		onUpdateImageComponent,
 		onUpdateBackgroundComponent,
@@ -44,6 +68,13 @@
 		onUpdateBorderHolographic,
 		onUpdateIconComponent,
 		onUpdateIconSelection,
+		onUpdateBadgeComponent,
+		onUpdateStatPanelComponent,
+		onUpdateDividerComponent,
+		onUpdateProgressBarComponent,
+		onUpdateRibbonComponent,
+		onUpdateFrameComponent,
+		onUpdateStampComponent,
 		onRemoveComponent,
 		onMoveComponentUp,
 		onMoveComponentDown
@@ -64,6 +95,13 @@
 		onAddBackgroundComponent: () => void;
 		onAddBorderComponent: () => void;
 		onAddIconComponent: () => void;
+		onAddBadgeComponent: () => void;
+		onAddStatPanelComponent: () => void;
+		onAddDividerComponent: () => void;
+		onAddProgressBarComponent: () => void;
+		onAddRibbonComponent: () => void;
+		onAddFrameComponent: () => void;
+		onAddStampComponent: () => void;
 		onUpdateTextComponent: (key: keyof Omit<TextComponent, 'type' | 'id'>, value: unknown) => void;
 		onUpdateImageComponent: (key: keyof Omit<ImageComponent, 'type' | 'id'>, value: unknown) => void;
 		onUpdateBackgroundComponent: (key: keyof Omit<BackgroundComponent, 'type' | 'id'>, value: unknown) => void;
@@ -72,7 +110,14 @@
 		onUpdateBorderHolographic: (key: string, value: unknown) => void;
 		onUpdateIconComponent: (key: keyof Omit<IconComponent, 'type' | 'id'>, value: unknown) => void;
 		onUpdateIconSelection: (icon: { iconData: IconData; iconName: string }) => void;
-		onRemoveComponent: (type: 'text' | 'image' | 'background' | 'border' | 'icon') => void;
+		onUpdateBadgeComponent: (key: keyof Omit<BadgeComponent, 'type' | 'id'>, value: unknown) => void;
+		onUpdateStatPanelComponent: (key: keyof Omit<StatPanelComponent, 'type' | 'id'>, value: unknown) => void;
+		onUpdateDividerComponent: (key: keyof Omit<DividerComponent, 'type' | 'id'>, value: unknown) => void;
+		onUpdateProgressBarComponent: (key: keyof Omit<ProgressBarComponent, 'type' | 'id'>, value: unknown) => void;
+		onUpdateRibbonComponent: (key: keyof Omit<RibbonComponent, 'type' | 'id'>, value: unknown) => void;
+		onUpdateFrameComponent: (key: keyof Omit<FrameComponent, 'type' | 'id'>, value: unknown) => void;
+		onUpdateStampComponent: (key: keyof Omit<StampComponent, 'type' | 'id'>, value: unknown) => void;
+		onRemoveComponent: (type: 'text' | 'image' | 'background' | 'border' | 'icon' | 'badge' | 'statpanel' | 'divider' | 'progressbar' | 'ribbon' | 'frame' | 'stamp') => void;
 		onMoveComponentUp: (componentId: string) => void;
 		onMoveComponentDown: (componentId: string) => void;
 	} = $props();
@@ -82,14 +127,23 @@
 	const selectedBackground = $derived(container ? getComponentByType(container, 'background') : undefined);
 	const selectedBorder = $derived(container ? getComponentByType(container, 'border') : undefined);
 	const selectedIcon = $derived(container ? getComponentByType(container, 'icon') : undefined);
+	const selectedBadge = $derived(container ? getComponentByType(container, 'badge') : undefined);
+	const selectedStatPanel = $derived(container ? getComponentByType(container, 'statpanel') : undefined);
+	const selectedDivider = $derived(container ? getComponentByType(container, 'divider') : undefined);
+	const selectedProgressBar = $derived(container ? getComponentByType(container, 'progressbar') : undefined);
+	const selectedRibbon = $derived(container ? getComponentByType(container, 'ribbon') : undefined);
+	const selectedFrame = $derived(container ? getComponentByType(container, 'frame') : undefined);
+	const selectedStamp = $derived(container ? getComponentByType(container, 'stamp') : undefined);
 </script>
 
-<div class="flex min-w-80 flex-1 flex-col gap-3 overflow-auto">
-	<!-- Zone Actions (sticky) -->
+<div class="min-w-80 flex-1 overflow-hidden">
+<ScrollArea class="h-full">
+<div class="flex flex-col gap-3 pr-3">
+	<!-- Layer Actions (sticky) -->
 	<Card.Root class="sticky top-0 z-10 bg-background">
 		<Card.Content class="flex items-center gap-2 px-3 py-2">
-			<Button variant="default" size="sm" onclick={onAddContainer} title="Add Zone" class="bg-green-600 font-medium hover:bg-green-700">
-				<span class="text-sm">+ Add Zone</span>
+			<Button variant="default" size="sm" onclick={onAddContainer} title="Add Layer" class="bg-green-600 font-medium hover:bg-green-700">
+				<span class="text-sm">+ Add Layer</span>
 			</Button>
 			<Separator orientation="vertical" class="h-6" />
 			<Button variant="ghost" size="sm" onclick={onUndo} disabled={!canUndo} title="Undo (Cmd+Z)">
@@ -117,18 +171,17 @@
 			<Card.Root>
 				<div class="border-t">
 					<!-- Add Component -->
-					<div class="border-b">
-						<button
-							class="flex w-full items-center justify-between px-3 py-2 hover:bg-muted/50"
-							onclick={() => onTogglePanel('addcomponent')}
-						>
+					<Collapsible.Root open={expandedPanels.has('addcomponent')} onOpenChange={() => onTogglePanel('addcomponent')} class="border-b">
+						<Collapsible.Trigger class="flex w-full items-center justify-between px-3 py-2 hover:bg-muted/50">
 							<span class="flex items-center gap-2 text-sm font-medium">
-								<span class="text-sm">{expandedPanels.has('addcomponent') ? '▼' : '▶'}</span>
+								<ChevronDown
+									class="h-3 w-3 shrink-0 transition-transform duration-200 {expandedPanels.has('addcomponent') ? '' : '-rotate-90'}"
+								/>
 								Add Component
 							</span>
-						</button>
+						</Collapsible.Trigger>
 
-						{#if expandedPanels.has('addcomponent')}
+						<Collapsible.Content>
 							<div class="px-3 pb-3">
 								<div class="flex flex-wrap gap-2">
 									<Button variant="outline" size="sm" onclick={onAddTextComponent} disabled={!!selectedText}>
@@ -146,10 +199,31 @@
 									<Button variant="outline" size="sm" onclick={onAddIconComponent} disabled={!!selectedIcon}>
 										+ Icon
 									</Button>
+									<Button variant="outline" size="sm" onclick={onAddBadgeComponent} disabled={!!selectedBadge}>
+										+ Badge
+									</Button>
+									<Button variant="outline" size="sm" onclick={onAddStatPanelComponent} disabled={!!selectedStatPanel}>
+										+ Stats
+									</Button>
+									<Button variant="outline" size="sm" onclick={onAddDividerComponent} disabled={!!selectedDivider}>
+										+ Divider
+									</Button>
+									<Button variant="outline" size="sm" onclick={onAddProgressBarComponent} disabled={!!selectedProgressBar}>
+										+ Progress
+									</Button>
+									<Button variant="outline" size="sm" onclick={onAddRibbonComponent} disabled={!!selectedRibbon}>
+										+ Ribbon
+									</Button>
+									<Button variant="outline" size="sm" onclick={onAddFrameComponent} disabled={!!selectedFrame}>
+										+ Frame
+									</Button>
+									<Button variant="outline" size="sm" onclick={onAddStampComponent} disabled={!!selectedStamp}>
+										+ Stamp
+									</Button>
 								</div>
 							</div>
-						{/if}
-					</div>
+						</Collapsible.Content>
+					</Collapsible.Root>
 
 					<!-- Text Component -->
 					{#if selectedText}
@@ -213,6 +287,90 @@
 							onMoveDown={() => onMoveComponentDown(selectedIcon.id)}
 						/>
 					{/if}
+
+					<!-- Badge Component -->
+					{#if selectedBadge}
+						<BadgePanel
+							component={selectedBadge}
+							expanded={expandedPanels.has('comp-badge')}
+							onUpdate={onUpdateBadgeComponent}
+							onRemove={() => onRemoveComponent('badge')}
+							onMoveUp={() => onMoveComponentUp(selectedBadge.id)}
+							onMoveDown={() => onMoveComponentDown(selectedBadge.id)}
+						/>
+					{/if}
+
+					<!-- StatPanel Component -->
+					{#if selectedStatPanel}
+						<StatPanelPanel
+							component={selectedStatPanel}
+							expanded={expandedPanels.has('comp-statpanel')}
+							onUpdate={onUpdateStatPanelComponent}
+							onRemove={() => onRemoveComponent('statpanel')}
+							onMoveUp={() => onMoveComponentUp(selectedStatPanel.id)}
+							onMoveDown={() => onMoveComponentDown(selectedStatPanel.id)}
+						/>
+					{/if}
+
+					<!-- Divider Component -->
+					{#if selectedDivider}
+						<DividerPanel
+							component={selectedDivider}
+							expanded={expandedPanels.has('comp-divider')}
+							onUpdate={onUpdateDividerComponent}
+							onRemove={() => onRemoveComponent('divider')}
+							onMoveUp={() => onMoveComponentUp(selectedDivider.id)}
+							onMoveDown={() => onMoveComponentDown(selectedDivider.id)}
+						/>
+					{/if}
+
+					<!-- ProgressBar Component -->
+					{#if selectedProgressBar}
+						<ProgressBarPanel
+							component={selectedProgressBar}
+							expanded={expandedPanels.has('comp-progressbar')}
+							onUpdate={onUpdateProgressBarComponent}
+							onRemove={() => onRemoveComponent('progressbar')}
+							onMoveUp={() => onMoveComponentUp(selectedProgressBar.id)}
+							onMoveDown={() => onMoveComponentDown(selectedProgressBar.id)}
+						/>
+					{/if}
+
+					<!-- Ribbon Component -->
+					{#if selectedRibbon}
+						<RibbonPanel
+							component={selectedRibbon}
+							expanded={expandedPanels.has('comp-ribbon')}
+							onUpdate={onUpdateRibbonComponent}
+							onRemove={() => onRemoveComponent('ribbon')}
+							onMoveUp={() => onMoveComponentUp(selectedRibbon.id)}
+							onMoveDown={() => onMoveComponentDown(selectedRibbon.id)}
+						/>
+					{/if}
+
+					<!-- Frame Component -->
+					{#if selectedFrame}
+						<FramePanel
+							component={selectedFrame}
+							expanded={expandedPanels.has('comp-frame')}
+							onUpdate={onUpdateFrameComponent}
+							onRemove={() => onRemoveComponent('frame')}
+							onMoveUp={() => onMoveComponentUp(selectedFrame.id)}
+							onMoveDown={() => onMoveComponentDown(selectedFrame.id)}
+						/>
+					{/if}
+
+					<!-- Stamp Component -->
+					{#if selectedStamp}
+						<StampPanel
+							component={selectedStamp}
+							expanded={expandedPanels.has('comp-stamp')}
+							onUpdate={onUpdateStampComponent}
+							onRemove={() => onRemoveComponent('stamp')}
+							onMoveUp={() => onMoveComponentUp(selectedStamp.id)}
+							onMoveDown={() => onMoveComponentDown(selectedStamp.id)}
+						/>
+					{/if}
 				</div>
 			</Card.Root>
 		{/if}
@@ -220,9 +378,11 @@
 		<!-- No selection -->
 		<Card.Root class="flex-1">
 			<Card.Content class="flex h-full flex-col items-center justify-center py-12">
-				<p class="text-muted-foreground">No zone selected</p>
-				<p class="mt-2 text-sm text-muted-foreground">Click + to add a zone or select one from the hierarchy</p>
+				<p class="text-muted-foreground">No layer selected</p>
+				<p class="mt-2 text-sm text-muted-foreground">Click + to add a layer or select one from the list</p>
 			</Card.Content>
 		</Card.Root>
 	{/if}
+</div>
+</ScrollArea>
 </div>

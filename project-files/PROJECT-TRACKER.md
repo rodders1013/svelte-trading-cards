@@ -1,7 +1,7 @@
 # svelte-trading-cards Project Tracker
 
 **Last Updated:** 2025-11-29
-**Current Progress:** ~88% (Effects system & trace animation complete)
+**Current Progress:** ~91% (All decoration components complete)
 
 ---
 
@@ -193,18 +193,26 @@
 - [x] Real-time color picker updates (oninput instead of onchange)
 - [x] Effects embedded in SVG via inline filters
 
-### Field Components
-- [ ] TitleField (styled presets)
-- [ ] DetailRow (label/value pairs)
-- [ ] StatPanel (multi-row stats display)
+### Data Display Components
+- [x] StatPanel (label/value rows with optional bars/icons, combines DetailRow concept)
 
 ### Decoration Components
-- [ ] RarityBadge (common/rare/epic/legendary/mythic)
-- [ ] Emblem (star/crown/shield/diamond)
+- [x] Badge (universal badge: shapes, presets for rarity/status/labels)
+- [x] Divider (decorative separators: lines, ornate, fading)
+- [x] ProgressBar (visual stat bars, HP meters, power gauges)
+- [x] Ribbon (banner/ribbon text overlays: "SOLD", "NEW", "LIMITED")
+- [x] Frame (corner/edge decorations, flourishes)
+- [x] Stamp (seal/certification marks, numbered editions)
 - [x] GlowEffect (replaced by Effects System with glow, neon, shadow, etc.)
 
 ### Layer Features
 - [ ] Blend modes support (multiply, screen, overlay)
+
+### Removed from Scope
+- ~~TitleField~~ - TextField already handles styled text with auto-fit
+- ~~Emblem~~ - Icon component covers stars/crowns/shields/diamonds via Iconify
+- ~~DetailRow~~ - Merged into StatPanel component
+- ~~RarityBadge~~ - Replaced by universal Badge with rarity presets
 
 ---
 
@@ -239,11 +247,24 @@
 |-------|--------|----------|
 | Phase 1: Core Package | Complete | 28/28 |
 | Phase 2: Visual Creator | Complete | 46/46 |
-| Phase 3: Additional Components | In Progress | 21/24 |
+| Phase 3: Additional Components | In Progress | 28/29 |
 | Phase 4: Theming | Not Started | 0/3 |
 | Phase 5: Testing & Docs | Not Started | 0/4 |
 | Phase 6: Publish | In Progress | 1/3 |
-| **Total** | | **96/108 (~89%)** |
+| **Total** | | **103/113 (~91%)** |
+
+### Phase 3 Component Priority
+
+| Priority | Component | Description | Complexity |
+|----------|-----------|-------------|------------|
+| 1 | Badge | Universal badge with shapes & presets | Medium |
+| 2 | StatPanel | Label/value rows with optional bars | Medium |
+| 3 | Divider | Decorative separators | Low |
+| 4 | ProgressBar | Visual stat bars, meters | Medium |
+| 5 | Ribbon | Banner/ribbon text overlays | Medium |
+| 6 | Frame | Corner/edge decorations | Medium |
+| 7 | Stamp | Seal/certification marks | Medium |
+| 8 | Blend modes | multiply, screen, overlay support | Low |
 
 ---
 
@@ -278,9 +299,18 @@ src/lib/
 │   ├── borders/
 │   │   ├── index.ts
 │   │   └── Border.svelte
+│   ├── decorations/
+│   │   ├── index.ts
+│   │   ├── Badge.svelte          # Universal badge with shapes/presets
+│   │   ├── Divider.svelte        # Decorative separators
+│   │   ├── ProgressBar.svelte    # Visual stat bars
+│   │   ├── Ribbon.svelte         # Banner/ribbon overlays
+│   │   ├── Frame.svelte          # Corner/edge decorations
+│   │   └── Stamp.svelte          # Seal/certification marks
 │   ├── fields/
 │   │   ├── index.ts
-│   │   └── TextField.svelte
+│   │   ├── TextField.svelte
+│   │   └── StatPanel.svelte      # Label/value rows with bars
 │   └── icons/
 │       ├── index.ts
 │       ├── Icon.svelte           # Iconify SVG icon renderer
@@ -318,12 +348,29 @@ src/routes/
         ├── AnimationControls.svelte    # Reusable animation panel
         ├── EffectsControls.svelte      # Reusable effects panel
         ├── HelpModal.svelte            # Keyboard shortcuts modal
+        ├── form/                       # Reusable form components (shadcn-based)
+        │   ├── index.ts               # Form component exports
+        │   ├── FormSlider.svelte      # Label + Slider with value display
+        │   ├── FormSelect.svelte      # Label + NativeSelect
+        │   ├── FormCheckbox.svelte    # Label + Checkbox
+        │   ├── FormSwitch.svelte      # Label + Switch
+        │   ├── FormInput.svelte       # Label + Input (text/number)
+        │   ├── FormColorPicker.svelte # Label + color input
+        │   ├── FormGrid.svelte        # Grid layout (2/3/4 columns)
+        │   └── PanelEffects.svelte    # Shared effects section footer
         └── panels/
             ├── TextPanel.svelte        # Text component properties
             ├── ImagePanel.svelte       # Image component properties
             ├── BackgroundPanel.svelte  # Background component properties
             ├── BorderPanel.svelte      # Border component properties
-            └── IconPanel.svelte        # Icon component properties
+            ├── IconPanel.svelte        # Icon component properties
+            ├── BadgePanel.svelte       # Badge component properties
+            ├── DividerPanel.svelte     # Divider component properties
+            ├── ProgressBarPanel.svelte # Progress bar component properties
+            ├── RibbonPanel.svelte      # Ribbon component properties
+            ├── FramePanel.svelte       # Frame component properties
+            ├── StampPanel.svelte       # Stamp component properties
+            └── StatPanelPanel.svelte   # Stat panel component properties
 ```
 
 ---
@@ -334,3 +381,30 @@ src/routes/
 - **Creator:** http://localhost:5173/creator
 - **Type check:** `npm run check` (0 errors)
 - **Generic data:** CardData is `Record<string, unknown>` - works for any domain
+
+### shadcn-svelte Components
+
+The creator uses shadcn-svelte components for consistent UI. Reference: https://www.shadcn-svelte.com/llms.txt
+
+**Core Components:**
+- `Button`, `Card`, `Separator` - Basic UI building blocks
+- `Dialog` - Modals (HelpModal)
+- `Tooltip` - Help text tooltips (HelpTooltip)
+- `Collapsible` - Expandable panels (HierarchyPanel, PropertiesPanel, ComponentPanel)
+- `Select` - Rich dropdowns with animations (replaced all native `<select>`)
+- `Checkbox` - Styled checkboxes (replaced all native checkboxes)
+- `Switch` - Toggle switches
+- `Slider` - Range inputs
+- `Input`, `Label` - Form inputs
+- `ScrollArea` - Custom scrollbars (PropertiesPanel, JSON preview)
+- `Badge` - Count indicators
+
+**Custom form wrapper components** in `src/routes/creator/components/form/`:
+- `FormSlider` - Labeled slider with value display (percent or suffix)
+- `FormSelect` - Labeled select using shadcn Select component
+- `FormCheckbox` - Labeled checkbox
+- `FormSwitch` - Labeled toggle switch
+- `FormInput` - Labeled text/number input
+- `FormColorPicker` - Labeled color picker
+- `FormGrid` - 2/3/4 column grid layout
+- `PanelEffects` - Shared effects section footer (eliminates 12x duplication)

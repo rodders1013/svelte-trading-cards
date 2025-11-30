@@ -2,12 +2,14 @@
 	import { registerComponent, Group } from '$lib';
 	import { GradientBackground, Image, PatternBackground } from '$lib/components/backgrounds';
 	import { Border } from '$lib/components/borders';
-	import { TextField } from '$lib/components/fields';
+	import { TextField, StatPanel } from '$lib/components/fields';
 	import { Icon } from '$lib/components/icons';
 	import type { IconData } from '$lib/components/icons';
+	import { Badge, Divider, ProgressBar, Ribbon, Frame, Stamp } from '$lib/components/decorations';
 	import { CARD_WIDTH, CARD_HEIGHT } from '$lib/types';
 	import { datasets, type DemoCard } from '$lib/demo';
 	import * as Card from '$lib/components/ui/card';
+	import * as Select from '$lib/components/ui/select';
 
 	import HierarchyPanel from './components/HierarchyPanel.svelte';
 	import CanvasControls from './components/CanvasControls.svelte';
@@ -23,6 +25,13 @@
 		BackgroundComponent,
 		BorderComponent,
 		IconComponent,
+		BadgeComponent,
+		StatPanelComponent,
+		DividerComponent,
+		ProgressBarComponent,
+		RibbonComponent,
+		FrameComponent,
+		StampComponent,
 		ResizeHandle
 	} from './types';
 
@@ -34,6 +43,13 @@
 		createBackgroundComponent,
 		createBorderComponent,
 		createIconComponent,
+		createBadgeComponent,
+		createStatPanelComponent,
+		createDividerComponent,
+		createProgressBarComponent,
+		createRibbonComponent,
+		createFrameComponent,
+		createStampComponent,
 		generateId,
 		getComponentByType,
 		hasComponentType,
@@ -50,6 +66,13 @@
 	registerComponent('Border', Border);
 	registerComponent('TextField', TextField);
 	registerComponent('Icon', Icon);
+	registerComponent('Badge', Badge);
+	registerComponent('StatPanel', StatPanel);
+	registerComponent('Divider', Divider);
+	registerComponent('ProgressBar', ProgressBar);
+	registerComponent('Ribbon', Ribbon);
+	registerComponent('Frame', Frame);
+	registerComponent('Stamp', Stamp);
 
 	// Template state
 	let templateName = $state('New Template');
@@ -67,7 +90,23 @@
 	let draggedContainerId = $state<string | null>(null);
 	let dragOverContainerId = $state<string | null>(null);
 	let expandedPanels = $state<Set<string>>(
-		new Set(['hierarchy', 'container', 'addcomponent', 'comp-text', 'comp-image', 'comp-background', 'comp-border', 'comp-icon'])
+		new Set([
+			'hierarchy',
+			'container',
+			'addcomponent',
+			'comp-text',
+			'comp-image',
+			'comp-background',
+			'comp-border',
+			'comp-icon',
+			'comp-badge',
+			'comp-statpanel',
+			'comp-divider',
+			'comp-progressbar',
+			'comp-ribbon',
+			'comp-frame',
+			'comp-stamp'
+		])
 	);
 
 	// Preview data
@@ -265,7 +304,77 @@
 		);
 	}
 
-	function removeComponent(type: 'text' | 'image' | 'background' | 'border' | 'icon') {
+	function addBadgeComponent() {
+		if (!selectedContainerId) return;
+		const container = containers.find((c) => c.id === selectedContainerId);
+		if (!container || hasComponentType(container, 'badge')) return;
+		pushHistory();
+		containers = containers.map((c) =>
+			c.id === selectedContainerId ? { ...c, components: [...c.components, createBadgeComponent()] } : c
+		);
+	}
+
+	function addStatPanelComponent() {
+		if (!selectedContainerId) return;
+		const container = containers.find((c) => c.id === selectedContainerId);
+		if (!container || hasComponentType(container, 'statpanel')) return;
+		pushHistory();
+		containers = containers.map((c) =>
+			c.id === selectedContainerId ? { ...c, components: [...c.components, createStatPanelComponent()] } : c
+		);
+	}
+
+	function addDividerComponent() {
+		if (!selectedContainerId) return;
+		const container = containers.find((c) => c.id === selectedContainerId);
+		if (!container || hasComponentType(container, 'divider')) return;
+		pushHistory();
+		containers = containers.map((c) =>
+			c.id === selectedContainerId ? { ...c, components: [...c.components, createDividerComponent()] } : c
+		);
+	}
+
+	function addProgressBarComponent() {
+		if (!selectedContainerId) return;
+		const container = containers.find((c) => c.id === selectedContainerId);
+		if (!container || hasComponentType(container, 'progressbar')) return;
+		pushHistory();
+		containers = containers.map((c) =>
+			c.id === selectedContainerId ? { ...c, components: [...c.components, createProgressBarComponent()] } : c
+		);
+	}
+
+	function addRibbonComponent() {
+		if (!selectedContainerId) return;
+		const container = containers.find((c) => c.id === selectedContainerId);
+		if (!container || hasComponentType(container, 'ribbon')) return;
+		pushHistory();
+		containers = containers.map((c) =>
+			c.id === selectedContainerId ? { ...c, components: [...c.components, createRibbonComponent()] } : c
+		);
+	}
+
+	function addFrameComponent() {
+		if (!selectedContainerId) return;
+		const container = containers.find((c) => c.id === selectedContainerId);
+		if (!container || hasComponentType(container, 'frame')) return;
+		pushHistory();
+		containers = containers.map((c) =>
+			c.id === selectedContainerId ? { ...c, components: [...c.components, createFrameComponent()] } : c
+		);
+	}
+
+	function addStampComponent() {
+		if (!selectedContainerId) return;
+		const container = containers.find((c) => c.id === selectedContainerId);
+		if (!container || hasComponentType(container, 'stamp')) return;
+		pushHistory();
+		containers = containers.map((c) =>
+			c.id === selectedContainerId ? { ...c, components: [...c.components, createStampComponent()] } : c
+		);
+	}
+
+	function removeComponent(type: 'text' | 'image' | 'background' | 'border' | 'icon' | 'badge' | 'statpanel' | 'divider' | 'progressbar' | 'ribbon' | 'frame' | 'stamp') {
 		if (!selectedContainerId) return;
 		pushHistory();
 		containers = containers.map((c) => {
@@ -302,6 +411,34 @@
 
 	function updateIconComponent(key: keyof Omit<IconComponent, 'type' | 'id'>, value: unknown) {
 		updateComponent<IconComponent>('icon', key, value);
+	}
+
+	function updateBadgeComponent(key: keyof Omit<BadgeComponent, 'type' | 'id'>, value: unknown) {
+		updateComponent<BadgeComponent>('badge', key, value);
+	}
+
+	function updateStatPanelComponent(key: keyof Omit<StatPanelComponent, 'type' | 'id'>, value: unknown) {
+		updateComponent<StatPanelComponent>('statpanel', key, value);
+	}
+
+	function updateDividerComponent(key: keyof Omit<DividerComponent, 'type' | 'id'>, value: unknown) {
+		updateComponent<DividerComponent>('divider', key, value);
+	}
+
+	function updateProgressBarComponent(key: keyof Omit<ProgressBarComponent, 'type' | 'id'>, value: unknown) {
+		updateComponent<ProgressBarComponent>('progressbar', key, value);
+	}
+
+	function updateRibbonComponent(key: keyof Omit<RibbonComponent, 'type' | 'id'>, value: unknown) {
+		updateComponent<RibbonComponent>('ribbon', key, value);
+	}
+
+	function updateFrameComponent(key: keyof Omit<FrameComponent, 'type' | 'id'>, value: unknown) {
+		updateComponent<FrameComponent>('frame', key, value);
+	}
+
+	function updateStampComponent(key: keyof Omit<StampComponent, 'type' | 'id'>, value: unknown) {
+		updateComponent<StampComponent>('stamp', key, value);
 	}
 
 	function updateIconSelection(icon: { iconData: IconData; iconName: string }) {
@@ -754,24 +891,26 @@
 			<Card.Root>
 				<Card.Content class="space-y-2 px-3 py-2">
 					<div class="flex gap-2">
-						<select
-							value={selectedDataset}
-							onchange={(e) => (selectedDataset = (e.target as HTMLSelectElement).value as typeof selectedDataset)}
-							class="flex-1 rounded border border-input bg-background px-2 py-1 text-sm"
-						>
-							<option value="creator">Fantasy Heroes</option>
-							<option value="gallery">Cosmic Voyagers</option>
-							<option value="sports">Sports Legends</option>
-						</select>
-						<select
-							value={String(selectedCardIndex)}
-							onchange={(e) => (selectedCardIndex = parseInt((e.target as HTMLSelectElement).value))}
-							class="flex-1 rounded border border-input bg-background px-2 py-1 text-sm"
-						>
-							{#each currentDataset.cards as card, i}
-								<option value={String(i)}>{card.title}</option>
-							{/each}
-						</select>
+						<Select.Root type="single" value={selectedDataset} onValueChange={(v) => v && (selectedDataset = v as typeof selectedDataset)}>
+							<Select.Trigger class="flex-1">
+								{selectedDataset === 'creator' ? 'Fantasy Heroes' : selectedDataset === 'gallery' ? 'Cosmic Voyagers' : 'Sports Legends'}
+							</Select.Trigger>
+							<Select.Content>
+								<Select.Item value="creator" label="Fantasy Heroes" />
+								<Select.Item value="gallery" label="Cosmic Voyagers" />
+								<Select.Item value="sports" label="Sports Legends" />
+							</Select.Content>
+						</Select.Root>
+						<Select.Root type="single" value={String(selectedCardIndex)} onValueChange={(v) => v && (selectedCardIndex = parseInt(v))}>
+							<Select.Trigger class="flex-1">
+								{currentDataset.cards[selectedCardIndex]?.title ?? 'Select card'}
+							</Select.Trigger>
+							<Select.Content>
+								{#each currentDataset.cards as card, i (i)}
+									<Select.Item value={String(i)} label={card.title} />
+								{/each}
+							</Select.Content>
+						</Select.Root>
 					</div>
 				</Card.Content>
 			</Card.Root>
@@ -796,6 +935,13 @@
 		onAddBackgroundComponent={addBackgroundComponent}
 		onAddBorderComponent={addBorderComponent}
 		onAddIconComponent={addIconComponent}
+		onAddBadgeComponent={addBadgeComponent}
+		onAddStatPanelComponent={addStatPanelComponent}
+		onAddDividerComponent={addDividerComponent}
+		onAddProgressBarComponent={addProgressBarComponent}
+		onAddRibbonComponent={addRibbonComponent}
+		onAddFrameComponent={addFrameComponent}
+		onAddStampComponent={addStampComponent}
 		onUpdateTextComponent={updateTextComponent}
 		onUpdateImageComponent={updateImageComponent}
 		onUpdateBackgroundComponent={updateBackgroundComponent}
@@ -804,6 +950,13 @@
 		onUpdateBorderHolographic={updateBorderHolographic}
 		onUpdateIconComponent={updateIconComponent}
 		onUpdateIconSelection={updateIconSelection}
+		onUpdateBadgeComponent={updateBadgeComponent}
+		onUpdateStatPanelComponent={updateStatPanelComponent}
+		onUpdateDividerComponent={updateDividerComponent}
+		onUpdateProgressBarComponent={updateProgressBarComponent}
+		onUpdateRibbonComponent={updateRibbonComponent}
+		onUpdateFrameComponent={updateFrameComponent}
+		onUpdateStampComponent={updateStampComponent}
 		onRemoveComponent={removeComponent}
 		onMoveComponentUp={moveComponentUp}
 		onMoveComponentDown={moveComponentDown}

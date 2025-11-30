@@ -4,9 +4,22 @@ export { CardCanvas, ComponentRenderer, Group, registerComponent, getComponentBy
 // Components
 export { GradientBackground, Image, PatternBackground } from './components/backgrounds/index.js';
 export { Border } from './components/borders/index.js';
-export { TextField } from './components/fields/index.js';
+export { TextField, StatPanel } from './components/fields/index.js';
 export { Icon, IconPicker } from './components/icons/index.js';
 export type { IconData, IconProps } from './components/icons/index.js';
+export type { StatPanelProps, StatRow } from './components/fields/index.js';
+
+// Decorations
+export { Badge, Divider, ProgressBar, Ribbon, Frame, Stamp } from './components/decorations/index.js';
+export type {
+	BadgeProps, BadgeShape, BadgePreset, BadgeSize,
+	DividerProps, DividerStyle, DividerFade, DividerOrnament,
+	ProgressBarProps, ProgressBarStyle, LabelPosition,
+	RibbonProps, RibbonPosition, RibbonStyle,
+	FrameProps, FrameStyle, FrameSize,
+	StampProps, StampStyle
+} from './components/decorations/index.js';
+export { BADGE_PRESETS } from './components/decorations/index.js';
 
 // Animations
 export {

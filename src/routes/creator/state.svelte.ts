@@ -9,6 +9,13 @@ import type {
 	BackgroundComponent,
 	BorderComponent,
 	IconComponent,
+	BadgeComponent,
+	StatPanelComponent,
+	DividerComponent,
+	ProgressBarComponent,
+	RibbonComponent,
+	FrameComponent,
+	StampComponent,
 	ClipShape,
 	ResizeHandle
 } from './types';
@@ -96,6 +103,20 @@ export function getComponentIcon(type: string): string {
 			return 'bdr';
 		case 'icon':
 			return 'ico';
+		case 'badge':
+			return 'bdg';
+		case 'statpanel':
+			return 'stat';
+		case 'divider':
+			return 'div';
+		case 'progressbar':
+			return 'bar';
+		case 'ribbon':
+			return 'rib';
+		case 'frame':
+			return 'frm';
+		case 'stamp':
+			return 'stp';
 		default:
 			return '?';
 	}
@@ -134,9 +155,6 @@ export function buildTemplate(templateName: string, containers: ContainerState[]
 						color: comp.solidColor,
 						opacity: comp.fillOpacity
 					};
-					if (comp.animation && comp.animation.type !== 'none') {
-						solidProps.animation = comp.animation;
-					}
 					if (comp.effect) {
 						solidProps.effect = comp.effect;
 					}
@@ -151,9 +169,6 @@ export function buildTemplate(templateName: string, containers: ContainerState[]
 						direction: comp.gradientDirection,
 						opacity: comp.fillOpacity
 					};
-					if (comp.animation && comp.animation.type !== 'none') {
-						gradientProps.animation = comp.animation;
-					}
 					if (comp.effect) {
 						gradientProps.effect = comp.effect;
 					}
@@ -170,9 +185,6 @@ export function buildTemplate(templateName: string, containers: ContainerState[]
 						color: comp.patternColor,
 						opacity: comp.patternOpacity
 					};
-					if (comp.animation && comp.animation.type !== 'none') {
-						patternProps.animation = comp.animation;
-					}
 					if (comp.effect) {
 						patternProps.effect = comp.effect;
 					}
@@ -188,9 +200,6 @@ export function buildTemplate(templateName: string, containers: ContainerState[]
 					opacity: comp.opacity,
 					preserveAspectRatio: comp.preserveAspectRatio
 				};
-				if (comp.animation && comp.animation.type !== 'none') {
-					imageProps.animation = comp.animation;
-				}
 				if (comp.effect) {
 					imageProps.effect = comp.effect;
 				}
@@ -210,9 +219,6 @@ export function buildTemplate(templateName: string, containers: ContainerState[]
 					alignment: comp.alignment,
 					verticalAlign: comp.verticalAlign
 				};
-				if (comp.animation && comp.animation.type !== 'none') {
-					textProps.animation = comp.animation;
-				}
 				if (comp.effect) {
 					textProps.effect = comp.effect;
 				}
@@ -249,9 +255,6 @@ export function buildTemplate(templateName: string, containers: ContainerState[]
 					}
 					borderProps.layerSpacing = comp.layerSpacing;
 				}
-				if (comp.animation && comp.animation.type !== 'none') {
-					borderProps.animation = comp.animation;
-				}
 				if (comp.effect) {
 					borderProps.effect = comp.effect;
 				}
@@ -272,9 +275,6 @@ export function buildTemplate(templateName: string, containers: ContainerState[]
 						flipHorizontal: comp.flipHorizontal,
 						flipVertical: comp.flipVertical
 					};
-					if (comp.animation && comp.animation.type !== 'none') {
-						iconProps.animation = comp.animation;
-					}
 					if (comp.effect) {
 						iconProps.effect = comp.effect;
 					}
@@ -284,21 +284,199 @@ export function buildTemplate(templateName: string, containers: ContainerState[]
 						props: iconProps
 					});
 				}
+			} else if (comp.type === 'badge') {
+				const badgeProps: Record<string, unknown> = {
+					textPreset: comp.textPreset,
+					dataField: comp.dataField,
+					shape: comp.shape,
+					preset: comp.preset,
+					backgroundColor: comp.backgroundColor,
+					textColor: comp.textColor,
+					borderColor: comp.borderColor,
+					borderWidth: comp.borderWidth,
+					size: comp.size,
+					fontFamily: comp.fontFamily,
+					fontWeight: comp.fontWeight,
+					icon: comp.icon,
+					iconColor: comp.iconColor,
+					opacity: comp.opacity
+				};
+				if (comp.effect) {
+					badgeProps.effect = comp.effect;
+				}
+				children.push({
+					id: comp.id,
+					type: 'Badge',
+					props: badgeProps
+				});
+			} else if (comp.type === 'statpanel') {
+				const statPanelProps: Record<string, unknown> = {
+					rows: comp.rows,
+					labelColor: comp.labelColor,
+					valueColor: comp.valueColor,
+					divider: comp.divider,
+					dividerColor: comp.dividerColor,
+					compact: comp.compact,
+					fontFamily: comp.fontFamily,
+					labelFontSize: comp.labelFontSize,
+					valueFontSize: comp.valueFontSize,
+					barHeight: comp.barHeight,
+					barBackgroundColor: comp.barBackgroundColor,
+					barBorderRadius: comp.barBorderRadius,
+					opacity: comp.opacity
+				};
+				if (comp.effect) {
+					statPanelProps.effect = comp.effect;
+				}
+				children.push({
+					id: comp.id,
+					type: 'StatPanel',
+					props: statPanelProps
+				});
+			} else if (comp.type === 'divider') {
+				const dividerProps: Record<string, unknown> = {
+					style: comp.style,
+					color: comp.color,
+					secondaryColor: comp.secondaryColor,
+					thickness: comp.thickness,
+					fade: comp.fade,
+					ornament: comp.ornament,
+					ornamentSize: comp.ornamentSize,
+					ornamentColor: comp.ornamentColor,
+					dashLength: comp.dashLength,
+					gapLength: comp.gapLength,
+					opacity: comp.opacity
+				};
+				if (comp.effect) {
+					dividerProps.effect = comp.effect;
+				}
+				children.push({
+					id: comp.id,
+					type: 'Divider',
+					props: dividerProps
+				});
+			} else if (comp.type === 'progressbar') {
+				const progressBarProps: Record<string, unknown> = {
+					value: comp.value,
+					max: comp.max,
+					dataField: comp.dataField,
+					color: comp.color,
+					backgroundColor: comp.backgroundColor,
+					borderColor: comp.borderColor,
+					borderWidth: comp.borderWidth,
+					showLabel: comp.showLabel,
+					labelPosition: comp.labelPosition,
+					labelColor: comp.labelColor,
+					labelFontSize: comp.labelFontSize,
+					labelFontFamily: comp.labelFontFamily,
+					labelFormat: comp.labelFormat,
+					style: comp.style,
+					segments: comp.segments,
+					segmentGap: comp.segmentGap,
+					glowEnabled: comp.glowEnabled,
+					glowColor: comp.glowColor,
+					glowIntensity: comp.glowIntensity,
+					opacity: comp.opacity
+				};
+				if (comp.effect) {
+					progressBarProps.effect = comp.effect;
+				}
+				children.push({
+					id: comp.id,
+					type: 'ProgressBar',
+					props: progressBarProps
+				});
+			} else if (comp.type === 'ribbon') {
+				const ribbonProps: Record<string, unknown> = {
+					textPreset: comp.textPreset,
+					dataField: comp.dataField,
+					position: comp.position,
+					style: comp.style,
+					color: comp.color,
+					textColor: comp.textColor,
+					shadowColor: comp.shadowColor,
+					fontSize: comp.fontSize,
+					fontFamily: comp.fontFamily,
+					fontWeight: comp.fontWeight,
+					angle: comp.angle,
+					ribbonWidth: comp.ribbonWidth,
+					opacity: comp.opacity
+				};
+				if (comp.effect) {
+					ribbonProps.effect = comp.effect;
+				}
+				children.push({
+					id: comp.id,
+					type: 'Ribbon',
+					props: ribbonProps
+				});
+			} else if (comp.type === 'frame') {
+				const frameProps: Record<string, unknown> = {
+					style: comp.style,
+					corners: comp.corners,
+					edges: comp.edges,
+					color: comp.color,
+					secondaryColor: comp.secondaryColor,
+					size: comp.size,
+					strokeWidth: comp.strokeWidth,
+					opacity: comp.opacity
+				};
+				if (comp.effect) {
+					frameProps.effect = comp.effect;
+				}
+				children.push({
+					id: comp.id,
+					type: 'Frame',
+					props: frameProps
+				});
+			} else if (comp.type === 'stamp') {
+				const stampProps: Record<string, unknown> = {
+					textPreset: comp.textPreset,
+					dataField: comp.dataField,
+					style: comp.style,
+					color: comp.color,
+					textColor: comp.textColor,
+					secondaryColor: comp.secondaryColor,
+					icon: comp.icon,
+					iconColor: comp.iconColor,
+					rotation: comp.rotation,
+					fontSize: comp.fontSize,
+					fontFamily: comp.fontFamily,
+					fontWeight: comp.fontWeight,
+					borderWidth: comp.borderWidth,
+					showRing: comp.showRing,
+					opacity: comp.opacity
+				};
+				if (comp.effect) {
+					stampProps.effect = comp.effect;
+				}
+				children.push({
+					id: comp.id,
+					type: 'Stamp',
+					props: stampProps
+				});
 			}
+		}
+
+			const groupProps: Record<string, unknown> = {
+			x: container.x,
+			y: container.y,
+			width: container.width,
+			height: container.height,
+			radius: container.clipShape === 'rect' ? container.radius : 0,
+			clipShape: container.clipShape,
+			clipContent: container.clipContent
+		};
+
+		// Animation is now at the zone/group level
+		if (container.animation && container.animation.type !== 'none') {
+			groupProps.animation = container.animation;
 		}
 
 		components.push({
 			id: container.id,
 			type: 'Group',
-			props: {
-				x: container.x,
-				y: container.y,
-				width: container.width,
-				height: container.height,
-				radius: container.clipShape === 'rect' ? container.radius : 0,
-				clipShape: container.clipShape,
-				clipContent: container.clipContent
-			},
+			props: groupProps,
 			children
 		});
 	}
@@ -397,15 +575,168 @@ export function createIconComponent(): IconComponent {
 		opacity: 1,
 		rotation: 0,
 		flipHorizontal: false,
-		flipVertical: false,
-		animation: undefined
+		flipVertical: false
+	};
+}
+
+export function createBadgeComponent(): BadgeComponent {
+	return {
+		type: 'badge',
+		id: generateComponentId('badge'),
+		visible: true,
+		textPreset: 'RARE',
+		dataField: undefined,
+		shape: 'pill',
+		preset: 'custom',
+		backgroundColor: '#3b82f6',
+		textColor: '#ffffff',
+		borderColor: undefined,
+		borderWidth: 0,
+		size: 'md',
+		fontFamily: 'Arial, sans-serif',
+		fontWeight: 'bold',
+		icon: undefined,
+		iconColor: undefined,
+		opacity: 1
+	};
+}
+
+export function createStatPanelComponent(): StatPanelComponent {
+	return {
+		type: 'statpanel',
+		id: generateComponentId('statpanel'),
+		visible: true,
+		rows: [
+			{ labelPreset: 'ATTACK', dataField: 'title', showBar: true, barColor: '#ef4444', barMax: 100 },
+			{ labelPreset: 'DEFENSE', dataField: 'subtitle', showBar: true, barColor: '#3b82f6', barMax: 100 },
+			{ labelPreset: 'SPEED', dataField: 'category', showBar: true, barColor: '#22c55e', barMax: 100 }
+		],
+		labelColor: '#9ca3af',
+		valueColor: '#ffffff',
+		divider: true,
+		dividerColor: '#374151',
+		compact: false,
+		fontFamily: 'Arial, sans-serif',
+		labelFontSize: 12,
+		valueFontSize: 14,
+		barHeight: 6,
+		barBackgroundColor: '#1f2937',
+		barBorderRadius: 3,
+		opacity: 1
+	};
+}
+
+export function createDividerComponent(): DividerComponent {
+	return {
+		type: 'divider',
+		id: generateComponentId('divider'),
+		visible: true,
+		style: 'solid',
+		color: '#ffffff',
+		secondaryColor: undefined,
+		thickness: 2,
+		fade: 'both',
+		ornament: 'none',
+		ornamentSize: 12,
+		ornamentColor: undefined,
+		dashLength: 8,
+		gapLength: 4,
+		opacity: 1
+	};
+}
+
+export function createProgressBarComponent(): ProgressBarComponent {
+	return {
+		type: 'progressbar',
+		id: generateComponentId('progressbar'),
+		visible: true,
+		value: 75,
+		max: 100,
+		dataField: undefined,
+		color: '#22c55e',
+		backgroundColor: '#374151',
+		borderColor: undefined,
+		borderWidth: 0,
+		showLabel: true,
+		labelPosition: 'right',
+		labelColor: '#ffffff',
+		labelFontSize: 12,
+		labelFontFamily: 'Arial, sans-serif',
+		labelFormat: 'value',
+		style: 'rounded',
+		segments: 0,
+		segmentGap: 2,
+		glowEnabled: false,
+		glowColor: undefined,
+		glowIntensity: 0.5,
+		opacity: 1
+	};
+}
+
+export function createRibbonComponent(): RibbonComponent {
+	return {
+		type: 'ribbon',
+		id: generateComponentId('ribbon'),
+		visible: true,
+		textPreset: 'LIMITED',
+		dataField: undefined,
+		position: 'top-right',
+		style: 'folded',
+		color: '#ef4444',
+		textColor: '#ffffff',
+		shadowColor: '#b91c1c',
+		fontSize: 12,
+		fontFamily: 'Arial, sans-serif',
+		fontWeight: 'bold',
+		angle: 45,
+		ribbonWidth: undefined,
+		opacity: 1
+	};
+}
+
+export function createFrameComponent(): FrameComponent {
+	return {
+		type: 'frame',
+		id: generateComponentId('frame'),
+		visible: true,
+		style: 'ornate',
+		corners: true,
+		edges: false,
+		color: '#fbbf24',
+		secondaryColor: undefined,
+		size: 'md',
+		strokeWidth: 2,
+		opacity: 1
+	};
+}
+
+export function createStampComponent(): StampComponent {
+	return {
+		type: 'stamp',
+		id: generateComponentId('stamp'),
+		visible: true,
+		textPreset: '#001',
+		dataField: undefined,
+		style: 'wax-seal',
+		color: '#dc2626',
+		textColor: '#ffffff',
+		secondaryColor: undefined,
+		icon: undefined,
+		iconColor: undefined,
+		rotation: -15,
+		fontSize: 10,
+		fontFamily: 'Arial, sans-serif',
+		fontWeight: 'bold',
+		borderWidth: 3,
+		showRing: true,
+		opacity: 0.9
 	};
 }
 
 export function createContainer(containerNumber: number): ContainerState {
 	return {
 		id: generateId(),
-		name: `Zone ${containerNumber}`,
+		name: `Layer ${containerNumber}`,
 		visible: true,
 		locked: false,
 		x: 50,

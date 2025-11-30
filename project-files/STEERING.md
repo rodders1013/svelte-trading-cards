@@ -159,6 +159,62 @@ This library does NOT use emojis anywhere.
 
 ---
 
+## UI Components - shadcn-svelte
+
+**Always prefer shadcn-svelte components for UI elements in the creator interface.**
+
+Documentation entry point for LLMs: https://www.shadcn-svelte.com/llms.txt
+
+### Available Components
+
+The project uses these shadcn-svelte components:
+
+| Component | Usage |
+|-----------|-------|
+| `Button` | Actions, form submissions |
+| `Card` | Content containers |
+| `Dialog` | Modals (HelpModal) |
+| `Tooltip` | Help text (HelpTooltip) |
+| `Collapsible` | Expandable panels |
+| `Select` | Dropdowns (NOT native `<select>`) |
+| `Checkbox` | Boolean toggles |
+| `Switch` | On/off toggles |
+| `Slider` | Range inputs |
+| `Input` | Text/number inputs |
+| `Label` | Form labels |
+| `Separator` | Visual dividers |
+| `ScrollArea` | Custom scrollbars |
+| `Badge` | Count indicators |
+
+### When Adding UI Elements
+
+1. Check if shadcn-svelte has a component: https://www.shadcn-svelte.com/llms.txt
+2. Install if needed: `pnpm dlx shadcn-svelte@latest add <component>`
+3. Use the shadcn component instead of raw HTML elements
+
+**Do NOT use:**
+- Native `<select>` elements → Use `Select` component
+- Native `<input type="checkbox">` → Use `Checkbox` component
+- `overflow-auto` for scrolling → Use `ScrollArea` component
+- Custom tooltip CSS → Use `Tooltip` component
+- Custom modal/dialog CSS → Use `Dialog` component
+
+### Form Wrapper Components
+
+Located in `src/routes/creator/components/form/`:
+
+| Component | Purpose |
+|-----------|---------|
+| `FormSlider` | Labeled slider with value display |
+| `FormSelect` | Labeled select with shadcn Select |
+| `FormCheckbox` | Labeled checkbox |
+| `FormSwitch` | Labeled toggle switch |
+| `FormInput` | Labeled text/number input |
+| `FormColorPicker` | Labeled color picker |
+| `FormGrid` | 2/3/4 column grid layout |
+
+---
+
 ## Commands
 
 ```bash

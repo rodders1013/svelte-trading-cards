@@ -6,6 +6,9 @@
 		type EffectType
 	} from '$lib/effects';
 	import type { AnimationSpeed } from '$lib/animations';
+	import * as Select from '$lib/components/ui/select';
+	import { Checkbox } from '$lib/components/ui/checkbox';
+	import { Label } from '$lib/components/ui/label';
 
 	let {
 		effect = $bindable<EffectConfig | undefined>(undefined)
@@ -40,12 +43,11 @@
 		{ label: 'Cyan', value: '#00ffff' }
 	];
 
-	function handleTypeChange(e: Event) {
-		const type = (e.target as HTMLSelectElement).value as EffectType;
-		if (type === 'none') {
+	function handleTypeChange(type: string | undefined) {
+		if (!type || type === 'none') {
 			effect = undefined;
 		} else {
-			effect = getDefaultEffectConfig(type);
+			effect = getDefaultEffectConfig(type as EffectType);
 		}
 	}
 
@@ -54,6 +56,27 @@
 			effect = { ...effect, [key]: value } as EffectConfig;
 		}
 	}
+
+	// Get label for current effect type
+	const currentEffectLabel = $derived(
+		effectOptions.find((opt) => opt.value === (effect?.type ?? 'none'))?.label ?? 'None'
+	);
+
+	// Get label for current elevation (only for lift effect)
+	const currentElevationLabel = $derived.by(() => {
+		if (effect && effect.type === 'lift') {
+			return liftOptions.find((opt) => opt.value === effect.elevation)?.label ?? 'Medium';
+		}
+		return '';
+	});
+
+	// Get label for current speed
+	const currentSpeedLabel = $derived.by(() => {
+		if (effect && effect.animated) {
+			return speedOptions.find((opt) => opt.value === effect.speed)?.label ?? 'Normal';
+		}
+		return '';
+	});
 </script>
 
 <div class="rounded border border-input p-2">
@@ -61,15 +84,16 @@
 	<div class="mt-2 space-y-2">
 		<div>
 			<span class="text-sm text-muted-foreground">Type</span>
-			<select
-				class="mt-1 w-full rounded border border-input bg-background px-2 py-1 text-sm"
-				value={effect?.type ?? 'none'}
-				onchange={handleTypeChange}
-			>
-				{#each effectOptions as opt}
-					<option value={opt.value}>{opt.label}</option>
-				{/each}
-			</select>
+			<Select.Root type="single" value={effect?.type ?? 'none'} onValueChange={handleTypeChange}>
+				<Select.Trigger class="mt-1 w-full">
+					{currentEffectLabel}
+				</Select.Trigger>
+				<Select.Content>
+					{#each effectOptions as opt (opt.value)}
+						<Select.Item value={opt.value} label={opt.label} />
+					{/each}
+				</Select.Content>
+			</Select.Root>
 		</div>
 
 		{#if effect}
@@ -240,15 +264,16 @@
 			{:else if effect.type === 'lift'}
 				<div>
 					<span class="text-sm text-muted-foreground">Elevation</span>
-					<select
-						class="mt-1 w-full rounded border border-input bg-background px-2 py-1 text-sm"
-						value={effect.elevation}
-						onchange={(e) => updateEffect('elevation', (e.target as HTMLSelectElement).value)}
-					>
-						{#each liftOptions as opt}
-							<option value={opt.value}>{opt.label}</option>
-						{/each}
-					</select>
+					<Select.Root type="single" value={effect.elevation} onValueChange={(v) => v && updateEffect('elevation', v)}>
+						<Select.Trigger class="mt-1 w-full">
+							{currentElevationLabel}
+						</Select.Trigger>
+						<Select.Content>
+							{#each liftOptions as opt (opt.value)}
+								<Select.Item value={opt.value} label={opt.label} />
+							{/each}
+						</Select.Content>
+					</Select.Root>
 				</div>
 
 			<!-- Outline Effect Controls -->
@@ -277,26 +302,27 @@
 
 			<!-- Animation toggle (available for all effects) -->
 			<div class="border-t border-input pt-2">
-				<label class="flex items-center gap-2 text-sm">
-					<input
-						type="checkbox"
+				<div class="flex items-center gap-2">
+					<Checkbox
+						id="effect-animated"
 						checked={effect.animated}
-						onchange={(e) => updateEffect('animated', (e.target as HTMLInputElement).checked)}
+						onCheckedChange={(checked) => updateEffect('animated', checked === true)}
 					/>
-					Animated (pulsing)
-				</label>
+					<Label for="effect-animated" class="text-sm">Animated (pulsing)</Label>
+				</div>
 				{#if effect.animated}
 					<div class="mt-2">
 						<span class="text-sm text-muted-foreground">Speed</span>
-						<select
-							class="mt-1 w-full rounded border border-input bg-background px-2 py-1 text-sm"
-							value={effect.speed}
-							onchange={(e) => updateEffect('speed', (e.target as HTMLSelectElement).value)}
-						>
-							{#each speedOptions as opt}
-								<option value={opt.value}>{opt.label}</option>
-							{/each}
-						</select>
+						<Select.Root type="single" value={effect.speed} onValueChange={(v) => v && updateEffect('speed', v)}>
+							<Select.Trigger class="mt-1 w-full">
+								{currentSpeedLabel}
+							</Select.Trigger>
+							<Select.Content>
+								{#each speedOptions as opt (opt.value)}
+									<Select.Item value={opt.value} label={opt.label} />
+								{/each}
+							</Select.Content>
+						</Select.Root>
 					</div>
 				{/if}
 			</div>

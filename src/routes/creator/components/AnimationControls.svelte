@@ -7,6 +7,9 @@
 		AnimationDirection,
 		AnimationEasing
 	} from '$lib/animations';
+	import * as Select from '$lib/components/ui/select';
+	import { Checkbox } from '$lib/components/ui/checkbox';
+	import { Label } from '$lib/components/ui/label';
 
 	let {
 		animation = $bindable<AnimationConfig | undefined>(undefined)
@@ -35,13 +38,12 @@
 		{ value: 'ease-in-out', label: 'Ease In-Out' }
 	];
 
-	function handleTypeChange(e: Event) {
-		const type = (e.target as HTMLSelectElement).value as AnimationType;
-		if (type === 'none') {
+	function handleTypeChange(type: string | undefined) {
+		if (!type || type === 'none') {
 			animation = undefined;
 		} else {
 			animation = {
-				type,
+				type: type as AnimationType,
 				speed: animation?.speed ?? 'normal',
 				direction: animation?.direction ?? 'clockwise',
 				easing: animation?.easing ?? 'ease-in-out',
@@ -57,6 +59,26 @@
 			animation = { ...animation, [key]: value };
 		}
 	}
+
+	// Get labels for current values
+	const currentTypeLabel = $derived(
+		animationOptions.find((opt) => opt.value === (animation?.type ?? 'none'))?.label ?? 'None'
+	);
+
+	const currentSpeedLabel = $derived.by(() => {
+		if (!animation) return '';
+		return speedOptions.find((opt) => opt.value === animation.speed)?.label ?? 'Normal';
+	});
+
+	const currentDirectionLabel = $derived.by(() => {
+		if (!animation) return '';
+		return directionOptions.find((opt) => opt.value === animation.direction)?.label ?? 'Clockwise';
+	});
+
+	const currentEasingLabel = $derived.by(() => {
+		if (!animation) return '';
+		return easingOptions.find((opt) => opt.value === animation.easing)?.label ?? 'Ease In-Out';
+	});
 </script>
 
 <div class="rounded border border-input p-2">
@@ -64,69 +86,73 @@
 	<div class="mt-2 space-y-2">
 		<div>
 			<span class="text-sm text-muted-foreground">Type</span>
-			<select
-				class="mt-1 w-full rounded border border-input bg-background px-2 py-1 text-sm"
-				value={animation?.type ?? 'none'}
-				onchange={handleTypeChange}
-			>
-				{#each animationOptions as opt}
-					<option value={opt.value}>{opt.label}</option>
-				{/each}
-			</select>
+			<Select.Root type="single" value={animation?.type ?? 'none'} onValueChange={handleTypeChange}>
+				<Select.Trigger class="mt-1 w-full">
+					{currentTypeLabel}
+				</Select.Trigger>
+				<Select.Content>
+					{#each animationOptions as opt (opt.value)}
+						<Select.Item value={opt.value} label={opt.label} />
+					{/each}
+				</Select.Content>
+			</Select.Root>
 		</div>
 
 		{#if animation && animation.type !== 'none'}
 			<div class="grid grid-cols-2 gap-2">
 				<div>
 					<span class="text-sm text-muted-foreground">Speed</span>
-					<select
-						class="mt-1 w-full rounded border border-input bg-background px-2 py-1 text-sm"
-						value={animation.speed}
-						onchange={(e) => updateAnimation('speed', (e.target as HTMLSelectElement).value as AnimationSpeed)}
-					>
-						{#each speedOptions as opt}
-							<option value={opt.value}>{opt.label}</option>
-						{/each}
-					</select>
+					<Select.Root type="single" value={animation.speed} onValueChange={(v) => v && updateAnimation('speed', v as AnimationSpeed)}>
+						<Select.Trigger class="mt-1 w-full">
+							{currentSpeedLabel}
+						</Select.Trigger>
+						<Select.Content>
+							{#each speedOptions as opt (opt.value)}
+								<Select.Item value={opt.value} label={opt.label} />
+							{/each}
+						</Select.Content>
+					</Select.Root>
 				</div>
 
 				{#if animation.type === 'spin' || animation.type === 'trace'}
 					<div>
 						<span class="text-sm text-muted-foreground">Direction</span>
-						<select
-							class="mt-1 w-full rounded border border-input bg-background px-2 py-1 text-sm"
-							value={animation.direction}
-							onchange={(e) => updateAnimation('direction', (e.target as HTMLSelectElement).value as AnimationDirection)}
-						>
-							{#each directionOptions as opt}
-								<option value={opt.value}>{opt.label}</option>
-							{/each}
-						</select>
+						<Select.Root type="single" value={animation.direction} onValueChange={(v) => v && updateAnimation('direction', v as AnimationDirection)}>
+							<Select.Trigger class="mt-1 w-full">
+								{currentDirectionLabel}
+							</Select.Trigger>
+							<Select.Content>
+								{#each directionOptions as opt (opt.value)}
+									<Select.Item value={opt.value} label={opt.label} />
+								{/each}
+							</Select.Content>
+						</Select.Root>
 					</div>
 				{/if}
 			</div>
 
 			<div>
 				<span class="text-sm text-muted-foreground">Easing</span>
-				<select
-					class="mt-1 w-full rounded border border-input bg-background px-2 py-1 text-sm"
-					value={animation.easing}
-					onchange={(e) => updateAnimation('easing', (e.target as HTMLSelectElement).value as AnimationEasing)}
-				>
-					{#each easingOptions as opt}
-						<option value={opt.value}>{opt.label}</option>
-					{/each}
-				</select>
+				<Select.Root type="single" value={animation.easing} onValueChange={(v) => v && updateAnimation('easing', v as AnimationEasing)}>
+					<Select.Trigger class="mt-1 w-full">
+						{currentEasingLabel}
+					</Select.Trigger>
+					<Select.Content>
+						{#each easingOptions as opt (opt.value)}
+							<Select.Item value={opt.value} label={opt.label} />
+						{/each}
+					</Select.Content>
+				</Select.Root>
 			</div>
 
-			<label class="flex items-center gap-2 text-sm">
-				<input
-					type="checkbox"
+			<div class="flex items-center gap-2">
+				<Checkbox
+					id="animation-paused"
 					checked={animation.paused}
-					onchange={(e) => updateAnimation('paused', (e.target as HTMLInputElement).checked)}
+					onCheckedChange={(checked) => updateAnimation('paused', checked === true)}
 				/>
-				Paused
-			</label>
+				<Label for="animation-paused" class="text-sm">Paused</Label>
+			</div>
 		{/if}
 	</div>
 </div>

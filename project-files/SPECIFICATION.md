@@ -2,8 +2,8 @@
 
 **Package:** `svelte-trading-cards`
 **Version:** 0.1.0
-**Last Updated:** 2025-11-28
-**Status:** In Development (~89% complete)
+**Last Updated:** 2025-11-29
+**Status:** In Development (~85% complete)
 
 ---
 
@@ -62,7 +62,7 @@ All cards use standard trading card dimensions:
 | Tailwind CSS | 4.x | CSS-first configuration with `@plugin` directive |
 | Zod | 4.x | Runtime validation |
 | Iconify | - | Icons via CSS classes (`icon-[set--name]`) |
-| shadcn-svelte | - | UI components for creator interface |
+| shadcn-svelte | - | UI components for creator interface (https://www.shadcn-svelte.com/llms.txt) |
 
 ---
 
@@ -253,6 +253,140 @@ Groups position and contain child components:
 ```
 
 **Available clipShapes:** rect, circle, ellipse, hexagon, octagon, diamond, shield, star, polygon
+
+### Badge (Planned)
+
+Universal badge component with shapes and style presets:
+
+```typescript
+{
+  type: 'Badge',
+  props: {
+    text: 'LEGENDARY',
+    shape: 'pill',             // pill, square, diamond, hexagon, shield, star
+    preset: 'legendary',       // Rarity: common, rare, epic, legendary, mythic
+                               // Status: verified, new, sold, limited, promo
+    backgroundColor: '#fbbf24',
+    textColor: '#000000',
+    borderColor: '#ffffff',
+    icon: { ... },             // Optional icon
+    size: 'md'                 // sm, md, lg
+  }
+}
+```
+
+### StatPanel (Planned)
+
+Label/value rows for displaying card statistics:
+
+```typescript
+{
+  type: 'StatPanel',
+  props: {
+    rows: [
+      { label: 'Attack', value: 500, showBar: true, barColor: '#ef4444' },
+      { label: 'Defense', value: 350, showBar: true, barColor: '#3b82f6' },
+      { label: 'Type', value: 'Fire', showBar: false }
+    ],
+    labelColor: '#888888',
+    valueColor: '#ffffff',
+    divider: true,             // Show dividers between rows
+    compact: false             // Compact or spacious layout
+  }
+}
+```
+
+### Divider (Planned)
+
+Decorative separators between card sections:
+
+```typescript
+{
+  type: 'Divider',
+  props: {
+    style: 'solid',            // solid, dashed, dotted, gradient, ornate
+    color: '#ffffff',
+    thickness: 2,
+    fade: 'both',              // none, left, right, both (gradient fade)
+    ornament: 'diamond'        // Optional: diamond, star, circle (center ornament)
+  }
+}
+```
+
+### ProgressBar (Planned)
+
+Visual stat bars and meters:
+
+```typescript
+{
+  type: 'ProgressBar',
+  props: {
+    value: 75,                 // Current value (0-100 or custom max)
+    max: 100,
+    color: '#22c55e',
+    backgroundColor: '#374151',
+    showLabel: true,           // Show value text
+    labelPosition: 'right',    // left, center, right, inside
+    style: 'rounded',          // rounded, square, pointed
+    animated: true,            // Animate on load
+    segments: 0                // 0 = smooth, >0 = segmented bar
+  }
+}
+```
+
+### Ribbon (Planned)
+
+Banner/ribbon text overlays:
+
+```typescript
+{
+  type: 'Ribbon',
+  props: {
+    text: 'LIMITED EDITION',
+    position: 'top-right',     // top-left, top-right, bottom-left, bottom-right
+    color: '#ef4444',
+    textColor: '#ffffff',
+    style: 'folded',           // flat, folded, bookmark
+    angle: 45                  // Rotation angle for corner ribbons
+  }
+}
+```
+
+### Frame (Planned)
+
+Corner and edge decorations:
+
+```typescript
+{
+  type: 'Frame',
+  props: {
+    style: 'ornate',           // simple, ornate, art-deco, celtic, tribal
+    corners: true,             // Show corner decorations
+    edges: false,              // Show edge decorations
+    color: '#fbbf24',
+    opacity: 1,
+    size: 'md'                 // sm, md, lg (decoration size)
+  }
+}
+```
+
+### Stamp (Planned)
+
+Seal and certification marks:
+
+```typescript
+{
+  type: 'Stamp',
+  props: {
+    style: 'wax-seal',         // wax-seal, rubber, foil, embossed
+    text: '#001/500',          // Edition number or text
+    icon: { ... },             // Optional center icon
+    color: '#dc2626',
+    rotation: -15,             // Slight rotation for authenticity
+    opacity: 0.9
+  }
+}
+```
 
 ---
 

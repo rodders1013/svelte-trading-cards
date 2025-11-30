@@ -1,5 +1,6 @@
 <script lang="ts" module>
 	import { z } from 'zod';
+	import { AnimationConfigSchema } from '$lib/animations';
 
 	// Predefined clip shapes
 	export const ClipShapeEnum = z.enum([
@@ -24,7 +25,8 @@
 		radius: z.number().default(0),
 		clipContent: z.boolean().default(true),
 		clipShape: ClipShapeEnum.default('rect'),
-		clipPoints: z.array(z.object({ x: z.number(), y: z.number() })).optional()
+		clipPoints: z.array(z.object({ x: z.number(), y: z.number() })).optional(),
+		animation: AnimationConfigSchema.optional()
 	});
 
 	export type GroupProps = z.infer<typeof GroupPropsSchema>;
@@ -32,7 +34,9 @@
 
 <script lang="ts">
 	import type { ComponentDefinition, ContainerContext, CardData } from '$lib/types';
+	import type { AnimationConfig } from '$lib/animations';
 	import ComponentRenderer from './ComponentRenderer.svelte';
+	import AnimationWrapper from '$lib/animations/AnimationWrapper.svelte';
 
 	let {
 		x = 0,
@@ -43,6 +47,7 @@
 		clipContent = true,
 		clipShape = 'rect',
 		clipPoints,
+		animation,
 		children,
 		data,
 		container: _container
@@ -51,6 +56,9 @@
 		data: CardData;
 		container: ContainerContext;
 	} = $props();
+
+	// Check if animation should be applied
+	const hasAnimation = $derived(animation && animation.type !== 'none');
 
 	const uid = Math.random().toString(36).substring(2, 9);
 	const clipId = `group-clip-${uid}`;
@@ -152,30 +160,62 @@
 	});
 </script>
 
-<g transform="translate({x}, {y})">
-	{#if needsClip}
-		<defs>
-			<clipPath id={clipId}>
-				{#if clipPathData.type === 'rect'}
-					<rect x="0" y="0" width={clipPathData.width} height={clipPathData.height} rx={clipPathData.radius} ry={clipPathData.radius} />
-				{:else if clipPathData.type === 'circle'}
-					<circle cx={clipPathData.cx} cy={clipPathData.cy} r={clipPathData.r} />
-				{:else if clipPathData.type === 'ellipse'}
-					<ellipse cx={clipPathData.cx} cy={clipPathData.cy} rx={clipPathData.rx} ry={clipPathData.ry} />
-				{:else if clipPathData.type === 'polygon'}
-					<polygon points={clipPathData.points} />
-				{:else if clipPathData.type === 'path'}
-					<path d={clipPathData.d} />
-				{/if}
-			</clipPath>
-		</defs>
-	{/if}
+{#if hasAnimation && animation}
+	<AnimationWrapper {animation} transformOrigin="{width / 2}px {height / 2}px">
+		<g transform="translate({x}, {y})">
+			{#if needsClip}
+				<defs>
+					<clipPath id={clipId}>
+						{#if clipPathData.type === 'rect'}
+							<rect x="0" y="0" width={clipPathData.width} height={clipPathData.height} rx={clipPathData.radius} ry={clipPathData.radius} />
+						{:else if clipPathData.type === 'circle'}
+							<circle cx={clipPathData.cx} cy={clipPathData.cy} r={clipPathData.r} />
+						{:else if clipPathData.type === 'ellipse'}
+							<ellipse cx={clipPathData.cx} cy={clipPathData.cy} rx={clipPathData.rx} ry={clipPathData.ry} />
+						{:else if clipPathData.type === 'polygon'}
+							<polygon points={clipPathData.points} />
+						{:else if clipPathData.type === 'path'}
+							<path d={clipPathData.d} />
+						{/if}
+					</clipPath>
+				</defs>
+			{/if}
 
-	<g clip-path={needsClip ? `url(#${clipId})` : undefined}>
-		{#if children}
-			{#each children as child (child.id)}
-				<ComponentRenderer definition={child} {data} container={childContainer} />
-			{/each}
+			<g clip-path={needsClip ? `url(#${clipId})` : undefined}>
+				{#if children}
+					{#each children as child (child.id)}
+						<ComponentRenderer definition={child} {data} container={childContainer} />
+					{/each}
+				{/if}
+			</g>
+		</g>
+	</AnimationWrapper>
+{:else}
+	<g transform="translate({x}, {y})">
+		{#if needsClip}
+			<defs>
+				<clipPath id={clipId}>
+					{#if clipPathData.type === 'rect'}
+						<rect x="0" y="0" width={clipPathData.width} height={clipPathData.height} rx={clipPathData.radius} ry={clipPathData.radius} />
+					{:else if clipPathData.type === 'circle'}
+						<circle cx={clipPathData.cx} cy={clipPathData.cy} r={clipPathData.r} />
+					{:else if clipPathData.type === 'ellipse'}
+						<ellipse cx={clipPathData.cx} cy={clipPathData.cy} rx={clipPathData.rx} ry={clipPathData.ry} />
+					{:else if clipPathData.type === 'polygon'}
+						<polygon points={clipPathData.points} />
+					{:else if clipPathData.type === 'path'}
+						<path d={clipPathData.d} />
+					{/if}
+				</clipPath>
+			</defs>
 		{/if}
+
+		<g clip-path={needsClip ? `url(#${clipId})` : undefined}>
+			{#if children}
+				{#each children as child (child.id)}
+					<ComponentRenderer definition={child} {data} container={childContainer} />
+				{/each}
+			{/if}
+		</g>
 	</g>
-</g>
+{/if}

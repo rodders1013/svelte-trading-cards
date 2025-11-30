@@ -25,6 +25,7 @@ Build professional trading cards by composing pre-built SVG components. Think of
 | SvelteKit | 2.x | Library packaging |
 | Tailwind CSS | 4.x | Styling |
 | Zod | 4.x | Runtime validation |
+| shadcn-svelte | - | Creator UI components |
 
 ## Quick Start
 

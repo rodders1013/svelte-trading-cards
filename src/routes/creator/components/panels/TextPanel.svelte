@@ -1,7 +1,12 @@
 <script lang="ts">
-	import { Button } from '$lib/components/ui/button';
-	import AnimationControls from '../AnimationControls.svelte';
-	import EffectsControls from '../EffectsControls.svelte';
+	import ComponentPanel from '../ComponentPanel.svelte';
+	import {
+		FormSelect,
+		FormInput,
+		FormColorPicker,
+		FormGrid,
+		PanelEffects
+	} from '../form';
 	import type { TextComponent } from '../../types';
 	import { dataFields, fontFamilies } from '../../types';
 
@@ -20,136 +25,101 @@
 		onMoveUp: () => void;
 		onMoveDown: () => void;
 	} = $props();
+
+	const fontWeights = [
+		{ value: 'normal', label: 'Normal' },
+		{ value: 'bold', label: 'Bold' }
+	];
+
+	const alignments = [
+		{ value: 'left', label: 'Left' },
+		{ value: 'center', label: 'Center' },
+		{ value: 'right', label: 'Right' }
+	];
+
+	const verticalAligns = [
+		{ value: 'top', label: 'Top' },
+		{ value: 'center', label: 'Center' },
+		{ value: 'bottom', label: 'Bottom' }
+	];
 </script>
 
-<div class="border-b">
-	<div class="flex items-center justify-between px-3 py-2">
-		<button
-			class="flex items-center gap-2 text-sm font-medium hover:text-foreground/80"
-			onclick={() => (expanded = !expanded)}
-		>
-			<span class="text-sm">{expanded ? '▼' : '▶'}</span>
-			Text
-		</button>
-		<div class="flex items-center gap-1">
-			<Button variant="ghost" size="sm" class="h-6 w-6 p-0 text-sm" onclick={onMoveUp} title="Move up">↑</Button>
-			<Button variant="ghost" size="sm" class="h-6 w-6 p-0 text-sm" onclick={onMoveDown} title="Move down">↓</Button>
-			<Button variant="ghost" size="sm" class="h-6 px-2 text-sm text-destructive hover:text-destructive" onclick={onRemove}>Remove</Button>
-		</div>
+<ComponentPanel
+	title="Text"
+	badge={{ text: 'txt', color: 'bg-blue-600' }}
+	bind:expanded
+	{onRemove}
+	{onMoveUp}
+	{onMoveDown}
+>
+	<div class="rounded bg-muted/50 px-2 py-1.5 text-sm text-muted-foreground">
+		Text automatically scales between min/max size to fit the zone
 	</div>
 
-	{#if expanded}
-		<div class="space-y-3 px-3 pb-3">
-			<div class="rounded bg-muted/50 px-2 py-1.5 text-sm text-muted-foreground">
-				Text automatically scales between min/max size to fit the zone
-			</div>
+	<FormGrid>
+		<FormSelect
+			label="Data Field"
+			value={component.dataField}
+			onchange={(v) => onUpdate('dataField', v)}
+			options={dataFields}
+		/>
+		<FormSelect
+			label="Font Family"
+			value={component.fontFamily}
+			onchange={(v) => onUpdate('fontFamily', v)}
+			options={fontFamilies}
+		/>
+	</FormGrid>
 
-			<div class="grid grid-cols-2 gap-2">
-				<div>
-					<label class="text-sm text-muted-foreground">Data Field</label>
-					<select
-						value={component.dataField}
-						onchange={(e) => onUpdate('dataField', (e.target as HTMLSelectElement).value)}
-						class="w-full rounded border border-input bg-background px-2 py-1 text-sm"
-					>
-						{#each dataFields as field}
-							<option value={field.value}>{field.label}</option>
-						{/each}
-					</select>
-				</div>
-				<div>
-					<label class="text-sm text-muted-foreground">Font Family</label>
-					<select
-						value={component.fontFamily}
-						onchange={(e) => onUpdate('fontFamily', (e.target as HTMLSelectElement).value)}
-						class="w-full rounded border border-input bg-background px-2 py-1 text-sm"
-					>
-						{#each fontFamilies as font}
-							<option value={font.value}>{font.label}</option>
-						{/each}
-					</select>
-				</div>
-			</div>
+	<div class="rounded border border-input p-2">
+		<label class="text-sm font-medium">Font Size Range</label>
+		<FormGrid class="mt-1">
+			<FormInput
+				label="Min Size"
+				type="number"
+				value={component.minFontSize}
+				onchange={(v) => onUpdate('minFontSize', v)}
+				min={8}
+				max={component.maxFontSize - 1}
+			/>
+			<FormInput
+				label="Max Size"
+				type="number"
+				value={component.maxFontSize}
+				onchange={(v) => onUpdate('maxFontSize', v)}
+				min={component.minFontSize + 1}
+				max={200}
+			/>
+		</FormGrid>
+	</div>
 
-			<div class="rounded border border-input p-2">
-				<label class="text-sm font-medium">Font Size Range</label>
-				<div class="mt-1 grid grid-cols-2 gap-2">
-					<div>
-						<label class="text-sm text-muted-foreground">Min Size</label>
-						<input
-							type="number"
-							min="8"
-							max={component.maxFontSize - 1}
-							value={component.minFontSize}
-							onchange={(e) => onUpdate('minFontSize', parseInt((e.target as HTMLInputElement).value))}
-							class="w-full rounded border border-input bg-background px-2 py-1 text-sm"
-						/>
-					</div>
-					<div>
-						<label class="text-sm text-muted-foreground">Max Size</label>
-						<input
-							type="number"
-							min={component.minFontSize + 1}
-							max="200"
-							value={component.maxFontSize}
-							onchange={(e) => onUpdate('maxFontSize', parseInt((e.target as HTMLInputElement).value))}
-							class="w-full rounded border border-input bg-background px-2 py-1 text-sm"
-						/>
-					</div>
-				</div>
-			</div>
+	<FormGrid>
+		<FormSelect
+			label="Weight"
+			value={component.fontWeight}
+			onchange={(v) => onUpdate('fontWeight', v)}
+			options={fontWeights}
+		/>
+		<FormSelect
+			label="Horizontal"
+			value={component.alignment}
+			onchange={(v) => onUpdate('alignment', v)}
+			options={alignments}
+		/>
+	</FormGrid>
 
-			<div class="grid grid-cols-2 gap-2">
-				<div>
-					<label class="text-sm text-muted-foreground">Weight</label>
-					<select
-						value={component.fontWeight}
-						onchange={(e) => onUpdate('fontWeight', (e.target as HTMLSelectElement).value)}
-						class="w-full rounded border border-input bg-background px-2 py-1 text-sm"
-					>
-						<option value="normal">Normal</option>
-						<option value="bold">Bold</option>
-					</select>
-				</div>
-				<div>
-					<label class="text-sm text-muted-foreground">Horizontal</label>
-					<select
-						value={component.alignment}
-						onchange={(e) => onUpdate('alignment', (e.target as HTMLSelectElement).value as 'left' | 'center' | 'right')}
-						class="w-full rounded border border-input bg-background px-2 py-1 text-sm"
-					>
-						<option value="left">Left</option>
-						<option value="center">Center</option>
-						<option value="right">Right</option>
-					</select>
-				</div>
-			</div>
+	<FormSelect
+		label="Vertical Align"
+		value={component.verticalAlign}
+		onchange={(v) => onUpdate('verticalAlign', v)}
+		options={verticalAligns}
+	/>
 
-			<div>
-				<label class="text-sm text-muted-foreground">Vertical Align</label>
-				<select
-					value={component.verticalAlign}
-					onchange={(e) => onUpdate('verticalAlign', (e.target as HTMLSelectElement).value as 'top' | 'center' | 'bottom')}
-					class="w-full rounded border border-input bg-background px-2 py-1 text-sm"
-				>
-					<option value="top">Top</option>
-					<option value="center">Center</option>
-					<option value="bottom">Bottom</option>
-				</select>
-			</div>
+	<FormColorPicker
+		label="Color"
+		value={component.fill}
+		onchange={(v) => onUpdate('fill', v)}
+	/>
 
-			<div>
-				<label class="text-sm text-muted-foreground">Color</label>
-				<input
-					type="color"
-					value={component.fill}
-					oninput={(e) => onUpdate('fill', (e.target as HTMLInputElement).value)}
-					class="h-8 w-full cursor-pointer rounded"
-				/>
-			</div>
-
-			<AnimationControls bind:animation={component.animation} />
-			<EffectsControls bind:effect={component.effect} />
-		</div>
-	{/if}
-</div>
+	<PanelEffects bind:effect={component.effect} />
+</ComponentPanel>
