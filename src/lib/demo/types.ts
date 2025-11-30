@@ -63,11 +63,9 @@ export type SteamGame = z.infer<typeof SteamGameSchema>;
 // DATA FIELDS - What fields each dataset exposes in the creator dropdowns
 // =============================================================================
 
-export interface DataFieldOption {
-	value: string;
-	label: string;
-	type?: 'text' | 'number' | 'image' | 'date';
-}
+// Re-export from creator types (canonical location)
+export type { DataFieldOption } from '$lib/creator/types.js';
+import type { DataFieldOption } from '$lib/creator/types.js';
 
 export const xboxDataFields: DataFieldOption[] = [
 	{ value: 'gameName', label: 'Game Name', type: 'text' },

@@ -52,6 +52,7 @@
 	import type { ContainerContext, CardData } from '$lib/types';
 	import { AnimationWrapper } from '$lib/animations/index.js';
 	import { EffectWrapper } from '$lib/effects/index.js';
+	import { sanitizeSvgBody } from '$lib/components/icons/Icon.svelte';
 
 	let {
 		textPreset = 'none',
@@ -139,6 +140,9 @@
 	// Has icon check
 	const hasIcon = $derived(icon?.body);
 	const iconSize = $derived(radius * (resolvedText ? 0.5 : 0.8));
+
+	// Sanitize icon body to prevent XSS
+	const sanitizedIconBody = $derived(icon?.body ? sanitizeSvgBody(icon.body) : '');
 </script>
 
 <defs>
@@ -214,7 +218,7 @@
 					fill="none"
 				>
 					<g fill={iconColor ?? textColor} style="color: {iconColor ?? textColor}">
-						{@html icon.body}
+						{@html sanitizedIconBody}
 					</g>
 				</svg>
 			{/if}

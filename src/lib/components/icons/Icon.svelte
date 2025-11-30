@@ -27,6 +27,32 @@
 
 	export type IconData = z.infer<typeof IconDataSchema>;
 	export type IconProps = z.infer<typeof IconPropsSchema>;
+
+	/**
+	 * Sanitizes SVG body content to prevent XSS attacks.
+	 * Removes script tags, event handlers, and dangerous elements/attributes.
+	 */
+	export function sanitizeSvgBody(body: string): string {
+		return body
+			// Remove script tags and their content
+			.replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, '')
+			// Remove on* event handlers (onclick, onload, onerror, etc.)
+			.replace(/\s+on\w+\s*=\s*["'][^"']*["']/gi, '')
+			.replace(/\s+on\w+\s*=\s*[^\s>]+/gi, '')
+			// Remove javascript: URLs
+			.replace(/href\s*=\s*["']javascript:[^"']*["']/gi, '')
+			.replace(/xlink:href\s*=\s*["']javascript:[^"']*["']/gi, '')
+			// Remove data: URLs that could contain scripts (but allow data:image)
+			.replace(/href\s*=\s*["']data:(?!image\/)[^"']*["']/gi, '')
+			.replace(/xlink:href\s*=\s*["']data:(?!image\/)[^"']*["']/gi, '')
+			// Remove foreignObject which can contain HTML
+			.replace(/<foreignObject\b[^>]*>[\s\S]*?<\/foreignObject>/gi, '')
+			// Remove use elements pointing to external resources
+			.replace(/<use\b[^>]*href\s*=\s*["']https?:[^"']*["'][^>]*\/?>/gi, '')
+			// Remove set and animate elements that could trigger scripts
+			.replace(/<set\b[^>]*\bonbegin\b[^>]*\/?>/gi, '')
+			.replace(/<animate\b[^>]*\bonbegin\b[^>]*\/?>/gi, '');
+	}
 </script>
 
 <script lang="ts">
@@ -91,6 +117,9 @@
 
 	// Build viewBox from icon data
 	const viewBox = $derived(`${iconData?.left ?? 0} ${iconData?.top ?? 0} ${iconWidth} ${iconHeight}`);
+
+	// Sanitize icon body to prevent XSS
+	const sanitizedBody = $derived(iconData?.body ? sanitizeSvgBody(iconData.body) : '');
 </script>
 
 {#if iconData?.body}
@@ -107,7 +136,7 @@
 					xmlns="http://www.w3.org/2000/svg"
 				>
 					<g fill={color} style="color: {color}">
-						{@html iconData.body}
+						{@html sanitizedBody}
 					</g>
 				</svg>
 			</g>

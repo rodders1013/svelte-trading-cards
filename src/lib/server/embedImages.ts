@@ -104,6 +104,7 @@ function findImageReferences(svgString: string): ImageMatch[] {
 
 /**
  * Processes items with a concurrency limit.
+ * Uses a pool of in-flight promises to limit concurrent operations.
  */
 async function processWithConcurrency<T, R>(
 	items: T[],
@@ -111,31 +112,28 @@ async function processWithConcurrency<T, R>(
 	concurrency: number
 ): Promise<R[]> {
 	const results: R[] = [];
-	const executing: Promise<void>[] = [];
+	const inFlight = new Set<Promise<void>>();
 
 	for (const item of items) {
-		const promise = processor(item).then((result) => {
-			results.push(result);
-		});
+		// Create a promise that removes itself from the set when done
+		const promise = processor(item)
+			.then((result) => {
+				results.push(result);
+			})
+			.finally(() => {
+				inFlight.delete(promise);
+			});
 
-		executing.push(promise);
+		inFlight.add(promise);
 
-		if (executing.length >= concurrency) {
-			await Promise.race(executing);
-			// Remove completed promises
-			executing.splice(
-				0,
-				executing.length,
-				...executing.filter((p) => {
-					let resolved = false;
-					p.then(() => (resolved = true)).catch(() => (resolved = true));
-					return !resolved;
-				})
-			);
+		// If we've hit the concurrency limit, wait for one to complete
+		if (inFlight.size >= concurrency) {
+			await Promise.race(inFlight);
 		}
 	}
 
-	await Promise.all(executing);
+	// Wait for all remaining promises to complete
+	await Promise.all(inFlight);
 	return results;
 }
 

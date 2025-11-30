@@ -21,19 +21,8 @@
 	import type {
 		ContainerState,
 		ComponentItem,
-		TextComponent,
-		ImageComponent,
-		BackgroundComponent,
-		BorderComponent,
-		IconComponent,
-		BadgeComponent,
-		StatPanelComponent,
-		DividerComponent,
-		ProgressBarComponent,
-		RibbonComponent,
-		FrameComponent,
-		StampComponent,
-		ResizeHandle
+		ResizeHandle,
+		DataFieldOption
 	} from './types.js';
 
 	import {
@@ -58,8 +47,6 @@
 		buildPreviewData,
 		GRID_SIZE
 	} from './state.svelte.js';
-
-	import type { DataFieldOption } from '$lib/demo';
 
 	// =============================================================================
 	// PROPS - Consumer configures the creator via these
@@ -422,127 +409,53 @@
 	// COMPONENT MANAGEMENT
 	// =============================================================================
 
-	function addTextComponent() {
+	// Component factory map - maps type names to their factory functions
+	const componentFactories: Record<ComponentItem['type'], () => ComponentItem> = {
+		text: createTextComponent,
+		image: createImageComponent,
+		background: createBackgroundComponent,
+		border: createBorderComponent,
+		icon: createIconComponent,
+		badge: createBadgeComponent,
+		statpanel: createStatPanelComponent,
+		divider: createDividerComponent,
+		progressbar: createProgressBarComponent,
+		ribbon: createRibbonComponent,
+		frame: createFrameComponent,
+		stamp: createStampComponent
+	};
+
+	/**
+	 * Generic function to add a component to the selected container.
+	 * Prevents duplicate component types per container.
+	 */
+	function addComponent(type: ComponentItem['type']) {
 		if (!selectedContainerId) return;
 		const container = containers.find((c) => c.id === selectedContainerId);
-		if (!container || hasComponentType(container, 'text')) return;
+		if (!container || hasComponentType(container, type)) return;
 		pushHistory();
 		containers = containers.map((c) =>
-			c.id === selectedContainerId ? { ...c, components: [...c.components, createTextComponent()] } : c
+			c.id === selectedContainerId
+				? { ...c, components: [...c.components, componentFactories[type]()] }
+				: c
 		);
 	}
 
-	function addImageComponent() {
-		if (!selectedContainerId) return;
-		const container = containers.find((c) => c.id === selectedContainerId);
-		if (!container || hasComponentType(container, 'image')) return;
-		pushHistory();
-		containers = containers.map((c) =>
-			c.id === selectedContainerId ? { ...c, components: [...c.components, createImageComponent()] } : c
-		);
-	}
+	// Type-safe component adders (thin wrappers for API compatibility)
+	const addTextComponent = () => addComponent('text');
+	const addImageComponent = () => addComponent('image');
+	const addBackgroundComponent = () => addComponent('background');
+	const addBorderComponent = () => addComponent('border');
+	const addIconComponent = () => addComponent('icon');
+	const addBadgeComponent = () => addComponent('badge');
+	const addStatPanelComponent = () => addComponent('statpanel');
+	const addDividerComponent = () => addComponent('divider');
+	const addProgressBarComponent = () => addComponent('progressbar');
+	const addRibbonComponent = () => addComponent('ribbon');
+	const addFrameComponent = () => addComponent('frame');
+	const addStampComponent = () => addComponent('stamp');
 
-	function addBackgroundComponent() {
-		if (!selectedContainerId) return;
-		const container = containers.find((c) => c.id === selectedContainerId);
-		if (!container || hasComponentType(container, 'background')) return;
-		pushHistory();
-		containers = containers.map((c) =>
-			c.id === selectedContainerId ? { ...c, components: [...c.components, createBackgroundComponent()] } : c
-		);
-	}
-
-	function addBorderComponent() {
-		if (!selectedContainerId) return;
-		const container = containers.find((c) => c.id === selectedContainerId);
-		if (!container || hasComponentType(container, 'border')) return;
-		pushHistory();
-		containers = containers.map((c) =>
-			c.id === selectedContainerId ? { ...c, components: [...c.components, createBorderComponent()] } : c
-		);
-	}
-
-	function addIconComponent() {
-		if (!selectedContainerId) return;
-		const container = containers.find((c) => c.id === selectedContainerId);
-		if (!container || hasComponentType(container, 'icon')) return;
-		pushHistory();
-		containers = containers.map((c) =>
-			c.id === selectedContainerId ? { ...c, components: [...c.components, createIconComponent()] } : c
-		);
-	}
-
-	function addBadgeComponent() {
-		if (!selectedContainerId) return;
-		const container = containers.find((c) => c.id === selectedContainerId);
-		if (!container || hasComponentType(container, 'badge')) return;
-		pushHistory();
-		containers = containers.map((c) =>
-			c.id === selectedContainerId ? { ...c, components: [...c.components, createBadgeComponent()] } : c
-		);
-	}
-
-	function addStatPanelComponent() {
-		if (!selectedContainerId) return;
-		const container = containers.find((c) => c.id === selectedContainerId);
-		if (!container || hasComponentType(container, 'statpanel')) return;
-		pushHistory();
-		containers = containers.map((c) =>
-			c.id === selectedContainerId ? { ...c, components: [...c.components, createStatPanelComponent()] } : c
-		);
-	}
-
-	function addDividerComponent() {
-		if (!selectedContainerId) return;
-		const container = containers.find((c) => c.id === selectedContainerId);
-		if (!container || hasComponentType(container, 'divider')) return;
-		pushHistory();
-		containers = containers.map((c) =>
-			c.id === selectedContainerId ? { ...c, components: [...c.components, createDividerComponent()] } : c
-		);
-	}
-
-	function addProgressBarComponent() {
-		if (!selectedContainerId) return;
-		const container = containers.find((c) => c.id === selectedContainerId);
-		if (!container || hasComponentType(container, 'progressbar')) return;
-		pushHistory();
-		containers = containers.map((c) =>
-			c.id === selectedContainerId ? { ...c, components: [...c.components, createProgressBarComponent()] } : c
-		);
-	}
-
-	function addRibbonComponent() {
-		if (!selectedContainerId) return;
-		const container = containers.find((c) => c.id === selectedContainerId);
-		if (!container || hasComponentType(container, 'ribbon')) return;
-		pushHistory();
-		containers = containers.map((c) =>
-			c.id === selectedContainerId ? { ...c, components: [...c.components, createRibbonComponent()] } : c
-		);
-	}
-
-	function addFrameComponent() {
-		if (!selectedContainerId) return;
-		const container = containers.find((c) => c.id === selectedContainerId);
-		if (!container || hasComponentType(container, 'frame')) return;
-		pushHistory();
-		containers = containers.map((c) =>
-			c.id === selectedContainerId ? { ...c, components: [...c.components, createFrameComponent()] } : c
-		);
-	}
-
-	function addStampComponent() {
-		if (!selectedContainerId) return;
-		const container = containers.find((c) => c.id === selectedContainerId);
-		if (!container || hasComponentType(container, 'stamp')) return;
-		pushHistory();
-		containers = containers.map((c) =>
-			c.id === selectedContainerId ? { ...c, components: [...c.components, createStampComponent()] } : c
-		);
-	}
-
-	function removeComponent(type: 'text' | 'image' | 'background' | 'border' | 'icon' | 'badge' | 'statpanel' | 'divider' | 'progressbar' | 'ribbon' | 'frame' | 'stamp') {
+	function removeComponent(type: ComponentItem['type']) {
 		if (!selectedContainerId) return;
 		pushHistory();
 		containers = containers.map((c) => {
@@ -551,7 +464,10 @@
 		});
 	}
 
-	function updateComponent<T extends ComponentItem>(type: T['type'], key: keyof Omit<T, 'type' | 'id'>, value: unknown) {
+	/**
+	 * Generic function to update a component property.
+	 */
+	function updateComponent(type: ComponentItem['type'], key: string, value: unknown) {
 		if (!selectedContainerId) return;
 		pushHistory();
 		containers = containers.map((c) =>
@@ -561,53 +477,19 @@
 		);
 	}
 
-	function updateTextComponent(key: keyof Omit<TextComponent, 'type' | 'id'>, value: unknown) {
-		updateComponent<TextComponent>('text', key, value);
-	}
-
-	function updateImageComponent(key: keyof Omit<ImageComponent, 'type' | 'id'>, value: unknown) {
-		updateComponent<ImageComponent>('image', key, value);
-	}
-
-	function updateBackgroundComponent(key: keyof Omit<BackgroundComponent, 'type' | 'id'>, value: unknown) {
-		updateComponent<BackgroundComponent>('background', key, value);
-	}
-
-	function updateBorderComponent(key: keyof Omit<BorderComponent, 'type' | 'id'>, value: unknown) {
-		updateComponent<BorderComponent>('border', key, value);
-	}
-
-	function updateIconComponent(key: keyof Omit<IconComponent, 'type' | 'id'>, value: unknown) {
-		updateComponent<IconComponent>('icon', key, value);
-	}
-
-	function updateBadgeComponent(key: keyof Omit<BadgeComponent, 'type' | 'id'>, value: unknown) {
-		updateComponent<BadgeComponent>('badge', key, value);
-	}
-
-	function updateStatPanelComponent(key: keyof Omit<StatPanelComponent, 'type' | 'id'>, value: unknown) {
-		updateComponent<StatPanelComponent>('statpanel', key, value);
-	}
-
-	function updateDividerComponent(key: keyof Omit<DividerComponent, 'type' | 'id'>, value: unknown) {
-		updateComponent<DividerComponent>('divider', key, value);
-	}
-
-	function updateProgressBarComponent(key: keyof Omit<ProgressBarComponent, 'type' | 'id'>, value: unknown) {
-		updateComponent<ProgressBarComponent>('progressbar', key, value);
-	}
-
-	function updateRibbonComponent(key: keyof Omit<RibbonComponent, 'type' | 'id'>, value: unknown) {
-		updateComponent<RibbonComponent>('ribbon', key, value);
-	}
-
-	function updateFrameComponent(key: keyof Omit<FrameComponent, 'type' | 'id'>, value: unknown) {
-		updateComponent<FrameComponent>('frame', key, value);
-	}
-
-	function updateStampComponent(key: keyof Omit<StampComponent, 'type' | 'id'>, value: unknown) {
-		updateComponent<StampComponent>('stamp', key, value);
-	}
+	// Type-safe component updaters (thin wrappers for API compatibility)
+	const updateTextComponent = (key: string, value: unknown) => updateComponent('text', key, value);
+	const updateImageComponent = (key: string, value: unknown) => updateComponent('image', key, value);
+	const updateBackgroundComponent = (key: string, value: unknown) => updateComponent('background', key, value);
+	const updateBorderComponent = (key: string, value: unknown) => updateComponent('border', key, value);
+	const updateIconComponent = (key: string, value: unknown) => updateComponent('icon', key, value);
+	const updateBadgeComponent = (key: string, value: unknown) => updateComponent('badge', key, value);
+	const updateStatPanelComponent = (key: string, value: unknown) => updateComponent('statpanel', key, value);
+	const updateDividerComponent = (key: string, value: unknown) => updateComponent('divider', key, value);
+	const updateProgressBarComponent = (key: string, value: unknown) => updateComponent('progressbar', key, value);
+	const updateRibbonComponent = (key: string, value: unknown) => updateComponent('ribbon', key, value);
+	const updateFrameComponent = (key: string, value: unknown) => updateComponent('frame', key, value);
+	const updateStampComponent = (key: string, value: unknown) => updateComponent('stamp', key, value);
 
 	function updateIconSelection(icon: { iconData: IconData; iconName: string }) {
 		if (!selectedContainerId) return;
@@ -1054,7 +936,7 @@
 			onZoomIn={zoomIn}
 			onZoomOut={zoomOut}
 			onResetZoom={resetZoom}
-			onShowHelp={showHelpButton ? () => (showHelp = true) : undefined}
+			onShowHelp={showHelpButton ? () => { showHelp = true; } : undefined}
 		/>
 
 		<CanvasPreview

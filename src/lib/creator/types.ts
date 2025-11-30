@@ -277,8 +277,18 @@ export interface ContainerState {
 
 export type ResizeHandle = 'nw' | 'n' | 'ne' | 'e' | 'se' | 's' | 'sw' | 'w';
 
-// DataFieldOption type for prop typing
-export type { DataFieldOption } from '$lib/demo';
+/**
+ * Describes a data field that can be bound to card components.
+ * Used by the creator UI to populate field selection dropdowns.
+ */
+export interface DataFieldOption {
+	/** The field key used to access data (e.g., 'gameName', 'coverArt') */
+	value: string;
+	/** Human-readable label for the field */
+	label: string;
+	/** Field type hint for UI rendering */
+	type?: 'text' | 'number' | 'image' | 'date';
+}
 
 // Font family options
 export const fontFamilies = [

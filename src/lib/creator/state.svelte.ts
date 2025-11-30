@@ -137,6 +137,168 @@ export function getResizeCursor(handle: ResizeHandle): string {
 	return cursors[handle];
 }
 
+// =============================================================================
+// COMPONENT BUILD CONFIGURATION
+// =============================================================================
+
+type PropMapping = string | { from: string; to: string };
+
+interface ComponentBuildConfig {
+	renderType: string;
+	props: PropMapping[];
+	/** Return false to skip rendering this component */
+	guard?: (comp: ComponentItem) => boolean;
+}
+
+/**
+ * Configuration for building template props from component state.
+ * Maps component types to their render type and prop mappings.
+ */
+const componentBuildConfig: Partial<Record<ComponentItem['type'], ComponentBuildConfig>> = {
+	image: {
+		renderType: 'Image',
+		props: ['dataField', 'opacity', 'preserveAspectRatio']
+	},
+	text: {
+		renderType: 'TextField',
+		props: ['dataField', 'maxFontSize', 'minFontSize', 'fontWeight', 'fontFamily', { from: 'fill', to: 'color' }, 'alignment', 'verticalAlign']
+	},
+	icon: {
+		renderType: 'Icon',
+		props: ['iconData', 'iconName', 'color', 'size', 'opacity', 'rotation', 'flipHorizontal', 'flipVertical'],
+		guard: (comp) => !!(comp as IconComponent).iconData?.body
+	},
+	badge: {
+		renderType: 'Badge',
+		props: ['textPreset', 'dataField', 'shape', 'preset', 'backgroundColor', 'textColor', 'borderColor', 'borderWidth', 'size', 'fontFamily', 'fontWeight', 'icon', 'iconColor', 'opacity']
+	},
+	statpanel: {
+		renderType: 'StatPanel',
+		props: ['rows', 'labelColor', 'valueColor', 'divider', 'dividerColor', 'compact', 'fontFamily', 'labelFontSize', 'valueFontSize', 'barHeight', 'barBackgroundColor', 'barBorderRadius', 'opacity']
+	},
+	divider: {
+		renderType: 'Divider',
+		props: ['style', 'color', 'secondaryColor', 'thickness', 'fade', 'ornament', 'ornamentSize', 'ornamentColor', 'dashLength', 'gapLength', 'opacity']
+	},
+	progressbar: {
+		renderType: 'ProgressBar',
+		props: ['value', 'max', 'dataField', 'color', 'backgroundColor', 'borderColor', 'borderWidth', 'showLabel', 'labelPosition', 'labelColor', 'labelFontSize', 'labelFontFamily', 'labelFormat', 'style', 'segments', 'segmentGap', 'glowEnabled', 'glowColor', 'glowIntensity', 'opacity']
+	},
+	ribbon: {
+		renderType: 'Ribbon',
+		props: ['textPreset', 'dataField', 'position', 'style', 'color', 'textColor', 'shadowColor', 'fontSize', 'fontFamily', 'fontWeight', 'angle', 'ribbonWidth', 'opacity']
+	},
+	frame: {
+		renderType: 'Frame',
+		props: ['style', 'corners', 'edges', 'color', 'secondaryColor', 'size', 'strokeWidth', 'opacity']
+	},
+	stamp: {
+		renderType: 'Stamp',
+		props: ['textPreset', 'dataField', 'style', 'color', 'textColor', 'secondaryColor', 'icon', 'iconColor', 'rotation', 'fontSize', 'fontFamily', 'fontWeight', 'borderWidth', 'showRing', 'opacity']
+	}
+};
+
+/**
+ * Builds props object from component using config-driven mapping.
+ */
+function buildPropsFromConfig(
+	comp: ComponentItem,
+	propMappings: PropMapping[]
+): Record<string, unknown> {
+	const props: Record<string, unknown> = {};
+	const compRecord = comp as unknown as Record<string, unknown>;
+	for (const mapping of propMappings) {
+		if (typeof mapping === 'string') {
+			props[mapping] = compRecord[mapping];
+		} else {
+			props[mapping.to] = compRecord[mapping.from];
+		}
+	}
+	if (comp.effect) {
+		props.effect = comp.effect;
+	}
+	return props;
+}
+
+/**
+ * Builds background component children (special case: can produce multiple children).
+ */
+function buildBackgroundChildren(comp: BackgroundComponent): ComponentDefinition[] {
+	const children: ComponentDefinition[] = [];
+
+	if (comp.fillType === 'solid') {
+		const props: Record<string, unknown> = {
+			color: comp.solidColor,
+			opacity: comp.fillOpacity
+		};
+		if (comp.effect) props.effect = comp.effect;
+		children.push({ id: `${comp.id}-fill`, type: 'SolidBackground', props });
+	} else if (comp.fillType === 'gradient') {
+		const props: Record<string, unknown> = {
+			colors: comp.gradientColors,
+			direction: comp.gradientDirection,
+			opacity: comp.fillOpacity
+		};
+		if (comp.effect) props.effect = comp.effect;
+		children.push({ id: `${comp.id}-fill`, type: 'GradientBackground', props });
+	}
+
+	if (comp.patternType && comp.patternType !== 'none') {
+		const props: Record<string, unknown> = {
+			pattern: comp.patternType,
+			color: comp.patternColor,
+			opacity: comp.patternOpacity
+		};
+		if (comp.effect) props.effect = comp.effect;
+		children.push({ id: `${comp.id}-pattern`, type: 'PatternBackground', props });
+	}
+
+	return children;
+}
+
+/**
+ * Builds border component props (special case: conditional nested objects).
+ */
+function buildBorderProps(comp: BorderComponent): Record<string, unknown> {
+	const props: Record<string, unknown> = {
+		color: comp.color,
+		width: comp.width,
+		opacity: comp.opacity
+	};
+
+	if (comp.glow?.enabled) {
+		props.glow = {
+			color: comp.glow.color,
+			intensity: comp.glow.intensity,
+			blur: comp.glow.blur,
+			animated: comp.glow.animated,
+			speed: comp.glow.speed
+		};
+	}
+
+	if (comp.holographic?.enabled) {
+		props.holographic = {
+			secondaryColor: comp.holographic.secondaryColor,
+			speed: comp.holographic.speed
+		};
+	}
+
+	if (comp.layers && comp.layers > 1) {
+		props.layers = comp.layers;
+		if (comp.layerColors?.length) {
+			props.layerColors = comp.layerColors;
+		}
+		props.layerSpacing = comp.layerSpacing;
+	}
+
+	if (comp.effect) props.effect = comp.effect;
+	return props;
+}
+
+// =============================================================================
+// BUILD TEMPLATE
+// =============================================================================
+
 // Build CardTemplate from container state
 export function buildTemplate(templateName: string, containers: ContainerState[]): CardTemplate {
 	const components: ComponentDefinition[] = [];
@@ -149,316 +311,37 @@ export function buildTemplate(templateName: string, containers: ContainerState[]
 		for (const comp of container.components) {
 			if (!comp.visible) continue;
 
+			// Special case: background produces multiple children
 			if (comp.type === 'background') {
-				if (comp.fillType === 'solid') {
-					const solidProps: Record<string, unknown> = {
-						color: comp.solidColor,
-						opacity: comp.fillOpacity
-					};
-					if (comp.effect) {
-						solidProps.effect = comp.effect;
-					}
-					children.push({
-						id: `${comp.id}-fill`,
-						type: 'SolidBackground',
-						props: solidProps
-					});
-				} else if (comp.fillType === 'gradient') {
-					const gradientProps: Record<string, unknown> = {
-						colors: comp.gradientColors,
-						direction: comp.gradientDirection,
-						opacity: comp.fillOpacity
-					};
-					if (comp.effect) {
-						gradientProps.effect = comp.effect;
-					}
-					children.push({
-						id: `${comp.id}-fill`,
-						type: 'GradientBackground',
-						props: gradientProps
-					});
-				}
+				children.push(...buildBackgroundChildren(comp));
+				continue;
+			}
 
-				if (comp.patternType && comp.patternType !== 'none') {
-					const patternProps: Record<string, unknown> = {
-						pattern: comp.patternType,
-						color: comp.patternColor,
-						opacity: comp.patternOpacity
-					};
-					if (comp.effect) {
-						patternProps.effect = comp.effect;
-					}
-					children.push({
-						id: `${comp.id}-pattern`,
-						type: 'PatternBackground',
-						props: patternProps
-					});
-				}
-			} else if (comp.type === 'image') {
-				const imageProps: Record<string, unknown> = {
-					dataField: comp.dataField,
-					opacity: comp.opacity,
-					preserveAspectRatio: comp.preserveAspectRatio
-				};
-				if (comp.effect) {
-					imageProps.effect = comp.effect;
-				}
-				children.push({
-					id: comp.id,
-					type: 'Image',
-					props: imageProps
-				});
-			} else if (comp.type === 'text') {
-				const textProps: Record<string, unknown> = {
-					dataField: comp.dataField,
-					maxFontSize: comp.maxFontSize,
-					minFontSize: comp.minFontSize,
-					fontWeight: comp.fontWeight,
-					fontFamily: comp.fontFamily,
-					color: comp.fill,
-					alignment: comp.alignment,
-					verticalAlign: comp.verticalAlign
-				};
-				if (comp.effect) {
-					textProps.effect = comp.effect;
-				}
-				children.push({
-					id: comp.id,
-					type: 'TextField',
-					props: textProps
-				});
-			} else if (comp.type === 'border') {
-				const borderProps: Record<string, unknown> = {
-					color: comp.color,
-					width: comp.width,
-					opacity: comp.opacity
-				};
-				if (comp.glow?.enabled) {
-					borderProps.glow = {
-						color: comp.glow.color,
-						intensity: comp.glow.intensity,
-						blur: comp.glow.blur,
-						animated: comp.glow.animated,
-						speed: comp.glow.speed
-					};
-				}
-				if (comp.holographic?.enabled) {
-					borderProps.holographic = {
-						secondaryColor: comp.holographic.secondaryColor,
-						speed: comp.holographic.speed
-					};
-				}
-				if (comp.layers && comp.layers > 1) {
-					borderProps.layers = comp.layers;
-					if (comp.layerColors?.length) {
-						borderProps.layerColors = comp.layerColors;
-					}
-					borderProps.layerSpacing = comp.layerSpacing;
-				}
-				if (comp.effect) {
-					borderProps.effect = comp.effect;
-				}
+			// Special case: border has conditional nested objects
+			if (comp.type === 'border') {
 				children.push({
 					id: comp.id,
 					type: 'Border',
-					props: borderProps
+					props: buildBorderProps(comp)
 				});
-			} else if (comp.type === 'icon') {
-				if (comp.iconData?.body) {
-					const iconProps: Record<string, unknown> = {
-						iconData: comp.iconData,
-						iconName: comp.iconName,
-						color: comp.color,
-						size: comp.size,
-						opacity: comp.opacity,
-						rotation: comp.rotation,
-						flipHorizontal: comp.flipHorizontal,
-						flipVertical: comp.flipVertical
-					};
-					if (comp.effect) {
-						iconProps.effect = comp.effect;
-					}
-					children.push({
-						id: comp.id,
-						type: 'Icon',
-						props: iconProps
-					});
-				}
-			} else if (comp.type === 'badge') {
-				const badgeProps: Record<string, unknown> = {
-					textPreset: comp.textPreset,
-					dataField: comp.dataField,
-					shape: comp.shape,
-					preset: comp.preset,
-					backgroundColor: comp.backgroundColor,
-					textColor: comp.textColor,
-					borderColor: comp.borderColor,
-					borderWidth: comp.borderWidth,
-					size: comp.size,
-					fontFamily: comp.fontFamily,
-					fontWeight: comp.fontWeight,
-					icon: comp.icon,
-					iconColor: comp.iconColor,
-					opacity: comp.opacity
-				};
-				if (comp.effect) {
-					badgeProps.effect = comp.effect;
-				}
+				continue;
+			}
+
+			// Config-driven building for standard components
+			const config = componentBuildConfig[comp.type];
+			if (config) {
+				// Check guard condition if present
+				if (config.guard && !config.guard(comp)) continue;
+
 				children.push({
 					id: comp.id,
-					type: 'Badge',
-					props: badgeProps
-				});
-			} else if (comp.type === 'statpanel') {
-				const statPanelProps: Record<string, unknown> = {
-					rows: comp.rows,
-					labelColor: comp.labelColor,
-					valueColor: comp.valueColor,
-					divider: comp.divider,
-					dividerColor: comp.dividerColor,
-					compact: comp.compact,
-					fontFamily: comp.fontFamily,
-					labelFontSize: comp.labelFontSize,
-					valueFontSize: comp.valueFontSize,
-					barHeight: comp.barHeight,
-					barBackgroundColor: comp.barBackgroundColor,
-					barBorderRadius: comp.barBorderRadius,
-					opacity: comp.opacity
-				};
-				if (comp.effect) {
-					statPanelProps.effect = comp.effect;
-				}
-				children.push({
-					id: comp.id,
-					type: 'StatPanel',
-					props: statPanelProps
-				});
-			} else if (comp.type === 'divider') {
-				const dividerProps: Record<string, unknown> = {
-					style: comp.style,
-					color: comp.color,
-					secondaryColor: comp.secondaryColor,
-					thickness: comp.thickness,
-					fade: comp.fade,
-					ornament: comp.ornament,
-					ornamentSize: comp.ornamentSize,
-					ornamentColor: comp.ornamentColor,
-					dashLength: comp.dashLength,
-					gapLength: comp.gapLength,
-					opacity: comp.opacity
-				};
-				if (comp.effect) {
-					dividerProps.effect = comp.effect;
-				}
-				children.push({
-					id: comp.id,
-					type: 'Divider',
-					props: dividerProps
-				});
-			} else if (comp.type === 'progressbar') {
-				const progressBarProps: Record<string, unknown> = {
-					value: comp.value,
-					max: comp.max,
-					dataField: comp.dataField,
-					color: comp.color,
-					backgroundColor: comp.backgroundColor,
-					borderColor: comp.borderColor,
-					borderWidth: comp.borderWidth,
-					showLabel: comp.showLabel,
-					labelPosition: comp.labelPosition,
-					labelColor: comp.labelColor,
-					labelFontSize: comp.labelFontSize,
-					labelFontFamily: comp.labelFontFamily,
-					labelFormat: comp.labelFormat,
-					style: comp.style,
-					segments: comp.segments,
-					segmentGap: comp.segmentGap,
-					glowEnabled: comp.glowEnabled,
-					glowColor: comp.glowColor,
-					glowIntensity: comp.glowIntensity,
-					opacity: comp.opacity
-				};
-				if (comp.effect) {
-					progressBarProps.effect = comp.effect;
-				}
-				children.push({
-					id: comp.id,
-					type: 'ProgressBar',
-					props: progressBarProps
-				});
-			} else if (comp.type === 'ribbon') {
-				const ribbonProps: Record<string, unknown> = {
-					textPreset: comp.textPreset,
-					dataField: comp.dataField,
-					position: comp.position,
-					style: comp.style,
-					color: comp.color,
-					textColor: comp.textColor,
-					shadowColor: comp.shadowColor,
-					fontSize: comp.fontSize,
-					fontFamily: comp.fontFamily,
-					fontWeight: comp.fontWeight,
-					angle: comp.angle,
-					ribbonWidth: comp.ribbonWidth,
-					opacity: comp.opacity
-				};
-				if (comp.effect) {
-					ribbonProps.effect = comp.effect;
-				}
-				children.push({
-					id: comp.id,
-					type: 'Ribbon',
-					props: ribbonProps
-				});
-			} else if (comp.type === 'frame') {
-				const frameProps: Record<string, unknown> = {
-					style: comp.style,
-					corners: comp.corners,
-					edges: comp.edges,
-					color: comp.color,
-					secondaryColor: comp.secondaryColor,
-					size: comp.size,
-					strokeWidth: comp.strokeWidth,
-					opacity: comp.opacity
-				};
-				if (comp.effect) {
-					frameProps.effect = comp.effect;
-				}
-				children.push({
-					id: comp.id,
-					type: 'Frame',
-					props: frameProps
-				});
-			} else if (comp.type === 'stamp') {
-				const stampProps: Record<string, unknown> = {
-					textPreset: comp.textPreset,
-					dataField: comp.dataField,
-					style: comp.style,
-					color: comp.color,
-					textColor: comp.textColor,
-					secondaryColor: comp.secondaryColor,
-					icon: comp.icon,
-					iconColor: comp.iconColor,
-					rotation: comp.rotation,
-					fontSize: comp.fontSize,
-					fontFamily: comp.fontFamily,
-					fontWeight: comp.fontWeight,
-					borderWidth: comp.borderWidth,
-					showRing: comp.showRing,
-					opacity: comp.opacity
-				};
-				if (comp.effect) {
-					stampProps.effect = comp.effect;
-				}
-				children.push({
-					id: comp.id,
-					type: 'Stamp',
-					props: stampProps
+					type: config.renderType,
+					props: buildPropsFromConfig(comp, config.props)
 				});
 			}
 		}
 
-			const groupProps: Record<string, unknown> = {
+		const groupProps: Record<string, unknown> = {
 			x: container.x,
 			y: container.y,
 			width: container.width,
