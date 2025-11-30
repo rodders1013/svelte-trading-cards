@@ -50,12 +50,15 @@ function layoutText(
 	const lineHeight = fontSize * 1.2;
 	const totalHeight = result.lines.length * lineHeight;
 
+	// Check both height AND that all lines fit within width
+	const allLinesFitWidth = result.lineWidths.every((w) => w <= maxWidth);
+
 	return {
 		fontSize,
 		lines: result.lines,
 		lineWidths: result.lineWidths,
 		lineHeight,
-		fits: totalHeight <= maxHeight
+		fits: totalHeight <= maxHeight && allLinesFitWidth
 	};
 }
 

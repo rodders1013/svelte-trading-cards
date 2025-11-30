@@ -8,11 +8,12 @@
 		FormGrid,
 		PanelEffects
 	} from '../form';
-	import type { RibbonComponent } from '../../types';
-	import { dataFields, fontFamilies } from '../../types';
+	import type { RibbonComponent, DataFieldOption } from '../../types';
+	import { fontFamilies } from '../../types';
 
 	let {
 		component,
+		dataFields,
 		expanded = $bindable(true),
 		onUpdate,
 		onRemove,
@@ -20,6 +21,7 @@
 		onMoveDown
 	}: {
 		component: RibbonComponent;
+		dataFields: DataFieldOption[];
 		expanded: boolean;
 		onUpdate: (key: keyof Omit<RibbonComponent, 'type' | 'id'>, value: unknown) => void;
 		onRemove: () => void;

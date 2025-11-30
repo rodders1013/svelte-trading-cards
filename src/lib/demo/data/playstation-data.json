@@ -1,0 +1,49 @@
+{
+	"name": "PlayStation Games",
+	"description": "PlayStation game data with PSN-specific field names",
+	"platform": "playstation",
+	"cards": [
+		{
+			"id": "ps-1",
+			"title": "God of War Ragnarok",
+			"psnId": "KratosSlayer",
+			"boxArt": "https://picsum.photos/seed/gow/400/300",
+			"trophies": 58,
+			"platinumCount": 1,
+			"bronzeCount": 30,
+			"silverCount": 20,
+			"goldCount": 7,
+			"completionPercent": 89,
+			"category": "Action RPG",
+			"lastSynced": "2024-01-20"
+		},
+		{
+			"id": "ps-2",
+			"title": "Spider-Man 2",
+			"psnId": "WebSlinger",
+			"boxArt": "https://picsum.photos/seed/spiderman/400/300",
+			"trophies": 45,
+			"platinumCount": 1,
+			"bronzeCount": 25,
+			"silverCount": 15,
+			"goldCount": 4,
+			"completionPercent": 100,
+			"category": "Action",
+			"lastSynced": "2024-02-15"
+		},
+		{
+			"id": "ps-3",
+			"title": "Horizon Forbidden West",
+			"psnId": "MachineHunter",
+			"boxArt": "https://picsum.photos/seed/horizon/400/300",
+			"trophies": 62,
+			"platinumCount": 0,
+			"bronzeCount": 35,
+			"silverCount": 22,
+			"goldCount": 5,
+			"completionPercent": 76,
+			"category": "Action RPG",
+			"lastSynced": "2024-03-05"
+		}
+	]
+}

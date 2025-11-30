@@ -9,11 +9,12 @@
 		FormGrid,
 		PanelEffects
 	} from '../form';
-	import type { StampComponent } from '../../types';
-	import { dataFields, fontFamilies } from '../../types';
+	import type { StampComponent, DataFieldOption } from '../../types';
+	import { fontFamilies } from '../../types';
 
 	let {
 		component,
+		dataFields,
 		expanded = $bindable(true),
 		onUpdate,
 		onRemove,
@@ -21,6 +22,7 @@
 		onMoveDown
 	}: {
 		component: StampComponent;
+		dataFields: DataFieldOption[];
 		expanded: boolean;
 		onUpdate: (key: keyof Omit<StampComponent, 'type' | 'id'>, value: unknown) => void;
 		onRemove: () => void;

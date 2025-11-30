@@ -7,11 +7,12 @@
 		FormGrid,
 		PanelEffects
 	} from '../form';
-	import type { TextComponent } from '../../types';
-	import { dataFields, fontFamilies } from '../../types';
+	import type { TextComponent, DataFieldOption } from '../../types';
+	import { fontFamilies } from '../../types';
 
 	let {
 		component,
+		dataFields,
 		expanded = $bindable(true),
 		onUpdate,
 		onRemove,
@@ -19,6 +20,7 @@
 		onMoveDown
 	}: {
 		component: TextComponent;
+		dataFields: DataFieldOption[];
 		expanded: boolean;
 		onUpdate: (key: keyof Omit<TextComponent, 'type' | 'id'>, value: unknown) => void;
 		onRemove: () => void;

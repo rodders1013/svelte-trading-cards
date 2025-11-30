@@ -9,12 +9,13 @@
 		FormGrid,
 		PanelEffects
 	} from '../form';
-	import type { StatPanelComponent } from '../../types';
+	import type { StatPanelComponent, DataFieldOption } from '../../types';
 	import type { StatRow } from '$lib/components/fields';
-	import { fontFamilies, dataFields } from '../../types';
+	import { fontFamilies } from '../../types';
 
 	let {
 		component,
+		dataFields,
 		expanded = $bindable(true),
 		onUpdate,
 		onRemove,
@@ -22,6 +23,7 @@
 		onMoveDown
 	}: {
 		component: StatPanelComponent;
+		dataFields: DataFieldOption[];
 		expanded: boolean;
 		onUpdate: (key: keyof Omit<StatPanelComponent, 'type' | 'id'>, value: unknown) => void;
 		onRemove: () => void;

@@ -1,0 +1,40 @@
+{
+	"name": "Xbox Games",
+	"description": "Xbox game data with Xbox-specific field names",
+	"platform": "xbox",
+	"cards": [
+		{
+			"id": "xbox-1",
+			"gameName": "Halo Infinite",
+			"gamertag": "MasterChief117",
+			"coverArt": "https://picsum.photos/seed/halo/400/300",
+			"achievements": 47,
+			"gamerscore": 1250,
+			"hoursPlayed": 156,
+			"genre": "FPS",
+			"lastPlayed": "2024-01-15"
+		},
+		{
+			"id": "xbox-2",
+			"gameName": "Forza Horizon 5",
+			"gamertag": "SpeedDemon99",
+			"coverArt": "https://picsum.photos/seed/forza/400/300",
+			"achievements": 82,
+			"gamerscore": 2100,
+			"hoursPlayed": 230,
+			"genre": "Racing",
+			"lastPlayed": "2024-02-20"
+		},
+		{
+			"id": "xbox-3",
+			"gameName": "Sea of Thieves",
+			"gamertag": "PirateLord",
+			"coverArt": "https://picsum.photos/seed/pirates/400/300",
+			"achievements": 35,
+			"gamerscore": 890,
+			"hoursPlayed": 98,
+			"genre": "Adventure",
+			"lastPlayed": "2024-03-10"
+		}
+	]
+}

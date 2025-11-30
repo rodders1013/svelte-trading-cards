@@ -32,12 +32,14 @@
 		ProgressBarComponent,
 		RibbonComponent,
 		FrameComponent,
-		StampComponent
+		StampComponent,
+		DataFieldOption
 	} from '../types';
 	import { getComponentByType } from '../state.svelte';
 
 	let {
 		container,
+		dataFields,
 		expandedPanels,
 		canUndo,
 		canRedo,
@@ -80,6 +82,7 @@
 		onMoveComponentDown
 	}: {
 		container: ContainerState | null;
+		dataFields: DataFieldOption[];
 		expandedPanels: Set<string>;
 		canUndo: boolean;
 		canRedo: boolean;
@@ -229,6 +232,7 @@
 					{#if selectedText}
 						<TextPanel
 							component={selectedText}
+							{dataFields}
 							expanded={expandedPanels.has('comp-text')}
 							onUpdate={onUpdateTextComponent}
 							onRemove={() => onRemoveComponent('text')}
@@ -241,6 +245,7 @@
 					{#if selectedImage}
 						<ImagePanel
 							component={selectedImage}
+							{dataFields}
 							expanded={expandedPanels.has('comp-image')}
 							onUpdate={onUpdateImageComponent}
 							onRemove={() => onRemoveComponent('image')}
@@ -292,6 +297,7 @@
 					{#if selectedBadge}
 						<BadgePanel
 							component={selectedBadge}
+							{dataFields}
 							expanded={expandedPanels.has('comp-badge')}
 							onUpdate={onUpdateBadgeComponent}
 							onRemove={() => onRemoveComponent('badge')}
@@ -304,6 +310,7 @@
 					{#if selectedStatPanel}
 						<StatPanelPanel
 							component={selectedStatPanel}
+							{dataFields}
 							expanded={expandedPanels.has('comp-statpanel')}
 							onUpdate={onUpdateStatPanelComponent}
 							onRemove={() => onRemoveComponent('statpanel')}
@@ -328,6 +335,7 @@
 					{#if selectedProgressBar}
 						<ProgressBarPanel
 							component={selectedProgressBar}
+							{dataFields}
 							expanded={expandedPanels.has('comp-progressbar')}
 							onUpdate={onUpdateProgressBarComponent}
 							onRemove={() => onRemoveComponent('progressbar')}
@@ -340,6 +348,7 @@
 					{#if selectedRibbon}
 						<RibbonPanel
 							component={selectedRibbon}
+							{dataFields}
 							expanded={expandedPanels.has('comp-ribbon')}
 							onUpdate={onUpdateRibbonComponent}
 							onRemove={() => onRemoveComponent('ribbon')}
@@ -364,6 +373,7 @@
 					{#if selectedStamp}
 						<StampPanel
 							component={selectedStamp}
+							{dataFields}
 							expanded={expandedPanels.has('comp-stamp')}
 							onUpdate={onUpdateStampComponent}
 							onRemove={() => onRemoveComponent('stamp')}

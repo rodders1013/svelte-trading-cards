@@ -1,0 +1,43 @@
+{
+	"name": "Steam Games",
+	"description": "Steam game data with Steam-specific field names",
+	"platform": "steam",
+	"cards": [
+		{
+			"id": "steam-1",
+			"appName": "Elden Ring",
+			"steamUsername": "TarnishedOne",
+			"headerImage": "https://picsum.photos/seed/eldenring/400/300",
+			"achievementsUnlocked": 42,
+			"achievementsTotal": 42,
+			"playtimeMinutes": 18420,
+			"playtimeForever": "307 hrs",
+			"tags": ["RPG", "Souls-like", "Open World"],
+			"lastPlayedTimestamp": 1705334400
+		},
+		{
+			"id": "steam-2",
+			"appName": "Baldur's Gate 3",
+			"steamUsername": "DiceRoller",
+			"headerImage": "https://picsum.photos/seed/bg3/400/300",
+			"achievementsUnlocked": 28,
+			"achievementsTotal": 54,
+			"playtimeMinutes": 9600,
+			"playtimeForever": "160 hrs",
+			"tags": ["RPG", "Turn-Based", "Story Rich"],
+			"lastPlayedTimestamp": 1708012800
+		},
+		{
+			"id": "steam-3",
+			"appName": "Counter-Strike 2",
+			"steamUsername": "HeadshotKing",
+			"headerImage": "https://picsum.photos/seed/cs2/400/300",
+			"achievementsUnlocked": 15,
+			"achievementsTotal": 67,
+			"playtimeMinutes": 42000,
+			"playtimeForever": "700 hrs",
+			"tags": ["FPS", "Competitive", "Multiplayer"],
+			"lastPlayedTimestamp": 1709827200
+		}
+	]
+}

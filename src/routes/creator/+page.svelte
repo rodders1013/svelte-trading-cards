@@ -7,7 +7,7 @@
 	import type { IconData } from '$lib/components/icons';
 	import { Badge, Divider, ProgressBar, Ribbon, Frame, Stamp } from '$lib/components/decorations';
 	import { CARD_WIDTH, CARD_HEIGHT } from '$lib/types';
-	import { datasets, type DemoCard } from '$lib/demo';
+	import { datasets, type AnyCard } from '$lib/demo';
 	import * as Card from '$lib/components/ui/card';
 	import * as Select from '$lib/components/ui/select';
 
@@ -16,6 +16,7 @@
 	import CanvasPreview from './components/CanvasPreview.svelte';
 	import PropertiesPanel from './components/PropertiesPanel.svelte';
 	import HelpModal from './components/HelpModal.svelte';
+	import FieldRemapDialog from './components/FieldRemapDialog.svelte';
 
 	import type {
 		ContainerState,
@@ -110,10 +111,97 @@
 	);
 
 	// Preview data
-	let selectedDataset = $state<'creator' | 'gallery' | 'sports'>('creator');
+	let selectedDataset = $state<'xbox' | 'playstation' | 'steam'>('xbox');
 	let selectedCardIndex = $state(0);
 	const currentDataset = $derived(datasets[selectedDataset]);
-	const currentCard = $derived(currentDataset.cards[selectedCardIndex] as DemoCard);
+	const currentCard = $derived(currentDataset.cards[selectedCardIndex] as AnyCard);
+	const currentDataFields = $derived(currentDataset.dataFields);
+
+	// Helper to get display name from any card type
+	function getCardDisplayName(card: AnyCard): string {
+		if ('gameName' in card) return card.gameName; // Xbox
+		if ('appName' in card) return card.appName; // Steam
+		return card.title; // PlayStation
+	}
+
+	// Field remapping state
+	let showRemapDialog = $state(false);
+	let pendingDataset = $state<'xbox' | 'playstation' | 'steam' | null>(null);
+	let unmappedFields = $state<string[]>([]);
+
+	// Extract all dataField bindings from current containers
+	function extractBoundFields(): string[] {
+		const fields = new Set<string>();
+		for (const container of containers) {
+			for (const component of container.components) {
+				if ('dataField' in component && component.dataField) {
+					fields.add(component.dataField as string);
+				}
+			}
+		}
+		return Array.from(fields);
+	}
+
+	// Find fields that don't exist in target dataset
+	function findUnmappedFields(targetDatasetId: string): string[] {
+		const boundFields = extractBoundFields();
+		const targetFields = datasets[targetDatasetId]?.dataFields || [];
+		const targetFieldValues = new Set(targetFields.map(f => f.value));
+
+		return boundFields.filter(field => !targetFieldValues.has(field));
+	}
+
+	// Handle dataset change with remapping check
+	function handleDatasetChange(newDataset: 'xbox' | 'playstation' | 'steam') {
+		if (newDataset === selectedDataset) return;
+
+		const unmapped = findUnmappedFields(newDataset);
+
+		if (unmapped.length > 0) {
+			// Show remap dialog
+			pendingDataset = newDataset;
+			unmappedFields = unmapped;
+			showRemapDialog = true;
+		} else {
+			// No remapping needed, just switch
+			selectedDataset = newDataset;
+			selectedCardIndex = 0;
+		}
+	}
+
+	// Apply field remapping to all containers
+	function applyRemapping(mapping: Record<string, string>) {
+		if (!pendingDataset) return;
+
+		// Update all component dataField bindings
+		containers = containers.map(container => ({
+			...container,
+			components: container.components.map(component => {
+				if ('dataField' in component && component.dataField) {
+					const newField = mapping[component.dataField as string];
+					if (newField) {
+						return { ...component, dataField: newField };
+					}
+				}
+				return component;
+			})
+		}));
+
+		// Switch to new dataset
+		selectedDataset = pendingDataset;
+		selectedCardIndex = 0;
+		pendingDataset = null;
+		unmappedFields = [];
+	}
+
+	// Skip remapping and switch anyway
+	function skipRemapping() {
+		if (!pendingDataset) return;
+		selectedDataset = pendingDataset;
+		selectedCardIndex = 0;
+		pendingDataset = null;
+		unmappedFields = [];
+	}
 
 	// Selected container
 	const selectedContainer = $derived(containers.find((c) => c.id === selectedContainerId) ?? null);
@@ -143,7 +231,7 @@
 
 	// Build template and preview data
 	const template = $derived(buildTemplate(templateName, containers));
-	const previewData = $derived(buildPreviewData(previewMode, currentCard));
+	const previewData = $derived(buildPreviewData(previewMode, currentCard, currentDataFields));
 
 	// History functions
 	function pushHistory() {
@@ -891,23 +979,23 @@
 			<Card.Root>
 				<Card.Content class="space-y-2 px-3 py-2">
 					<div class="flex gap-2">
-						<Select.Root type="single" value={selectedDataset} onValueChange={(v) => v && (selectedDataset = v as typeof selectedDataset)}>
+						<Select.Root type="single" value={selectedDataset} onValueChange={(v) => v && handleDatasetChange(v as 'xbox' | 'playstation' | 'steam')}>
 							<Select.Trigger class="flex-1">
-								{selectedDataset === 'creator' ? 'Fantasy Heroes' : selectedDataset === 'gallery' ? 'Cosmic Voyagers' : 'Sports Legends'}
+								{datasets[selectedDataset].name}
 							</Select.Trigger>
 							<Select.Content>
-								<Select.Item value="creator" label="Fantasy Heroes" />
-								<Select.Item value="gallery" label="Cosmic Voyagers" />
-								<Select.Item value="sports" label="Sports Legends" />
+								<Select.Item value="xbox" label="Xbox Games" />
+								<Select.Item value="playstation" label="PlayStation Games" />
+								<Select.Item value="steam" label="Steam Games" />
 							</Select.Content>
 						</Select.Root>
 						<Select.Root type="single" value={String(selectedCardIndex)} onValueChange={(v) => v && (selectedCardIndex = parseInt(v))}>
 							<Select.Trigger class="flex-1">
-								{currentDataset.cards[selectedCardIndex]?.title ?? 'Select card'}
+								{currentDataset.cards[selectedCardIndex] ? getCardDisplayName(currentDataset.cards[selectedCardIndex] as AnyCard) : 'Select card'}
 							</Select.Trigger>
 							<Select.Content>
 								{#each currentDataset.cards as card, i (i)}
-									<Select.Item value={String(i)} label={card.title} />
+									<Select.Item value={String(i)} label={getCardDisplayName(card as AnyCard)} />
 								{/each}
 							</Select.Content>
 						</Select.Root>
@@ -920,6 +1008,7 @@
 	<!-- Right: Properties Panel -->
 	<PropertiesPanel
 		container={selectedContainer}
+		dataFields={currentDataFields}
 		{expandedPanels}
 		{canUndo}
 		{canRedo}
@@ -964,3 +1053,13 @@
 </div>
 
 <HelpModal bind:show={showHelp} />
+
+<FieldRemapDialog
+	bind:show={showRemapDialog}
+	{unmappedFields}
+	sourceDataset={selectedDataset}
+	targetDataset={pendingDataset ?? selectedDataset}
+	targetDataFields={pendingDataset ? datasets[pendingDataset].dataFields : currentDataFields}
+	onApply={applyRemapping}
+	onSkip={skipRemapping}
+/>

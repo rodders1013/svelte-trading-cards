@@ -487,19 +487,35 @@ export function buildTemplate(templateName: string, containers: ContainerState[]
 // Build preview data (field names or actual data)
 export function buildPreviewData(
 	previewMode: 'fields' | 'data',
-	currentCard: Record<string, unknown>
+	currentCard: Record<string, unknown>,
+	dataFields?: Array<{ value: string; label: string; type?: string }>
 ): Record<string, unknown> {
 	if (previewMode === 'data') {
 		return currentCard;
 	}
+
+	// Generate preview data dynamically from dataFields
+	if (dataFields) {
+		const preview: Record<string, unknown> = {};
+		for (const field of dataFields) {
+			if (field.type === 'image') {
+				preview[field.value] = `https://placehold.co/400x300/1e293b/64748b?text=${encodeURIComponent(field.label)}`;
+			} else {
+				preview[field.value] = field.label;
+			}
+		}
+		return preview;
+	}
+
+	// Fallback for backwards compatibility
 	return {
-		title: '{{title}}',
-		subtitle: '{{subtitle}}',
-		description: '{{description}}',
-		imageUrl: 'https://placehold.co/400x300/1e293b/64748b?text={{imageUrl}}',
-		category: '{{category}}',
-		rarity: '{{rarity}}',
-		date: '{{date}}'
+		title: 'Title',
+		subtitle: 'Subtitle',
+		description: 'Description',
+		imageUrl: 'https://placehold.co/400x300/1e293b/64748b?text=Image',
+		category: 'Category',
+		rarity: 'Rarity',
+		date: 'Date'
 	};
 }
 
@@ -509,7 +525,7 @@ export function createTextComponent(): TextComponent {
 		type: 'text',
 		id: generateComponentId('text'),
 		visible: true,
-		dataField: 'title',
+		dataField: '',
 		maxFontSize: 48,
 		minFontSize: 12,
 		fontWeight: 'normal',
@@ -525,7 +541,7 @@ export function createImageComponent(): ImageComponent {
 		type: 'image',
 		id: generateComponentId('image'),
 		visible: true,
-		dataField: 'imageUrl',
+		dataField: '',
 		opacity: 1,
 		preserveAspectRatio: 'xMidYMid slice'
 	};

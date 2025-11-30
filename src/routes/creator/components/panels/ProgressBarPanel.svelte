@@ -9,11 +9,11 @@
 		FormGrid,
 		PanelEffects
 	} from '../form';
-	import type { ProgressBarComponent } from '../../types';
-	import { dataFields } from '../../types';
+	import type { ProgressBarComponent, DataFieldOption } from '../../types';
 
 	let {
 		component,
+		dataFields,
 		expanded = $bindable(true),
 		onUpdate,
 		onRemove,
@@ -21,6 +21,7 @@
 		onMoveDown
 	}: {
 		component: ProgressBarComponent;
+		dataFields: DataFieldOption[];
 		expanded: boolean;
 		onUpdate: (key: keyof Omit<ProgressBarComponent, 'type' | 'id'>, value: unknown) => void;
 		onRemove: () => void;
@@ -32,10 +33,10 @@
 	const labelPositions = ['left', 'center', 'right', 'inside', 'none'];
 	const labelFormats = ['value', 'percent', 'fraction'];
 
-	const dataFieldOptions = [
+	const dataFieldOptions = $derived([
 		{ value: '', label: 'None (use static value)' },
 		...dataFields
-	];
+	]);
 </script>
 
 <ComponentPanel

@@ -277,16 +277,8 @@ export interface ContainerState {
 
 export type ResizeHandle = 'nw' | 'n' | 'ne' | 'e' | 'se' | 's' | 'sw' | 'w';
 
-// Data field options for binding
-export const dataFields = [
-	{ value: 'title', label: 'Title' },
-	{ value: 'subtitle', label: 'Subtitle' },
-	{ value: 'description', label: 'Description' },
-	{ value: 'imageUrl', label: 'Image URL' },
-	{ value: 'category', label: 'Category' },
-	{ value: 'rarity', label: 'Rarity' },
-	{ value: 'date', label: 'Date' }
-];
+// DataFieldOption type for prop typing
+export type { DataFieldOption } from '$lib/demo';
 
 // Font family options
 export const fontFamilies = [

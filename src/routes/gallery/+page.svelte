@@ -11,7 +11,7 @@
 	import { Border } from '$lib/components/borders';
 	import { TextField } from '$lib/components/fields';
 	import type { CardTemplate } from '$lib/types';
-	import { datasets, type DemoCard } from '$lib/demo';
+	import { datasets, type AnyCard } from '$lib/demo';
 	import * as Card from '$lib/components/ui/card';
 	import { Button } from '$lib/components/ui/button';
 	import * as Select from '$lib/components/ui/select';
@@ -27,10 +27,10 @@
 	registerComponent('TextField', TextField);
 
 	// Data selection
-	let selectedDataset = $state<'creator' | 'gallery' | 'sports'>('gallery');
+	let selectedDataset = $state<'xbox' | 'playstation' | 'steam'>('playstation');
 
 	const currentDataset = $derived(datasets[selectedDataset]);
-	const cards = $derived(currentDataset.cards as DemoCard[]);
+	const cards = $derived(currentDataset.cards as AnyCard[]);
 
 	// Template state
 	let loadedTemplate = $state<CardTemplate | null>(null);
@@ -42,16 +42,33 @@
 	// Download states
 	let downloadingCards = $state<Record<string, string>>({});
 
-	// Helper for rarity styling
-	function getRarityClasses(rarity: string): string {
+	// Helper for platform styling
+	function getPlatformClasses(platform: string): string {
 		const styles: Record<string, string> = {
-			common: 'bg-gray-500/20 text-gray-400',
-			uncommon: 'bg-green-500/20 text-green-400',
-			rare: 'bg-blue-500/20 text-blue-400',
-			epic: 'bg-purple-500/20 text-purple-400',
-			legendary: 'bg-yellow-500/20 text-yellow-400'
+			xbox: 'bg-green-500/20 text-green-400',
+			playstation: 'bg-blue-500/20 text-blue-400',
+			steam: 'bg-gray-500/20 text-gray-300'
 		};
-		return styles[rarity] ?? styles.common;
+		return styles[platform] ?? styles.steam;
+	}
+
+	// Helpers to get display values from any card type
+	function getCardTitle(card: AnyCard): string {
+		if ('gameName' in card) return card.gameName; // Xbox
+		if ('appName' in card) return card.appName; // Steam
+		return card.title; // PlayStation
+	}
+
+	function getCardPlayerId(card: AnyCard): string {
+		if ('gamertag' in card) return card.gamertag; // Xbox
+		if ('steamUsername' in card) return card.steamUsername; // Steam
+		return card.psnId; // PlayStation
+	}
+
+	function getCardCategory(card: AnyCard): string {
+		if ('genre' in card) return card.genre; // Xbox
+		if ('tags' in card) return card.tags[0] ?? 'Game'; // Steam
+		return card.category; // PlayStation
 	}
 
 	// Load template from file
@@ -89,21 +106,21 @@
 		return document.querySelector(`[data-card-id="${cardId}"] svg`) as SVGSVGElement | null;
 	}
 
-	async function handleDownloadSVG(card: DemoCard) {
+	async function handleDownloadSVG(card: AnyCard) {
 		const svg = getSvgElement(card.id);
 		if (!svg) return;
 
-		downloadSVG(svg, { filename: `${card.title.toLowerCase().replace(/\s+/g, '-')}` });
+		downloadSVG(svg, { filename: `${getCardTitle(card).toLowerCase().replace(/\s+/g, '-')}` });
 	}
 
-	async function handleDownloadPNGClient(card: DemoCard) {
+	async function handleDownloadPNGClient(card: AnyCard) {
 		const svg = getSvgElement(card.id);
 		if (!svg) return;
 
 		downloadingCards[card.id] = 'client-png';
 		try {
 			await downloadPNGClient(svg, {
-				filename: `${card.title.toLowerCase().replace(/\s+/g, '-')}`,
+				filename: `${getCardTitle(card).toLowerCase().replace(/\s+/g, '-')}`,
 				scale: 1
 			});
 		} finally {
@@ -111,7 +128,7 @@
 		}
 	}
 
-	async function handleDownloadPNGServer(card: DemoCard) {
+	async function handleDownloadPNGServer(card: AnyCard) {
 		const svg = getSvgElement(card.id);
 		if (!svg) return;
 
@@ -124,7 +141,7 @@
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({
 					svg: svgString,
-					filename: card.title.toLowerCase().replace(/\s+/g, '-')
+					filename: getCardTitle(card).toLowerCase().replace(/\s+/g, '-')
 				})
 			});
 
@@ -136,7 +153,7 @@
 			const url = URL.createObjectURL(blob);
 			const a = document.createElement('a');
 			a.href = url;
-			a.download = `${card.title.toLowerCase().replace(/\s+/g, '-')}-server.png`;
+			a.download = `${getCardTitle(card).toLowerCase().replace(/\s+/g, '-')}-server.png`;
 			a.click();
 			URL.revokeObjectURL(url);
 		} catch (error) {
@@ -188,9 +205,9 @@
 						{currentDataset.name}
 					</Select.Trigger>
 					<Select.Content>
-						<Select.Item value="creator">Fantasy Heroes (Creator Data)</Select.Item>
-						<Select.Item value="gallery">Cosmic Voyagers (Gallery Data)</Select.Item>
-						<Select.Item value="sports">Sports Legends (Sports Data)</Select.Item>
+						<Select.Item value="xbox">Xbox Games</Select.Item>
+						<Select.Item value="playstation">PlayStation Games</Select.Item>
+						<Select.Item value="steam">Steam Games</Select.Item>
 					</Select.Content>
 				</Select.Root>
 				<span class="text-xs text-muted-foreground">
@@ -213,16 +230,16 @@
 					</div>
 					<Card.Content class="space-y-3 pt-4">
 						<div>
-							<h3 class="font-semibold">{card.title}</h3>
-							<p class="text-xs text-muted-foreground">{card.subtitle}</p>
+							<h3 class="font-semibold">{getCardTitle(card)}</h3>
+							<p class="text-xs text-muted-foreground">{getCardPlayerId(card)}</p>
 						</div>
 
 						<div class="flex flex-wrap gap-2">
 							<span class="rounded bg-blue-500/20 px-2 py-0.5 text-xs text-blue-400">
-								{card.category}
+								{getCardCategory(card)}
 							</span>
-							<span class="rounded px-2 py-0.5 text-xs capitalize {getRarityClasses(card.rarity)}">
-								{card.rarity}
+							<span class="rounded px-2 py-0.5 text-xs capitalize {getPlatformClasses(selectedDataset)}">
+								{selectedDataset}
 							</span>
 						</div>
 

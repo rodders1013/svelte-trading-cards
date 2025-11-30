@@ -1,11 +1,11 @@
 <script lang="ts">
 	import ComponentPanel from '../ComponentPanel.svelte';
 	import { FormSelect, FormSlider, FormGrid, PanelEffects } from '../form';
-	import type { ImageComponent } from '../../types';
-	import { dataFields } from '../../types';
+	import type { ImageComponent, DataFieldOption } from '../../types';
 
 	let {
 		component,
+		dataFields,
 		expanded = $bindable(true),
 		onUpdate,
 		onRemove,
@@ -13,6 +13,7 @@
 		onMoveDown
 	}: {
 		component: ImageComponent;
+		dataFields: DataFieldOption[];
 		expanded: boolean;
 		onUpdate: (key: keyof Omit<ImageComponent, 'type' | 'id'>, value: unknown) => void;
 		onRemove: () => void;
@@ -20,7 +21,10 @@
 		onMoveDown: () => void;
 	} = $props();
 
-	const imageFields = dataFields.filter((f) => f.value.includes('Url') || f.value.includes('image'));
+	// Filter to image fields based on type or naming convention
+	const imageFields = $derived(
+		dataFields.filter((f) => f.type === 'image' || f.value.toLowerCase().includes('image') || f.value.toLowerCase().includes('art') || f.value.toLowerCase().includes('url'))
+	);
 
 	const fitModes = [
 		{ value: 'xMidYMid slice', label: 'Cover (fill)' },
