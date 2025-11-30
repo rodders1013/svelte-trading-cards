@@ -74,11 +74,51 @@ Build professional trading cards by composing pre-built SVG components. Think of
 
 ### 2. Use the Visual Creator
 
-Visit `/creator` to build templates visually:
+The `CardCreator` component is a full-featured template designer you can embed in your app:
+
+```svelte
+<script lang="ts">
+  import { CardCreator } from 'svelte-trading-cards';
+  import type { CardTemplate } from 'svelte-trading-cards';
+
+  // Define your data shape
+  const datasets = {
+    players: {
+      id: 'players',
+      name: 'Player Cards',
+      dataFields: [
+        { value: 'name', label: 'Player Name', type: 'text' },
+        { value: 'team', label: 'Team', type: 'text' },
+        { value: 'photo', label: 'Photo', type: 'image' },
+        { value: 'rating', label: 'Rating', type: 'number' }
+      ],
+      cards: [
+        { name: 'John Doe', team: 'Red Team', photo: '/players/john.jpg', rating: 85 }
+      ]
+    }
+  };
+
+  function handleSave(data: { template: CardTemplate; editorState: unknown; name: string }) {
+    // Save to your database
+    console.log('Template saved:', data);
+  }
+</script>
+
+<CardCreator
+  {datasets}
+  initialDataset="players"
+  onSave={handleSave}
+/>
+```
+
+**Features:**
 - Zone hierarchy with drag-to-reorder
 - Property panels for all component settings
-- Undo/Redo with keyboard shortcuts
+- Per-dataset data fields (different data shapes for different use cases)
+- Field remapping when switching datasets
+- Undo/Redo with keyboard shortcuts (Cmd/Ctrl+Z)
 - Save/Load templates as JSON
+- 50-entry history limit to prevent memory bloat
 
 ### 3. Export Cards
 
@@ -292,6 +332,76 @@ const svg = renderToSVGString(template, data);
 const svgWithImages = await embedImages(svg);
 const { buffer } = await svgToPNG(svgWithImages);
 ```
+
+### SVG Validation
+
+Server-side PNG conversion includes built-in protection against oversized or malicious SVG inputs:
+
+```typescript
+import { svgToPNG, SVGValidationError } from 'svelte-trading-cards/server';
+
+try {
+  const { buffer } = await svgToPNG(svg);
+} catch (error) {
+  if (error instanceof SVGValidationError) {
+    // SVG exceeds size (5MB) or complexity (1000 groups) limits
+    console.error('Invalid SVG:', error.message);
+  }
+}
+
+// Skip validation for trusted sources
+const { buffer } = await svgToPNG(trustedSvg, { skipValidation: true });
+```
+
+## Advanced Usage
+
+### Component Registry Isolation
+
+By default, components are registered globally. For multiple independent card instances, use isolated registries:
+
+```svelte
+<script lang="ts">
+  import {
+    CardCanvas,
+    createComponentRegistry,
+    setComponentRegistry,
+    Group,
+    GradientBackground
+  } from 'svelte-trading-cards';
+
+  // Create isolated registry for this component tree
+  const registry = createComponentRegistry();
+  registry.register('Group', Group);
+  registry.register('GradientBackground', GradientBackground);
+
+  // Set in context (children will use this registry)
+  setComponentRegistry(registry);
+</script>
+
+<CardCanvas {template} {data} />
+```
+
+### Filename Sanitization
+
+Download utilities automatically sanitize filenames to prevent path traversal:
+
+```typescript
+import { downloadSVG, sanitizeFilename } from 'svelte-trading-cards';
+
+// Automatically sanitized
+downloadSVG(svg, { filename: '../../../etc/passwd' }); // Downloads as "etcpasswd.svg"
+
+// Manual sanitization
+const safe = sanitizeFilename(userInput); // "My Card!" → "My Card"
+```
+
+## Package Exports
+
+| Import Path | Contents |
+|-------------|----------|
+| `svelte-trading-cards` | All components, CardCreator, types, client utilities |
+| `svelte-trading-cards/creator` | CardCreator component and creator types only |
+| `svelte-trading-cards/server` | Server-side rendering, image embedding, PNG conversion |
 
 ## License
 

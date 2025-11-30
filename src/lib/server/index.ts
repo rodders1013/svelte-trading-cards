@@ -33,7 +33,7 @@ export { embedImages, hasExternalImages } from './embedImages.js';
 export type { EmbedOptions } from './embedImages.js';
 
 // PNG conversion
-export { svgToPNG, svgToPNGDataURL } from './svgToPNG.js';
+export { svgToPNG, svgToPNGDataURL, SVGValidationError } from './svgToPNG.js';
 export type { PNGOptions, PNGResult } from './svgToPNG.js';
 
 // Re-export types and constants for convenience

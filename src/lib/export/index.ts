@@ -4,6 +4,7 @@ export {
 	svgToDataURL,
 	svgToBlob,
 	svgToPNGClient,
-	serializeSVG
+	serializeSVG,
+	sanitizeFilename
 } from './downloadSVG.js';
 export type { DownloadOptions } from './downloadSVG.js';

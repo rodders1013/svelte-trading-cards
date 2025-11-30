@@ -3,9 +3,11 @@
 
 	let {
 		cols = 2,
+		class: className = '',
 		children
 	}: {
 		cols?: 2 | 3 | 4;
+		class?: string;
 		children: Snippet;
 	} = $props();
 
@@ -16,6 +18,6 @@
 	};
 </script>
 
-<div class="grid gap-2 {colsClass[cols]}">
+<div class="grid gap-2 {colsClass[cols]} {className}">
 	{@render children()}
 </div>

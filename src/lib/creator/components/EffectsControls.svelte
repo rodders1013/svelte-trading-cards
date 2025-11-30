@@ -64,16 +64,18 @@
 
 	// Get label for current elevation (only for lift effect)
 	const currentElevationLabel = $derived.by(() => {
-		if (effect && effect.type === 'lift') {
-			return liftOptions.find((opt) => opt.value === effect.elevation)?.label ?? 'Medium';
+		const e = effect;
+		if (e && e.type === 'lift') {
+			return liftOptions.find((opt) => opt.value === e.elevation)?.label ?? 'Medium';
 		}
 		return '';
 	});
 
 	// Get label for current speed
 	const currentSpeedLabel = $derived.by(() => {
-		if (effect && effect.animated) {
-			return speedOptions.find((opt) => opt.value === effect.speed)?.label ?? 'Normal';
+		const e = effect;
+		if (e && e.animated) {
+			return speedOptions.find((opt) => opt.value === e.speed)?.label ?? 'Normal';
 		}
 		return '';
 	});

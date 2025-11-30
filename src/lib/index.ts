@@ -2,7 +2,7 @@
 export { CardCanvas, ComponentRenderer, Group, registerComponent, getComponentByName } from './core/index.js';
 
 // Components
-export { GradientBackground, Image, PatternBackground } from './components/backgrounds/index.js';
+export { GradientBackground, Image, PatternBackground, SolidBackground } from './components/backgrounds/index.js';
 export { Border } from './components/borders/index.js';
 export { TextField, StatPanel } from './components/fields/index.js';
 export { Icon, IconPicker } from './components/icons/index.js';
@@ -87,3 +87,22 @@ export type { DownloadOptions } from './export/index.js';
 
 // Utilities
 export { FitText } from './utils/index.js';
+
+// Creator
+export { CardCreator } from './creator/index.js';
+export type {
+	ContainerState,
+	ComponentItem,
+	TextComponent,
+	ImageComponent,
+	BackgroundComponent,
+	BorderComponent,
+	IconComponent,
+	BadgeComponent,
+	StatPanelComponent,
+	DividerComponent,
+	ProgressBarComponent,
+	RibbonComponent,
+	FrameComponent,
+	StampComponent
+} from './creator/index.js';

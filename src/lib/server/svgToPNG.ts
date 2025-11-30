@@ -7,6 +7,12 @@
 
 import { CARD_WIDTH, CARD_HEIGHT } from '../types/CardTemplate.js';
 
+/** Maximum SVG string size (5MB) */
+const MAX_SVG_SIZE = 5 * 1024 * 1024;
+
+/** Maximum number of group elements allowed */
+const MAX_GROUP_COUNT = 1000;
+
 export interface PNGOptions {
 	/** Output width in pixels. Defaults to CARD_WIDTH (750) */
 	width?: number;
@@ -14,6 +20,36 @@ export interface PNGOptions {
 	height?: number;
 	/** Background color (CSS color string). Defaults to transparent */
 	backgroundColor?: string;
+	/** Skip size/complexity validation (use with caution) */
+	skipValidation?: boolean;
+}
+
+export class SVGValidationError extends Error {
+	constructor(message: string) {
+		super(message);
+		this.name = 'SVGValidationError';
+	}
+}
+
+/**
+ * Validates SVG string for size and complexity.
+ * Throws SVGValidationError if validation fails.
+ */
+function validateSVG(svgString: string): void {
+	// Size validation
+	if (svgString.length > MAX_SVG_SIZE) {
+		throw new SVGValidationError(
+			`SVG exceeds maximum size of ${MAX_SVG_SIZE / 1024 / 1024}MB (received ${(svgString.length / 1024 / 1024).toFixed(2)}MB)`
+		);
+	}
+
+	// Complexity validation - count group elements
+	const groupCount = (svgString.match(/<g[\s>]/gi) || []).length;
+	if (groupCount > MAX_GROUP_COUNT) {
+		throw new SVGValidationError(
+			`SVG exceeds maximum complexity (${groupCount} groups, max ${MAX_GROUP_COUNT})`
+		);
+	}
 }
 
 export interface PNGResult {
@@ -49,7 +85,12 @@ export interface PNGResult {
  * ```
  */
 export async function svgToPNG(svgString: string, options: PNGOptions = {}): Promise<PNGResult> {
-	const { width = CARD_WIDTH, height = CARD_HEIGHT, backgroundColor } = options;
+	const { width = CARD_WIDTH, height = CARD_HEIGHT, backgroundColor, skipValidation = false } = options;
+
+	// Validate SVG size and complexity (unless explicitly skipped)
+	if (!skipValidation) {
+		validateSVG(svgString);
+	}
 
 	// Dynamically import resvg-js
 	const { Resvg } = await import('@resvg/resvg-js');

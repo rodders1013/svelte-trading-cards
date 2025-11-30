@@ -15,6 +15,27 @@ export interface DownloadOptions {
 }
 
 /**
+ * Sanitizes a filename to prevent path traversal and other issues.
+ * Only allows alphanumeric characters, underscores, hyphens, and spaces.
+ *
+ * @param filename - The filename to sanitize
+ * @returns A safe filename
+ */
+export function sanitizeFilename(filename: string): string {
+	return (
+		filename
+			// Remove path separators and dangerous characters
+			.replace(/[/\\:*?"<>|]/g, '')
+			// Replace any remaining non-alphanumeric chars (except underscore, hyphen, space, dot)
+			.replace(/[^\w\s.-]/g, '')
+			// Limit length
+			.substring(0, 100)
+			// Trim whitespace
+			.trim() || 'card'
+	);
+}
+
+/**
  * Serializes an SVG element to a string.
  *
  * @param svgElement - The SVG element to serialize
@@ -86,13 +107,14 @@ export function svgToBlob(svgElement: SVGSVGElement): Blob {
  */
 export function downloadSVG(svgElement: SVGSVGElement, options: DownloadOptions = {}): void {
 	const { filename = 'card', includeDeclaration = true } = options;
+	const safeFilename = sanitizeFilename(filename);
 
 	const blob = svgToBlob(svgElement);
 	const url = URL.createObjectURL(blob);
 
 	const link = document.createElement('a');
 	link.href = url;
-	link.download = `${filename}.svg`;
+	link.download = `${safeFilename}.svg`;
 	document.body.appendChild(link);
 	link.click();
 	document.body.removeChild(link);
@@ -173,13 +195,14 @@ export async function downloadPNGClient(
 	options: DownloadOptions & { scale?: number } = {}
 ): Promise<void> {
 	const { filename = 'card', scale = 1 } = options;
+	const safeFilename = sanitizeFilename(filename);
 
 	const blob = await svgToPNGClient(svgElement, scale);
 	const url = URL.createObjectURL(blob);
 
 	const link = document.createElement('a');
 	link.href = url;
-	link.download = `${filename}.png`;
+	link.download = `${safeFilename}.png`;
 	document.body.appendChild(link);
 	link.click();
 	document.body.removeChild(link);

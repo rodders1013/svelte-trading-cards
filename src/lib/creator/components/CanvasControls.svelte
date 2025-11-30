@@ -17,7 +17,7 @@
 		onZoomIn: () => void;
 		onZoomOut: () => void;
 		onResetZoom: () => void;
-		onShowHelp: () => void;
+		onShowHelp?: () => void;
 	} = $props();
 </script>
 

@@ -66,18 +66,21 @@
 	);
 
 	const currentSpeedLabel = $derived.by(() => {
-		if (!animation) return '';
-		return speedOptions.find((opt) => opt.value === animation.speed)?.label ?? 'Normal';
+		const a = animation;
+		if (!a) return '';
+		return speedOptions.find((opt) => opt.value === a.speed)?.label ?? 'Normal';
 	});
 
 	const currentDirectionLabel = $derived.by(() => {
-		if (!animation) return '';
-		return directionOptions.find((opt) => opt.value === animation.direction)?.label ?? 'Clockwise';
+		const a = animation;
+		if (!a) return '';
+		return directionOptions.find((opt) => opt.value === a.direction)?.label ?? 'Clockwise';
 	});
 
 	const currentEasingLabel = $derived.by(() => {
-		if (!animation) return '';
-		return easingOptions.find((opt) => opt.value === animation.easing)?.label ?? 'Ease In-Out';
+		const a = animation;
+		if (!a) return '';
+		return easingOptions.find((opt) => opt.value === a.easing)?.label ?? 'Ease In-Out';
 	});
 </script>
 
