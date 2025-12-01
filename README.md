@@ -265,6 +265,43 @@ Display ratings with icons - supports 10 presets plus custom Iconify icons:
 
 **Use cases:** User ratings, difficulty levels, spiciness meters, health bars, achievement tiers.
 
+### PatternBackground (17 Patterns + Icon Patterns)
+
+Repeating patterns for backgrounds with 17 geometric options plus custom icon patterns:
+
+```typescript
+{
+  type: 'PatternBackground',
+  props: {
+    pattern: 'hexagons',     // 17 geometric: dots, grid, diagonal, hexagons,
+                             // triangles, squares, diamonds, chevrons, waves,
+                             // circles, crosses, zigzag, checkered, stripes-h,
+                             // stripes-v, confetti, stars
+                             // Icon: 'icon' (single), 'icons' (multiple)
+    color: '#ffffff',
+    opacity: 0.1,
+    size: 32,
+    spacing: 0,              // Gap between elements
+    rotation: 0,             // Rotate entire pattern
+    strokeWidth: 1,          // Line thickness
+
+    // For 'icons' pattern - multiple icons in sequence
+    icons: [
+      { iconData: {...}, iconName: 'mdi:star', rotation: 0 },
+      { iconData: {...}, iconName: 'mdi:heart', rotation: 15 }
+    ],
+    rowOffset: 25            // Stagger rows for brick effect
+  }
+}
+```
+
+**Multi-icon pattern example:** With icons [★, ♥, ◆] and rowOffset of 25:
+```
+★  ♥  ◆  ★  ♥  ◆
+   ★  ♥  ◆  ★  ♥  ◆   (offset 25px)
+★  ♥  ◆  ★  ♥  ◆
+```
+
 ## Animation System
 
 All components support CSS animations that are embedded in the SVG for portability. Animations work in preview and SVG exports, but are automatically static in PNG exports.

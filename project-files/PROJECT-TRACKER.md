@@ -222,6 +222,13 @@
 - [x] Stamp (seal/certification marks, numbered editions)
 - [x] GlowEffect (replaced by Effects System with glow, neon, shadow, etc.)
 
+### SVG Patterns System - COMPLETE
+- [x] 17 geometric patterns (dots, grid, diagonal, hexagons, triangles, squares, diamonds, chevrons, waves, circles, crosses, zigzag, checkered, stripes-h, stripes-v, confetti, stars)
+- [x] Single icon pattern (any Iconify icon as repeating pattern)
+- [x] Multi-icon pattern (multiple icons in sequence with row offset/stagger)
+- [x] Pattern controls (size, spacing, rotation, stroke width)
+- [x] Row offset for brick/staggered effect on multi-icon patterns
+
 ### Layer Features
 - [ ] Blend modes support (multiply, screen, overlay)
 

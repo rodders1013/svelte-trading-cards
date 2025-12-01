@@ -45,9 +45,21 @@ export interface BackgroundComponent {
 	gradientColors?: string[];
 	gradientDirection?: 'vertical' | 'horizontal' | 'diagonal';
 	fillOpacity?: number;
-	patternType: 'none' | 'dots' | 'grid' | 'diagonal' | 'hexagons';
+	patternType: 'none' | 'dots' | 'grid' | 'diagonal' | 'hexagons' | 'triangles' | 'squares' | 'diamonds' | 'chevrons' | 'waves' | 'circles' | 'crosses' | 'zigzag' | 'checkered' | 'stripes-h' | 'stripes-v' | 'confetti' | 'stars' | 'icon' | 'icons';
 	patternColor?: string;
 	patternOpacity?: number;
+	patternSize?: number;
+	patternSpacing?: number;
+	patternRotation?: number;
+	patternStrokeWidth?: number;
+	// Icon pattern props
+	patternIcon?: IconData;
+	patternIconName?: string;
+	patternIconRotation?: number;
+	patternIconScale?: number;
+	// Multi-icon pattern props
+	patternIcons?: Array<{ iconData: IconData; iconName?: string; rotation?: number }>;
+	patternRowOffset?: number;
 	effect?: EffectConfig;
 }
 

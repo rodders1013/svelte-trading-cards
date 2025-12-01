@@ -2324,7 +2324,7 @@ Current FitText uses browser font measurement. Ensure approach works with resvg 
 | 8 | IconRating (stars, hearts, etc.) | Major | Medium | P2 | **Implemented** - 10 preset icons + custom + half-value + sourceMax scaling |
 | 9 | ~~Starter templates~~ | ~~Nice~~ | ~~Low~~ | ~~P3~~ | **Removed** - Not adding value |
 | 10 | ~~Icon collections~~ | ~~Nice~~ | ~~Medium~~ | ~~P3~~ | **Removed** - Current search sufficient |
-| 11 | SVG Patterns + Icon Patterns | Nice | Medium | P3 | **Solution designed** - Geometric + Iconify |
+| 11 | SVG Patterns + Icon Patterns | Nice | Medium | P3 | **Implemented** - 17 geometric + single/multi-icon patterns + row offset |
 | 12 | ~~Social export~~ | ~~Nice~~ | ~~Medium~~ | ~~P3~~ | **Removed** - Fixed card size |
 | 13 | Universal Text Fitting | Major | Medium | P4 | **Solution designed** - FitText for Badge/Ribbon |
 
@@ -2340,7 +2340,7 @@ Current FitText uses browser font measurement. Ensure approach works with resvg 
 | 4 | **List Component** | Array data → bullet/numbered list, delimiter parsing - **IMPLEMENTED** |
 | 5 | **Fonts** | Expanded web-safe (35+) + dataset brand fonts - **IMPLEMENTED** |
 | 8 | **IconRating** | 10 preset icons + custom Iconify, half-value support, sourceMax scaling - **IMPLEMENTED** |
-| 11 | **SVG Patterns** | 17 geometric patterns + any Iconify icon as pattern |
+| 11 | **SVG Patterns** | 17 geometric + single/multi-icon patterns + row offset - **IMPLEMENTED** |
 | 13 | **Universal Text Fitting** | Enhanced FitText with inner bounds, single-line mode for Badge/Ribbon |
 
 ### Not Required / Removed
@@ -2368,7 +2368,7 @@ Current FitText uses browser font measurement. Ensure approach works with resvg 
 3. [x] Implement P0: List Component ✓
 4. [x] Implement P1: Fonts ✓
 5. [x] Implement P2: IconRating ✓
-6. [ ] Implement P3: SVG Patterns
+6. [x] Implement P3: SVG Patterns ✓
 7. [ ] Implement P4: Universal Text Fitting (FitText for Badge/Ribbon)
 8. [x] Update documentation ✓
 

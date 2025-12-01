@@ -256,6 +256,27 @@ function buildBackgroundChildren(comp: BackgroundComponent): ComponentDefinition
 			color: comp.patternColor,
 			opacity: comp.patternOpacity
 		};
+
+		// Add pattern options if set
+		if (comp.patternSize !== undefined) props.size = comp.patternSize;
+		if (comp.patternSpacing !== undefined) props.spacing = comp.patternSpacing;
+		if (comp.patternRotation !== undefined) props.rotation = comp.patternRotation;
+		if (comp.patternStrokeWidth !== undefined) props.strokeWidth = comp.patternStrokeWidth;
+
+		// Single icon pattern
+		if (comp.patternType === 'icon' && comp.patternIcon) {
+			props.icon = comp.patternIcon;
+			props.iconName = comp.patternIconName;
+			if (comp.patternIconRotation !== undefined) props.iconRotation = comp.patternIconRotation;
+			if (comp.patternIconScale !== undefined) props.iconScale = comp.patternIconScale;
+		}
+
+		// Multi-icon pattern
+		if (comp.patternType === 'icons' && comp.patternIcons && comp.patternIcons.length > 0) {
+			props.icons = comp.patternIcons;
+			if (comp.patternRowOffset !== undefined) props.rowOffset = comp.patternRowOffset;
+		}
+
 		if (comp.effect) props.effect = comp.effect;
 		children.push({ id: `${comp.id}-pattern`, type: 'PatternBackground', props });
 	}
@@ -449,7 +470,17 @@ export function createBackgroundComponent(): BackgroundComponent {
 		fillOpacity: 1,
 		patternType: 'none',
 		patternColor: '#ffffff',
-		patternOpacity: 0.3
+		patternOpacity: 0.3,
+		patternSize: 20,
+		patternSpacing: 0,
+		patternRotation: 0,
+		patternStrokeWidth: 1,
+		patternIcon: undefined,
+		patternIconName: undefined,
+		patternIconRotation: 0,
+		patternIconScale: 1,
+		patternIcons: undefined,
+		patternRowOffset: 0
 	};
 }
 
