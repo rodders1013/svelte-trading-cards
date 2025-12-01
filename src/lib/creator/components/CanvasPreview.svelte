@@ -88,6 +88,7 @@
 							width: {container.width * scale}px;
 							height: {container.height * scale}px;
 							cursor: {isLocked ? 'not-allowed' : isSelected ? 'grab' : 'pointer'};
+							z-index: {isSelected ? 1000 : 'auto'};
 						"
 						role="button"
 						tabindex="0"
@@ -127,6 +128,7 @@
 								width: {handleSize}px;
 								height: {handleSize}px;
 								cursor: nwse-resize;
+								z-index: 1001;
 							"
 							role="slider"
 							tabindex="0"
@@ -142,6 +144,7 @@
 								width: {handleSize}px;
 								height: {handleSize}px;
 								cursor: nesw-resize;
+								z-index: 1001;
 							"
 							role="slider"
 							tabindex="0"
@@ -157,6 +160,7 @@
 								width: {handleSize}px;
 								height: {handleSize}px;
 								cursor: nesw-resize;
+								z-index: 1001;
 							"
 							role="slider"
 							tabindex="0"
@@ -172,6 +176,7 @@
 								width: {handleSize}px;
 								height: {handleSize}px;
 								cursor: nwse-resize;
+								z-index: 1001;
 							"
 							role="slider"
 							tabindex="0"
@@ -188,6 +193,7 @@
 								width: {handleSize}px;
 								height: {handleSize}px;
 								cursor: ns-resize;
+								z-index: 1001;
 							"
 							role="slider"
 							tabindex="0"
@@ -203,6 +209,7 @@
 								width: {handleSize}px;
 								height: {handleSize}px;
 								cursor: ns-resize;
+								z-index: 1001;
 							"
 							role="slider"
 							tabindex="0"
@@ -218,6 +225,7 @@
 								width: {handleSize}px;
 								height: {handleSize}px;
 								cursor: ew-resize;
+								z-index: 1001;
 							"
 							role="slider"
 							tabindex="0"
@@ -233,6 +241,7 @@
 								width: {handleSize}px;
 								height: {handleSize}px;
 								cursor: ew-resize;
+								z-index: 1001;
 							"
 							role="slider"
 							tabindex="0"

@@ -15,7 +15,8 @@ import type {
 	ProgressBarComponent,
 	RibbonComponent,
 	FrameComponent,
-	StampComponent,
+	ListComponent,
+	IconRatingComponent,
 	ClipShape,
 	ResizeHandle
 } from './types';
@@ -115,8 +116,10 @@ export function getComponentIcon(type: string): string {
 			return 'rib';
 		case 'frame':
 			return 'frm';
-		case 'stamp':
-			return 'stp';
+		case 'list':
+			return 'lst';
+		case 'iconrating':
+			return '★';
 		default:
 			return '?';
 	}
@@ -192,9 +195,13 @@ const componentBuildConfig: Partial<Record<ComponentItem['type'], ComponentBuild
 		renderType: 'Frame',
 		props: ['style', 'corners', 'edges', 'color', 'secondaryColor', 'size', 'strokeWidth', 'opacity']
 	},
-	stamp: {
-		renderType: 'Stamp',
-		props: ['textPreset', 'dataField', 'style', 'color', 'textColor', 'secondaryColor', 'icon', 'iconColor', 'rotation', 'fontSize', 'fontFamily', 'fontWeight', 'borderWidth', 'showRing', 'opacity']
+	list: {
+		renderType: 'List',
+		props: ['dataField', 'delimiter', 'style', 'fontSize', 'fontFamily', 'fontWeight', 'color', 'lineHeight', 'bulletColor', 'bulletSize', 'numberPadding', 'alignment', 'verticalAlign', 'itemSpacing', 'indent', 'maxItems', 'overflowText', 'overflowColor', 'opacity']
+	},
+	iconrating: {
+		renderType: 'IconRating',
+		props: ['dataField', 'value', 'max', 'min', 'sourceMax', 'iconPreset', 'customIcon', 'customIconName', 'filledColor', 'emptyColor', 'useEmptyOpacity', 'emptyOpacity', 'size', 'gap', 'allowHalf', 'showValue', 'valuePosition', 'valueFormat', 'valueFontSize', 'valueFontFamily', 'valueColor', 'valueGap', 'opacity']
 	}
 };
 
@@ -609,26 +616,61 @@ export function createFrameComponent(): FrameComponent {
 	};
 }
 
-export function createStampComponent(): StampComponent {
+export function createListComponent(): ListComponent {
 	return {
-		type: 'stamp',
-		id: generateComponentId('stamp'),
+		type: 'list',
+		id: generateComponentId('list'),
 		visible: true,
-		textPreset: '#001',
-		dataField: undefined,
-		style: 'wax-seal',
-		color: '#dc2626',
-		textColor: '#ffffff',
-		secondaryColor: undefined,
-		icon: undefined,
-		iconColor: undefined,
-		rotation: -15,
-		fontSize: 10,
+		dataField: '',
+		delimiter: ',',
+		style: 'bullet',
+		fontSize: 14,
 		fontFamily: 'Arial, sans-serif',
-		fontWeight: 'bold',
-		borderWidth: 3,
-		showRing: true,
-		opacity: 0.9
+		fontWeight: 'normal',
+		color: '#ffffff',
+		lineHeight: 1.6,
+		bulletColor: undefined,
+		bulletSize: undefined,
+		numberPadding: 2,
+		alignment: 'left',
+		verticalAlign: 'top',
+		itemSpacing: 4,
+		indent: 20,
+		maxItems: undefined,
+		overflowText: '+{n} more',
+		overflowColor: undefined,
+		opacity: 1
+	};
+}
+
+export function createIconRatingComponent(): IconRatingComponent {
+	return {
+		type: 'iconrating',
+		id: generateComponentId('iconrating'),
+		visible: true,
+		dataField: undefined,
+		value: 4,
+		max: 5,
+		min: 0,
+		sourceMax: undefined,
+		iconPreset: 'star',
+		customIcon: undefined,
+		customIconName: undefined,
+		filledColor: '#fbbf24',
+		emptyColor: '#374151',
+		useEmptyOpacity: false,
+		emptyOpacity: 0.3,
+		size: 24,
+		gap: 4,
+		allowHalf: true,
+		showValue: false,
+		valuePosition: 'right',
+		valueFormat: 'decimal',
+		valueFontSize: 14,
+		valueFontFamily: 'Arial, sans-serif',
+		valueColor: '#ffffff',
+		valueGap: 8,
+		opacity: 1
 	};
 }
 

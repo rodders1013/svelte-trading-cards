@@ -11,11 +11,18 @@
 	} from '../form';
 	import type { StatPanelComponent, DataFieldOption } from '../../types';
 	import type { StatRow } from '$lib/components/fields';
-	import { fontFamilies } from '../../types';
+	import { getAllFontsForDataset } from '$lib/fonts';
+	import {
+		getLabelsByCategory,
+		getCategoryDisplayName,
+		DEFAULT_DATASET,
+		type DatasetId
+	} from '$lib/presets';
 
 	let {
 		component,
 		dataFields,
+		datasetId = DEFAULT_DATASET,
 		expanded = $bindable(true),
 		onUpdate,
 		onRemove,
@@ -24,6 +31,7 @@
 	}: {
 		component: StatPanelComponent;
 		dataFields: DataFieldOption[];
+		datasetId?: DatasetId;
 		expanded: boolean;
 		onUpdate: (key: keyof Omit<StatPanelComponent, 'type' | 'id'>, value: unknown) => void;
 		onRemove: () => void;
@@ -31,14 +39,41 @@
 		onMoveDown: () => void;
 	} = $props();
 
-	const labelPresets = [
-		'ATTACK', 'DEFENSE', 'HEALTH', 'HP', 'MP', 'MANA', 'POWER', 'SPEED', 'LUCK',
-		'STRENGTH', 'AGILITY', 'INTELLIGENCE', 'STAMINA', 'ARMOR', 'DAMAGE',
-		'LEVEL', 'RANK', 'TIER', 'RARITY', 'EDITION', 'YEAR', 'SERIES',
-		'SCORE', 'POINTS', 'VALUE', 'RATING', 'COUNT', 'TOTAL', 'MAX',
-		'TYPE', 'CLASS', 'ELEMENT', 'FACTION', 'TEAM', 'ROLE',
-		'STATUS', 'CONDITION', 'QUALITY', 'GRADE'
-	];
+	// Get categorized labels based on current dataset
+	const labelCategories = $derived(getLabelsByCategory(datasetId));
+	const datasetDisplayName = $derived(getCategoryDisplayName(datasetId));
+
+	// Build flat list of label presets (dataset-specific first, then shared)
+	// Deduplicate labels to avoid duplicate key errors
+	const labelPresets = $derived.by(() => {
+		const seen = new Set<string>();
+		const labels: string[] = [];
+
+		const addUnique = (items: readonly string[]) => {
+			for (const label of items) {
+				if (!seen.has(label)) {
+					seen.add(label);
+					labels.push(label);
+				}
+			}
+		};
+
+		// Add dataset-specific labels first (priority)
+		if (labelCategories.specific.length > 0) {
+			addUnique(labelCategories.specific);
+		}
+
+		// Add shared categories (skip duplicates)
+		addUnique(labelCategories.rarity);
+		addUnique(labelCategories.status);
+		addUnique(labelCategories.editions);
+		addUnique(labelCategories.general);
+
+		return labels;
+	});
+
+	// Get fonts for current dataset (brand fonts first, then web-safe by category)
+	const fontOptions = $derived(getAllFontsForDataset(datasetId));
 
 	function addRow() {
 		const newRow: StatRow = {
@@ -157,7 +192,7 @@
 		label="Font Family"
 		value={component.fontFamily}
 		onchange={(v) => onUpdate('fontFamily', v)}
-		options={fontFamilies}
+		options={fontOptions}
 	/>
 
 	<FormSlider

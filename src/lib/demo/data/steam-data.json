@@ -12,8 +12,13 @@
 			"achievementsTotal": 42,
 			"playtimeMinutes": 18420,
 			"playtimeForever": "307 hrs",
+			"userRating": 5,
+			"steamRating": 4.5,
+			"difficulty": 5,
 			"tags": ["RPG", "Souls-like", "Open World"],
-			"lastPlayedTimestamp": 1705334400
+			"lastPlayedTimestamp": 1705334400,
+			"features": ["Steam Deck Verified", "Controller Support", "Cloud Saves"],
+			"highlights": ["All Achievements", "All Endings", "Level 200+"]
 		},
 		{
 			"id": "steam-2",
@@ -24,8 +29,13 @@
 			"achievementsTotal": 54,
 			"playtimeMinutes": 9600,
 			"playtimeForever": "160 hrs",
+			"userRating": 5,
+			"steamRating": 5,
+			"difficulty": 3,
 			"tags": ["RPG", "Turn-Based", "Story Rich"],
-			"lastPlayedTimestamp": 1708012800
+			"lastPlayedTimestamp": 1708012800,
+			"features": ["Steam Deck Playable", "Controller Support", "Mods"],
+			"highlights": ["Act 3 Complete", "Dark Urge Run", "Honor Mode"]
 		},
 		{
 			"id": "steam-3",
@@ -36,8 +46,13 @@
 			"achievementsTotal": 67,
 			"playtimeMinutes": 42000,
 			"playtimeForever": "700 hrs",
+			"userRating": 4,
+			"steamRating": 4,
+			"difficulty": 4.5,
 			"tags": ["FPS", "Competitive", "Multiplayer"],
-			"lastPlayedTimestamp": 1709827200
+			"lastPlayedTimestamp": 1709827200,
+			"features": ["VAC Secured", "Prime Status", "Workshop Maps"],
+			"highlights": ["Global Elite", "1000+ Wins", "5 Year Coin"]
 		}
 	]
 }

@@ -2,8 +2,8 @@
 
 **Package:** `svelte-trading-cards`
 **Version:** 0.1.0
-**Last Updated:** 2025-11-29
-**Status:** In Development (~85% complete)
+**Last Updated:** 2025-11-30
+**Status:** In Development (~93% complete)
 
 ---
 
@@ -15,10 +15,11 @@
 4. [Components](#components)
 5. [Animation System](#animation-system)
 6. [Effects System](#effects-system)
-7. [Visual Creator](#visual-creator)
-8. [Type System](#type-system)
-9. [Export System](#export-system)
-10. [Extensibility](#extensibility)
+7. [Fonts System](#fonts-system)
+8. [Visual Creator](#visual-creator)
+9. [Type System](#type-system)
+10. [Export System](#export-system)
+11. [Extensibility](#extensibility)
 
 ---
 
@@ -71,6 +72,9 @@ All cards use standard trading card dimensions:
 ```
 src/lib/
 ├── index.ts                 # Main entry point (client exports)
+├── animations/              # Animation system (spin, pulse, trace, etc.)
+├── effects/                 # Effects system (glow, shadow, neon, etc.)
+├── fonts/                   # Fonts system (web-safe + brand fonts)
 ├── core/
 │   ├── CardCanvas.svelte    # Main renderer - creates root container
 │   ├── ComponentRenderer.svelte # Renders components from definitions
@@ -79,8 +83,10 @@ src/lib/
 ├── components/
 │   ├── backgrounds/         # GradientBackground, Image, PatternBackground
 │   ├── borders/             # Border (unified with composable effects)
-│   ├── fields/              # TextField
+│   ├── decorations/         # Badge, Divider, ProgressBar, Ribbon, Frame
+│   ├── fields/              # TextField, StatPanel, List
 │   └── icons/               # Icon, IconPicker (Iconify integration)
+├── presets/                 # Dataset-based label presets
 ├── export/                  # Client-side export utilities
 ├── server/                  # Server-side utilities (separate entry point)
 ├── utils/                   # FitText, text measurement
@@ -388,6 +394,69 @@ Seal and certification marks:
 }
 ```
 
+### IconRating
+
+Icon-based rating display with half-value support:
+
+```typescript
+{
+  type: 'IconRating',
+  props: {
+    // Value source
+    dataField: 'userRating',       // Bind to data field
+    value: 4.5,                    // Or static value
+    max: 5,                        // Number of icons to show
+    sourceMax: 100,                // Optional: scale values (e.g., 47/100 → 2.35/5)
+
+    // Icon selection
+    iconPreset: 'star',            // star, heart, fire, thumbs-up, lightning,
+                                   // trophy, diamond, circle, pepper, skull, custom
+    customIcon: { ... },           // When iconPreset === 'custom'
+
+    // Colors
+    filledColor: '#fbbf24',        // Gold
+    emptyColor: '#374151',         // Gray
+    useEmptyOpacity: false,        // Use opacity instead of color for empty
+    emptyOpacity: 0.3,
+
+    // Layout
+    size: 24,                      // Icon size in px
+    gap: 4,                        // Space between icons
+    allowHalf: true,               // Show half-filled icons
+
+    // Value display
+    showValue: false,
+    valuePosition: 'right',        // left, right
+    valueFormat: 'decimal',        // decimal (4.5), fraction (4.5/5), percent (90%)
+    valueFontSize: 14,
+    valueFontFamily: 'Arial, sans-serif',
+    valueColor: '#ffffff',
+
+    opacity: 1,
+    effect: { ... }                // Optional effect
+  }
+}
+```
+
+**Preset Icons:**
+| Icon | ID | Use Case |
+|------|----|----------|
+| ★ | star | Ratings, reviews |
+| ♥ | heart | Favorites, health |
+| 🔥 | fire | Hotness, trending |
+| 👍 | thumbs-up | Approval, likes |
+| ⚡ | lightning | Speed, power |
+| 🏆 | trophy | Achievement level |
+| 💎 | diamond | Quality, rarity |
+| ● | circle | Generic dots |
+| 🌶️ | pepper | Spiciness |
+| 💀 | skull | Difficulty |
+
+**Source Max Scaling:**
+When data values use a different scale than your icon count, use `sourceMax`:
+- Data: 47/100, Icons: 5, sourceMax: 100
+- Result: 47/100 × 5 = 2.35 stars (displays ★★☆☆☆ with half)
+
 ---
 
 ## Animation System
@@ -579,6 +648,124 @@ All effects support pulsing animation via the `animated` and `speed` props:
 | `src/lib/effects/types.ts` | Effect types & Zod schemas |
 | `src/lib/effects/presets.ts` | Effect presets & color options |
 | `src/lib/effects/EffectWrapper.svelte` | Wrapper component with SVG filters |
+
+---
+
+## Fonts System
+
+The library includes 37+ web-safe fonts organized by category, plus dataset-specific brand fonts.
+
+### Architecture
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                     Fonts Module                             │
+│  ┌─────────────────────────────────────────────────────┐   │
+│  │ web-safe.ts                                          │   │
+│  │   WEB_SAFE_FONTS: 37 fonts across 5 categories       │   │
+│  │   - Sans-Serif (13): Arial, Helvetica, Verdana...    │   │
+│  │   - Serif (10): Georgia, Times New Roman...          │   │
+│  │   - Monospace (5): Courier New, Consolas...          │   │
+│  │   - Display (4): Impact, Arial Black...              │   │
+│  │   - Cursive (5): Brush Script, Comic Sans...         │   │
+│  └─────────────────────────────────────────────────────┘   │
+│  ┌─────────────────────────────────────────────────────┐   │
+│  │ brand-fonts.ts                                       │   │
+│  │   BRAND_FONTS: Dataset-specific fonts                │   │
+│  │   - PlayStation Style (Segoe UI based)               │   │
+│  │   - Xbox Style (Segoe UI based)                      │   │
+│  │   - Steam Style (system sans-serif)                  │   │
+│  └─────────────────────────────────────────────────────┘   │
+│  ┌─────────────────────────────────────────────────────┐   │
+│  │ index.ts                                             │   │
+│  │   - getAllFontsForDataset(datasetId)                 │   │
+│  │   - getFontsByGroupForDataset(datasetId)             │   │
+│  │   - getWebSafeFonts()                                │   │
+│  │   - fontFamilies (legacy export)                     │   │
+│  └─────────────────────────────────────────────────────┘   │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Font Categories
+
+| Category | Count | Examples |
+|----------|-------|----------|
+| Sans-Serif | 13 | Arial, Helvetica, Verdana, Tahoma, Segoe UI, Futura, Gill Sans |
+| Serif | 10 | Georgia, Times New Roman, Palatino, Garamond, Baskerville, Bodoni |
+| Monospace | 5 | Courier New, Consolas, Monaco, Lucida Console, Andale Mono |
+| Display | 4 | Impact, Arial Black, Copperplate, Haettenschweiler |
+| Cursive | 5 | Brush Script, Lucida Handwriting, Comic Sans, Snell Roundhand, Zapfino |
+
+### Font Option Type
+
+```typescript
+interface FontOption {
+  value: string;       // CSS font-family value (e.g., "Arial, sans-serif")
+  label: string;       // Display name (e.g., "Arial")
+  category: FontCategory;  // 'sans-serif' | 'serif' | 'monospace' | 'display' | 'cursive'
+}
+
+interface FontDropdownOption {
+  value: string;
+  label: string;
+  category?: FontCategory | 'brand';
+}
+```
+
+### Dataset Brand Fonts
+
+Brand fonts provide dataset-specific styling and appear first in font dropdowns:
+
+```typescript
+interface BrandFont {
+  id: string;              // Unique identifier
+  label: string;           // Display name (e.g., "PlayStation Style")
+  fontFamily: string;      // CSS font-family value
+  fallback: string;        // Fallback font
+  datasets: DatasetId[];   // Which datasets use this font
+}
+```
+
+### Helper Functions
+
+```typescript
+// Get all fonts for a dataset (brand fonts first, then web-safe by category)
+getAllFontsForDataset(datasetId: DatasetId): FontDropdownOption[]
+
+// Get fonts organized by category group
+getFontsByGroupForDataset(datasetId: DatasetId): {
+  brand: FontDropdownOption[];
+  'sans-serif': FontDropdownOption[];
+  serif: FontDropdownOption[];
+  monospace: FontDropdownOption[];
+  display: FontDropdownOption[];
+  cursive: FontDropdownOption[];
+}
+
+// Get flat list of web-safe fonts (no brand fonts)
+getWebSafeFonts(): Array<{ value: string; label: string }>
+
+// Get brand fonts for a specific dataset
+getBrandFontOptions(datasetId: DatasetId): Array<{ value: string; label: string }>
+```
+
+### Integration with Creator
+
+Font dropdowns in creator panels automatically use dataset-aware fonts:
+
+- **TextPanel** - Font family dropdown with brand fonts first
+- **BadgePanel** - Font family for badge text
+- **RibbonPanel** - Font family for ribbon text
+- **ListPanel** - Font family for list items
+- **StatPanelPanel** - Font family for stat labels/values
+
+### Key Files
+
+| File | Purpose |
+|------|---------|
+| `src/lib/fonts/index.ts` | Main exports & helper functions |
+| `src/lib/fonts/web-safe.ts` | Web-safe fonts with categories |
+| `src/lib/fonts/brand-fonts.ts` | Dataset-specific brand fonts |
 
 ---
 

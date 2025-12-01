@@ -9,11 +9,18 @@
 		PanelEffects
 	} from '../form';
 	import type { RibbonComponent, DataFieldOption } from '../../types';
-	import { fontFamilies } from '../../types';
+	import { getAllFontsForDataset } from '$lib/fonts';
+	import {
+		getLabelsByCategory,
+		getCategoryDisplayName,
+		DEFAULT_DATASET,
+		type DatasetId
+	} from '$lib/presets';
 
 	let {
 		component,
 		dataFields,
+		datasetId = DEFAULT_DATASET,
 		expanded = $bindable(true),
 		onUpdate,
 		onRemove,
@@ -22,6 +29,7 @@
 	}: {
 		component: RibbonComponent;
 		dataFields: DataFieldOption[];
+		datasetId?: DatasetId;
 		expanded: boolean;
 		onUpdate: (key: keyof Omit<RibbonComponent, 'type' | 'id'>, value: unknown) => void;
 		onRemove: () => void;
@@ -32,19 +40,48 @@
 	const positions = ['top-left', 'top-right', 'bottom-left', 'bottom-right', 'top', 'bottom'];
 	const styles = ['flat', 'folded', 'banner', 'bookmark'];
 
-	const textPresets = [
-		{ value: 'none', label: '(Default: RIBBON)' },
-		'NEW', 'HOT', 'SOLD', 'SOLD OUT', 'LIMITED', 'EXCLUSIVE',
-		'1ST EDITION', 'SPECIAL', 'COLLECTOR', 'PREMIUM',
-		'PROMO', 'BONUS', 'FREE', 'SALE',
-		'RARE', 'ULTRA RARE', 'LEGENDARY', 'MYTHIC',
-		'VERIFIED', 'AUTHENTIC', 'OFFICIAL'
-	];
+	// Get categorized labels based on current dataset
+	const labelCategories = $derived(getLabelsByCategory(datasetId));
+	const datasetDisplayName = $derived(getCategoryDisplayName(datasetId));
+
+	// Build flat list of text presets (dataset-specific first, then shared)
+	// Deduplicate labels to avoid duplicate key errors
+	const textPresets = $derived.by(() => {
+		const seen = new Set<string>();
+		const presets: Array<{ value: string; label: string } | string> = [
+			{ value: 'none', label: '(Default: RIBBON)' }
+		];
+
+		const addUnique = (labels: readonly string[]) => {
+			for (const label of labels) {
+				if (!seen.has(label)) {
+					seen.add(label);
+					presets.push(label);
+				}
+			}
+		};
+
+		// Add dataset-specific labels first (priority)
+		if (labelCategories.specific.length > 0) {
+			addUnique(labelCategories.specific);
+		}
+
+		// Add shared categories (skip duplicates)
+		addUnique(labelCategories.rarity);
+		addUnique(labelCategories.status);
+		addUnique(labelCategories.editions);
+		addUnique(labelCategories.general);
+
+		return presets;
+	});
 
 	const dataFieldOptions = [
 		{ value: '', label: 'None (use preset text)' },
 		...dataFields
 	];
+
+	// Get fonts for current dataset (brand fonts first, then web-safe by category)
+	const fontOptions = $derived(getAllFontsForDataset(datasetId));
 </script>
 
 <ComponentPanel
@@ -126,7 +163,7 @@
 		label="Font Family"
 		value={component.fontFamily}
 		onchange={(v) => onUpdate('fontFamily', v)}
-		options={fontFamilies}
+		options={fontOptions}
 	/>
 
 	<FormSlider

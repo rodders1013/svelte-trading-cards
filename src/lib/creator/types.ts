@@ -1,13 +1,13 @@
 import type { AnimationConfig } from '$lib/animations';
 import type { EffectConfig } from '$lib/effects';
 import type { IconData } from '$lib/components/icons';
-import type { StatRow } from '$lib/components/fields';
+import type { StatRow, ListStyle } from '$lib/components/fields';
 import type { BadgeShape, BadgePreset, BadgeSize, BadgeTextPreset } from '$lib/components/decorations';
 import type { DividerStyle, DividerFade, DividerOrnament } from '$lib/components/decorations';
 import type { ProgressBarStyle, LabelPosition } from '$lib/components/decorations';
 import type { RibbonPosition, RibbonStyle, RibbonTextPreset } from '$lib/components/decorations';
 import type { FrameStyle, FrameSize } from '$lib/components/decorations';
-import type { StampStyle, StampTextPreset } from '$lib/components/decorations';
+import type { RatingIconPreset, ValueFormat } from '$lib/components/decorations';
 
 // Component type definitions for the visual creator
 
@@ -213,24 +213,58 @@ export interface FrameComponent {
 	effect?: EffectConfig;
 }
 
-export interface StampComponent {
-	type: 'stamp';
+export interface ListComponent {
+	type: 'list';
 	id: string;
 	visible: boolean;
-	textPreset: StampTextPreset;
-	dataField?: string;
-	style: StampStyle;
-	color: string;
-	textColor: string;
-	secondaryColor?: string;
-	icon?: IconData;
-	iconColor?: string;
-	rotation: number;
+	dataField: string;
+	delimiter: string;
+	style: ListStyle;
 	fontSize: number;
 	fontFamily: string;
 	fontWeight: string;
-	borderWidth: number;
-	showRing: boolean;
+	color: string;
+	lineHeight: number;
+	bulletColor?: string;
+	bulletSize?: number;
+	numberPadding: number;
+	alignment: 'left' | 'center' | 'right';
+	verticalAlign: 'top' | 'center' | 'bottom';
+	itemSpacing: number;
+	indent: number;
+	maxItems?: number;
+	overflowText: string;
+	overflowColor?: string;
+	opacity: number;
+	effect?: EffectConfig;
+}
+
+export interface IconRatingComponent {
+	type: 'iconrating';
+	id: string;
+	visible: boolean;
+	dataField?: string;
+	value: number;
+	max: number;
+	min: number;
+	sourceMax?: number;
+	iconPreset: RatingIconPreset;
+	customIcon?: IconData;
+	customIconName?: string;
+	filledColor: string;
+	emptyColor: string;
+	useEmptyOpacity: boolean;
+	emptyOpacity: number;
+	size: number;
+	gap: number;
+	allowHalf: boolean;
+	showValue: boolean;
+	valuePosition: 'left' | 'right';
+	valueFormat: ValueFormat;
+	valueFontSize: number;
+	valueFontFamily: string;
+	valueColor: string;
+	valueGap: number;
 	opacity: number;
 	effect?: EffectConfig;
 }
@@ -247,7 +281,8 @@ export type ComponentItem =
 	| ProgressBarComponent
 	| RibbonComponent
 	| FrameComponent
-	| StampComponent;
+	| ListComponent
+	| IconRatingComponent;
 
 export type ClipShape =
 	| 'rect'
@@ -287,16 +322,9 @@ export interface DataFieldOption {
 	/** Human-readable label for the field */
 	label: string;
 	/** Field type hint for UI rendering */
-	type?: 'text' | 'number' | 'image' | 'date';
+	type?: 'text' | 'number' | 'image' | 'date' | 'array';
 }
 
-// Font family options
-export const fontFamilies = [
-	{ value: 'Arial, sans-serif', label: 'Arial' },
-	{ value: 'Georgia, serif', label: 'Georgia' },
-	{ value: 'Times New Roman, serif', label: 'Times New Roman' },
-	{ value: 'Courier New, monospace', label: 'Courier New' },
-	{ value: 'Verdana, sans-serif', label: 'Verdana' },
-	{ value: 'Impact, sans-serif', label: 'Impact' },
-	{ value: 'Comic Sans MS, cursive', label: 'Comic Sans' }
-];
+// Font family options - re-export from fonts module for backwards compatibility
+// Use getAllFontsForDataset(datasetId) for dataset-aware fonts
+export { fontFamilies, getAllFontsForDataset, type FontDropdownOption } from '$lib/fonts';

@@ -133,6 +133,46 @@ The `CardCreator` component is a full-featured template designer you can embed i
 <button onclick={() => downloadPNGClient(svgElement)}>Download PNG</button>
 ```
 
+## Fonts System
+
+The library includes 37+ web-safe fonts organized by category, plus dataset-specific brand fonts.
+
+### Font Categories
+
+| Category | Fonts | Examples |
+|----------|-------|----------|
+| Sans-Serif | 13 | Arial, Helvetica, Verdana, Segoe UI, Futura |
+| Serif | 10 | Georgia, Times New Roman, Palatino, Garamond |
+| Monospace | 5 | Courier New, Consolas, Monaco |
+| Display | 4 | Impact, Arial Black, Copperplate |
+| Cursive | 5 | Brush Script, Lucida Handwriting, Comic Sans |
+
+### Dataset Brand Fonts
+
+Each dataset can have brand-specific fonts that appear first in the dropdown:
+
+```typescript
+import { getAllFontsForDataset, getBrandFontOptions } from 'svelte-trading-cards';
+
+// Get all fonts for PlayStation dataset (brand fonts first)
+const fonts = getAllFontsForDataset('playstation');
+
+// Get only brand fonts
+const brandFonts = getBrandFontOptions('playstation');
+```
+
+### Font Utilities
+
+```typescript
+import {
+  getAllFontsForDataset,      // Brand + web-safe fonts for a dataset
+  getFontsByGroupForDataset,  // Fonts organized by category
+  getWebSafeFonts,            // Just web-safe fonts
+  WEB_SAFE_FONTS,             // Full font list with metadata
+  FONT_GROUP_LABELS           // Display names for categories
+} from 'svelte-trading-cards';
+```
+
 ## Components
 
 ### TextField (Auto-Fit)
@@ -197,6 +237,33 @@ Icons via Iconify API - 31 curated sets, all free for commercial use, no attribu
 ```
 
 **Available icon sets:** Material Design, Fluent UI, Phosphor, Tabler, Lucide, Simple Icons (brands), Noto Emoji, Circle Flags, Crypto Icons, and 22 more.
+
+### IconRating (Stars, Hearts, etc.)
+
+Display ratings with icons - supports 10 presets plus custom Iconify icons:
+
+```typescript
+{
+  type: 'IconRating',
+  props: {
+    dataField: 'userRating',    // Bind to data field
+    value: 4.5,                 // Or static value
+    max: 5,                     // Number of icons
+    sourceMax: 100,             // Optional: scale values (47/100 → 2.35/5)
+    iconPreset: 'star',         // star, heart, fire, thumbs-up, lightning,
+                                // trophy, diamond, circle, pepper, skull, custom
+    filledColor: '#fbbf24',
+    emptyColor: '#374151',
+    size: 24,
+    gap: 4,
+    allowHalf: true,            // Half-filled icons (★★★☆☆ for 3.5)
+    showValue: true,            // Display value text
+    valueFormat: 'decimal'      // decimal (4.5), fraction (4.5/5), percent (90%)
+  }
+}
+```
+
+**Use cases:** User ratings, difficulty levels, spiciness meters, health bars, achievement tiers.
 
 ## Animation System
 

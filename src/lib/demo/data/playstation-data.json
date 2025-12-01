@@ -14,8 +14,14 @@
 			"silverCount": 20,
 			"goldCount": 7,
 			"completionPercent": 89,
+			"userRating": 5,
+			"criticScore": 4.5,
+			"difficulty": 3,
 			"category": "Action RPG",
-			"lastSynced": "2024-01-20"
+			"lastSynced": "2024-01-20",
+			"features": ["PS5 Exclusive", "DualSense Haptics", "4K HDR", "60fps Mode"],
+			"dlc": ["Valhalla DLC"],
+			"platforms": ["PS5", "PS4"]
 		},
 		{
 			"id": "ps-2",
@@ -28,8 +34,14 @@
 			"silverCount": 15,
 			"goldCount": 4,
 			"completionPercent": 100,
+			"userRating": 4.5,
+			"criticScore": 4,
+			"difficulty": 2,
 			"category": "Action",
-			"lastSynced": "2024-02-15"
+			"lastSynced": "2024-02-15",
+			"features": ["PS5 Exclusive", "Ray Tracing", "DualSense Haptics", "3D Audio"],
+			"dlc": [],
+			"platforms": ["PS5"]
 		},
 		{
 			"id": "ps-3",
@@ -42,8 +54,14 @@
 			"silverCount": 22,
 			"goldCount": 5,
 			"completionPercent": 76,
+			"userRating": 4,
+			"criticScore": 4.5,
+			"difficulty": 3.5,
 			"category": "Action RPG",
-			"lastSynced": "2024-03-05"
+			"lastSynced": "2024-03-05",
+			"features": ["4K HDR", "Performance Mode", "Photo Mode", "New Game+"],
+			"dlc": ["Burning Shores"],
+			"platforms": ["PS5", "PS4", "PC"]
 		}
 	]
 }

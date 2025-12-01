@@ -9,11 +9,18 @@
 		PanelEffects
 	} from '../form';
 	import type { BadgeComponent, DataFieldOption } from '../../types';
-	import { fontFamilies } from '../../types';
+	import { getAllFontsForDataset } from '$lib/fonts';
+	import {
+		getLabelsByCategory,
+		getCategoryDisplayName,
+		DEFAULT_DATASET,
+		type DatasetId
+	} from '$lib/presets';
 
 	let {
 		component,
 		dataFields,
+		datasetId = DEFAULT_DATASET,
 		expanded = $bindable(true),
 		onUpdate,
 		onRemove,
@@ -22,6 +29,7 @@
 	}: {
 		component: BadgeComponent;
 		dataFields: DataFieldOption[];
+		datasetId?: DatasetId;
 		expanded: boolean;
 		onUpdate: (key: keyof Omit<BadgeComponent, 'type' | 'id'>, value: unknown) => void;
 		onRemove: () => void;
@@ -37,17 +45,68 @@
 		{ value: 'lg', label: 'LG' }
 	];
 
-	const textPresets = [
-		{ value: 'none', label: '(No text / Icon only)' },
-		'COMMON', 'UNCOMMON', 'RARE', 'EPIC', 'LEGENDARY', 'MYTHIC',
-		'NEW', 'HOT', 'SOLD', 'LIMITED', 'PROMO', 'EXCLUSIVE', 'VERIFIED',
-		'1ST EDITION', 'SPECIAL', 'COLLECTOR', 'PREMIUM', 'ULTRA'
-	];
+	// Get categorized labels based on current dataset
+	const labelCategories = $derived(getLabelsByCategory(datasetId));
+	const datasetDisplayName = $derived(getCategoryDisplayName(datasetId));
+
+	// Build grouped text presets for the dropdown
+	const textPresets = $derived.by(() => {
+		const options: Array<{ value: string; label: string } | { group: string; options: string[] }> = [
+			{ value: 'none', label: '(No text / Icon only)' }
+		];
+
+		// Add dataset-specific labels
+		if (labelCategories.specific.length > 0) {
+			options.push({ group: datasetDisplayName, options: [...labelCategories.specific] });
+		}
+
+		// Add shared categories
+		options.push({ group: 'Rarity', options: [...labelCategories.rarity] });
+		options.push({ group: 'Status', options: [...labelCategories.status] });
+		options.push({ group: 'Editions', options: [...labelCategories.editions] });
+		options.push({ group: 'General', options: [...labelCategories.general] });
+
+		return options;
+	});
+
+	// Flatten for simple dropdown (until grouped select is implemented)
+	// Deduplicate labels to avoid duplicate key errors
+	const flatTextPresets = $derived.by(() => {
+		const seen = new Set<string>();
+		const flat: Array<{ value: string; label: string } | string> = [
+			{ value: 'none', label: '(No text / Icon only)' }
+		];
+
+		const addUnique = (labels: readonly string[]) => {
+			for (const label of labels) {
+				if (!seen.has(label)) {
+					seen.add(label);
+					flat.push(label);
+				}
+			}
+		};
+
+		// Add dataset-specific labels first (priority)
+		if (labelCategories.specific.length > 0) {
+			addUnique(labelCategories.specific);
+		}
+
+		// Add shared categories (skip duplicates)
+		addUnique(labelCategories.rarity);
+		addUnique(labelCategories.status);
+		addUnique(labelCategories.editions);
+		addUnique(labelCategories.general);
+
+		return flat;
+	});
 
 	const dataFieldOptions = [
 		{ value: '', label: 'None (use preset text)' },
 		...dataFields
 	];
+
+	// Get fonts for current dataset (brand fonts first, then web-safe by category)
+	const fontOptions = $derived(getAllFontsForDataset(datasetId));
 </script>
 
 <ComponentPanel
@@ -62,7 +121,7 @@
 		label="Text Label"
 		value={component.textPreset}
 		onchange={(v) => onUpdate('textPreset', v)}
-		options={textPresets}
+		options={flatTextPresets}
 	/>
 
 	<FormSelect
@@ -129,7 +188,7 @@
 		label="Font Family"
 		value={component.fontFamily}
 		onchange={(v) => onUpdate('fontFamily', v)}
-		options={fontFamilies}
+		options={fontOptions}
 	/>
 
 	<FormSlider

@@ -1,7 +1,7 @@
 # svelte-trading-cards Project Tracker
 
-**Last Updated:** 2025-11-29
-**Current Progress:** ~91% (All decoration components complete)
+**Last Updated:** 2025-11-30
+**Current Progress:** ~93% (Fonts system complete)
 
 ---
 
@@ -193,8 +193,25 @@
 - [x] Real-time color picker updates (oninput instead of onchange)
 - [x] Effects embedded in SVG via inline filters
 
+### Presets System - COMPLETE
+- [x] Dataset-based label presets (PlayStation, Xbox, Steam)
+- [x] Shared label categories (Rarity, Status, Editions, General)
+- [x] Helper functions (getLabelsForDataset, getLabelsByCategory, getCategoryDisplayName)
+- [x] Integration with BadgePanel, StatPanelPanel, RibbonPanel
+- [x] Dataset-aware dropdown menus in creator
+
+### Fonts System - COMPLETE
+- [x] 37+ web-safe fonts organized by category (sans-serif, serif, monospace, display, cursive)
+- [x] Dataset-specific brand fonts (PlayStation Style, Xbox Style, Steam Style)
+- [x] Helper functions (getAllFontsForDataset, getFontsByGroupForDataset, getWebSafeFonts)
+- [x] Font dropdown integration in TextPanel, BadgePanel, RibbonPanel, ListPanel, StatPanelPanel
+- [x] Legacy fontFamilies export for backwards compatibility
+- [x] Fonts module exported from main index.ts
+
 ### Data Display Components
 - [x] StatPanel (label/value rows with optional bars/icons, combines DetailRow concept)
+- [x] List (array data → bullet/numbered/dash/arrow list, delimiter parsing, overflow handling)
+- [x] IconRating (star ratings, hearts, fire, skulls, etc. with half-value support and data binding)
 
 ### Decoration Components
 - [x] Badge (universal badge: shapes, presets for rarity/status/labels)
@@ -247,11 +264,11 @@
 |-------|--------|----------|
 | Phase 1: Core Package | Complete | 28/28 |
 | Phase 2: Visual Creator | Complete | 46/46 |
-| Phase 3: Additional Components | In Progress | 28/29 |
+| Phase 3: Additional Components | In Progress | 39/40 |
 | Phase 4: Theming | Not Started | 0/3 |
 | Phase 5: Testing & Docs | Not Started | 0/4 |
 | Phase 6: Publish | In Progress | 1/3 |
-| **Total** | | **103/113 (~91%)** |
+| **Total** | | **114/124 (~92%)** |
 
 ### Phase 3 Component Priority
 
@@ -284,6 +301,10 @@ src/lib/
 │   ├── types.ts            # Effect types & schemas (glow, shadow, neon, etc.)
 │   ├── presets.ts          # Effect presets & color options
 │   └── EffectWrapper.svelte # Wrapper component for SVG filter effects
+├── fonts/
+│   ├── index.ts            # Fonts exports & helpers
+│   ├── web-safe.ts         # 37+ web-safe fonts by category
+│   └── brand-fonts.ts      # Dataset-specific brand fonts
 ├── core/
 │   ├── index.ts            # Core exports
 │   ├── CardCanvas.svelte   # Main renderer
@@ -306,11 +327,13 @@ src/lib/
 │   │   ├── ProgressBar.svelte    # Visual stat bars
 │   │   ├── Ribbon.svelte         # Banner/ribbon overlays
 │   │   ├── Frame.svelte          # Corner/edge decorations
+│   │   ├── IconRating.svelte     # Star ratings, hearts, etc.
 │   │   └── Stamp.svelte          # Seal/certification marks
 │   ├── fields/
 │   │   ├── index.ts
 │   │   ├── TextField.svelte
-│   │   └── StatPanel.svelte      # Label/value rows with bars
+│   │   ├── StatPanel.svelte      # Label/value rows with bars
+│   │   └── List.svelte           # Array data → bullet/numbered list
 │   └── icons/
 │       ├── index.ts
 │       ├── Icon.svelte           # Iconify SVG icon renderer
@@ -369,6 +392,8 @@ src/routes/
             ├── ProgressBarPanel.svelte # Progress bar component properties
             ├── RibbonPanel.svelte      # Ribbon component properties
             ├── FramePanel.svelte       # Frame component properties
+            ├── IconRatingPanel.svelte  # Icon rating component properties
+            ├── ListPanel.svelte        # List component properties
             ├── StampPanel.svelte       # Stamp component properties
             └── StatPanelPanel.svelte   # Stat panel component properties
 ```

@@ -2,14 +2,13 @@
 	import { registerComponent, Group } from '$lib';
 	import { GradientBackground, Image, PatternBackground, SolidBackground } from '$lib/components/backgrounds';
 	import { Border } from '$lib/components/borders';
-	import { TextField, StatPanel } from '$lib/components/fields';
+	import { TextField, StatPanel, List } from '$lib/components/fields';
 	import { Icon } from '$lib/components/icons';
 	import type { IconData } from '$lib/components/icons';
-	import { Badge, Divider, ProgressBar, Ribbon, Frame, Stamp } from '$lib/components/decorations';
+	import { Badge, Divider, ProgressBar, Ribbon, Frame, IconRating } from '$lib/components/decorations';
 	import { CARD_WIDTH, CARD_HEIGHT } from '$lib/types';
 	import type { CardTemplate } from '$lib/types';
 	import * as Card from '$lib/components/ui/card';
-	import * as Select from '$lib/components/ui/select';
 
 	import HierarchyPanel from './components/HierarchyPanel.svelte';
 	import CanvasControls from './components/CanvasControls.svelte';
@@ -39,7 +38,8 @@
 		createProgressBarComponent,
 		createRibbonComponent,
 		createFrameComponent,
-		createStampComponent,
+		createListComponent,
+		createIconRatingComponent,
 		generateId,
 		getComponentByType,
 		hasComponentType,
@@ -108,7 +108,8 @@
 	registerComponent('ProgressBar', ProgressBar);
 	registerComponent('Ribbon', Ribbon);
 	registerComponent('Frame', Frame);
-	registerComponent('Stamp', Stamp);
+	registerComponent('List', List);
+	registerComponent('IconRating', IconRating);
 
 	// =============================================================================
 	// STATE
@@ -144,8 +145,7 @@
 			'comp-divider',
 			'comp-progressbar',
 			'comp-ribbon',
-			'comp-frame',
-			'comp-stamp'
+			'comp-frame'
 		])
 	);
 
@@ -166,6 +166,15 @@
 		if (typeof card.name === 'string') return card.name;
 		return 'Untitled';
 	}
+
+	// Derived data for CanvasControls dataset selector
+	const datasetOptions = $derived(datasetKeys.map(key => ({ id: key, name: datasets[key].name })));
+	const cardOptions = $derived(
+		currentDataset?.cards.map((card, i) => ({
+			index: i,
+			name: getCardDisplayName(card as Record<string, unknown>)
+		})) ?? []
+	);
 
 	// Field remapping state
 	let showRemapDialog = $state(false);
@@ -290,8 +299,8 @@
 
 	function pushHistory() {
 		let newHistory = history.slice(0, historyIndex + 1);
-		// Use structuredClone for faster, more complete deep cloning
-		newHistory.push(structuredClone(containers));
+		// Use $state.snapshot to get a plain object from the reactive proxy before cloning
+		newHistory.push(structuredClone($state.snapshot(containers)));
 
 		// Enforce history limit
 		if (newHistory.length > MAX_HISTORY_SIZE) {
@@ -341,7 +350,7 @@
 		if (!selectedContainer) return;
 		pushHistory();
 		const newContainer: ContainerState = {
-			...structuredClone(selectedContainer),
+			...structuredClone($state.snapshot(selectedContainer)),
 			id: generateId(),
 			name: `${selectedContainer.name} (copy)`,
 			y: selectedContainer.y + 20,
@@ -353,7 +362,7 @@
 
 	function copyContainer() {
 		if (!selectedContainer) return;
-		clipboard = structuredClone(selectedContainer);
+		clipboard = structuredClone($state.snapshot(selectedContainer));
 	}
 
 	function pasteContainer() {
@@ -422,7 +431,8 @@
 		progressbar: createProgressBarComponent,
 		ribbon: createRibbonComponent,
 		frame: createFrameComponent,
-		stamp: createStampComponent
+		list: createListComponent,
+		iconrating: createIconRatingComponent
 	};
 
 	/**
@@ -453,7 +463,8 @@
 	const addProgressBarComponent = () => addComponent('progressbar');
 	const addRibbonComponent = () => addComponent('ribbon');
 	const addFrameComponent = () => addComponent('frame');
-	const addStampComponent = () => addComponent('stamp');
+	const addListComponent = () => addComponent('list');
+	const addIconRatingComponent = () => addComponent('iconrating');
 
 	function removeComponent(type: ComponentItem['type']) {
 		if (!selectedContainerId) return;
@@ -489,7 +500,8 @@
 	const updateProgressBarComponent = (key: string, value: unknown) => updateComponent('progressbar', key, value);
 	const updateRibbonComponent = (key: string, value: unknown) => updateComponent('ribbon', key, value);
 	const updateFrameComponent = (key: string, value: unknown) => updateComponent('frame', key, value);
-	const updateStampComponent = (key: string, value: unknown) => updateComponent('stamp', key, value);
+	const updateListComponent = (key: string, value: unknown) => updateComponent('list', key, value);
+	const updateIconRatingComponent = (key: string, value: unknown) => updateComponent('iconrating', key, value);
 
 	function updateIconSelection(icon: { iconData: IconData; iconName: string }) {
 		if (!selectedContainerId) return;
@@ -933,6 +945,11 @@
 			bind:zoomLevel
 			bind:showGrid
 			bind:previewMode
+			datasets={datasetOptions}
+			bind:selectedDataset
+			bind:selectedCardIndex
+			cards={cardOptions}
+			onDatasetChange={handleDatasetChange}
 			onZoomIn={zoomIn}
 			onZoomOut={zoomOut}
 			onResetZoom={resetZoom}
@@ -954,42 +971,14 @@
 			onStartDrag={startDrag}
 			onStartResize={startResize}
 		/>
-
-		<!-- Preview Data Selector (when in data mode) -->
-		{#if previewMode === 'data' && currentDataset}
-			<Card.Root>
-				<Card.Content class="space-y-2 px-3 py-2">
-					<div class="flex gap-2">
-						<Select.Root type="single" value={selectedDataset} onValueChange={(v) => v && handleDatasetChange(v)}>
-							<Select.Trigger class="flex-1">
-								{currentDataset.name}
-							</Select.Trigger>
-							<Select.Content>
-								{#each datasetKeys as key (key)}
-									<Select.Item value={key} label={datasets[key].name} />
-								{/each}
-							</Select.Content>
-						</Select.Root>
-						<Select.Root type="single" value={String(selectedCardIndex)} onValueChange={(v) => v && (selectedCardIndex = parseInt(v))}>
-							<Select.Trigger class="flex-1">
-								{currentCard ? getCardDisplayName(currentCard) : 'Select card'}
-							</Select.Trigger>
-							<Select.Content>
-								{#each currentDataset.cards as card, i (i)}
-									<Select.Item value={String(i)} label={getCardDisplayName(card as Record<string, unknown>)} />
-								{/each}
-							</Select.Content>
-						</Select.Root>
-					</div>
-				</Card.Content>
-			</Card.Root>
-		{/if}
 	</div>
 
 	<!-- Right: Properties Panel -->
 	<PropertiesPanel
 		container={selectedContainer}
 		dataFields={currentDataFields}
+		datasetId={selectedDataset as import('$lib/presets').DatasetId}
+		{previewData}
 		{expandedPanels}
 		{canUndo}
 		{canRedo}
@@ -1011,7 +1000,8 @@
 		onAddProgressBarComponent={addProgressBarComponent}
 		onAddRibbonComponent={addRibbonComponent}
 		onAddFrameComponent={addFrameComponent}
-		onAddStampComponent={addStampComponent}
+		onAddListComponent={addListComponent}
+		onAddIconRatingComponent={addIconRatingComponent}
 		onUpdateTextComponent={updateTextComponent}
 		onUpdateImageComponent={updateImageComponent}
 		onUpdateBackgroundComponent={updateBackgroundComponent}
@@ -1026,7 +1016,8 @@
 		onUpdateProgressBarComponent={updateProgressBarComponent}
 		onUpdateRibbonComponent={updateRibbonComponent}
 		onUpdateFrameComponent={updateFrameComponent}
-		onUpdateStampComponent={updateStampComponent}
+		onUpdateListComponent={updateListComponent}
+		onUpdateIconRatingComponent={updateIconRatingComponent}
 		onRemoveComponent={removeComponent}
 		onMoveComponentUp={moveComponentUp}
 		onMoveComponentDown={moveComponentDown}

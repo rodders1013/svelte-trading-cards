@@ -8,11 +8,13 @@
 		PanelEffects
 	} from '../form';
 	import type { TextComponent, DataFieldOption } from '../../types';
-	import { fontFamilies } from '../../types';
+	import { getAllFontsForDataset } from '$lib/fonts';
+	import { DEFAULT_DATASET, type DatasetId } from '$lib/presets';
 
 	let {
 		component,
 		dataFields,
+		datasetId = DEFAULT_DATASET,
 		expanded = $bindable(true),
 		onUpdate,
 		onRemove,
@@ -21,12 +23,16 @@
 	}: {
 		component: TextComponent;
 		dataFields: DataFieldOption[];
+		datasetId?: DatasetId;
 		expanded: boolean;
 		onUpdate: (key: keyof Omit<TextComponent, 'type' | 'id'>, value: unknown) => void;
 		onRemove: () => void;
 		onMoveUp: () => void;
 		onMoveDown: () => void;
 	} = $props();
+
+	// Get fonts for current dataset (brand fonts first, then web-safe by category)
+	const fontOptions = $derived(getAllFontsForDataset(datasetId));
 
 	const fontWeights = [
 		{ value: 'normal', label: 'Normal' },
@@ -69,7 +75,7 @@
 			label="Font Family"
 			value={component.fontFamily}
 			onchange={(v) => onUpdate('fontFamily', v)}
-			options={fontFamilies}
+			options={fontOptions}
 		/>
 	</FormGrid>
 

@@ -15,8 +15,14 @@ export const XboxGameSchema = z.object({
 	achievements: z.number(),
 	gamerscore: z.number(),
 	hoursPlayed: z.number(),
+	userRating: z.number(),
+	criticScore: z.number(),
+	difficulty: z.number(),
 	genre: z.string(),
-	lastPlayed: z.string()
+	lastPlayed: z.string(),
+	features: z.array(z.string()).optional(),
+	modes: z.array(z.string()).optional(),
+	platforms: z.array(z.string()).optional()
 });
 
 export type XboxGame = z.infer<typeof XboxGameSchema>;
@@ -35,8 +41,14 @@ export const PlayStationGameSchema = z.object({
 	silverCount: z.number(),
 	goldCount: z.number(),
 	completionPercent: z.number(),
+	userRating: z.number(),
+	criticScore: z.number(),
+	difficulty: z.number(),
 	category: z.string(),
-	lastSynced: z.string()
+	lastSynced: z.string(),
+	features: z.array(z.string()).optional(),
+	dlc: z.array(z.string()).optional(),
+	platforms: z.array(z.string()).optional()
 });
 
 export type PlayStationGame = z.infer<typeof PlayStationGameSchema>;
@@ -53,8 +65,13 @@ export const SteamGameSchema = z.object({
 	achievementsTotal: z.number(),
 	playtimeMinutes: z.number(),
 	playtimeForever: z.string(),
+	userRating: z.number(),
+	steamRating: z.number(),
+	difficulty: z.number(),
 	tags: z.array(z.string()),
-	lastPlayedTimestamp: z.number()
+	lastPlayedTimestamp: z.number(),
+	features: z.array(z.string()).optional(),
+	highlights: z.array(z.string()).optional()
 });
 
 export type SteamGame = z.infer<typeof SteamGameSchema>;
@@ -74,8 +91,14 @@ export const xboxDataFields: DataFieldOption[] = [
 	{ value: 'achievements', label: 'Achievements', type: 'number' },
 	{ value: 'gamerscore', label: 'Gamerscore', type: 'number' },
 	{ value: 'hoursPlayed', label: 'Hours Played', type: 'number' },
+	{ value: 'userRating', label: 'User Rating', type: 'number' },
+	{ value: 'criticScore', label: 'Critic Score', type: 'number' },
+	{ value: 'difficulty', label: 'Difficulty', type: 'number' },
 	{ value: 'genre', label: 'Genre', type: 'text' },
-	{ value: 'lastPlayed', label: 'Last Played', type: 'date' }
+	{ value: 'lastPlayed', label: 'Last Played', type: 'date' },
+	{ value: 'features', label: 'Features', type: 'array' },
+	{ value: 'modes', label: 'Game Modes', type: 'array' },
+	{ value: 'platforms', label: 'Platforms', type: 'array' }
 ];
 
 export const playstationDataFields: DataFieldOption[] = [
@@ -88,8 +111,14 @@ export const playstationDataFields: DataFieldOption[] = [
 	{ value: 'silverCount', label: 'Silver Trophies', type: 'number' },
 	{ value: 'bronzeCount', label: 'Bronze Trophies', type: 'number' },
 	{ value: 'completionPercent', label: 'Completion %', type: 'number' },
+	{ value: 'userRating', label: 'User Rating', type: 'number' },
+	{ value: 'criticScore', label: 'Critic Score', type: 'number' },
+	{ value: 'difficulty', label: 'Difficulty', type: 'number' },
 	{ value: 'category', label: 'Category', type: 'text' },
-	{ value: 'lastSynced', label: 'Last Synced', type: 'date' }
+	{ value: 'lastSynced', label: 'Last Synced', type: 'date' },
+	{ value: 'features', label: 'Features', type: 'array' },
+	{ value: 'dlc', label: 'DLC', type: 'array' },
+	{ value: 'platforms', label: 'Platforms', type: 'array' }
 ];
 
 export const steamDataFields: DataFieldOption[] = [
@@ -100,8 +129,13 @@ export const steamDataFields: DataFieldOption[] = [
 	{ value: 'achievementsTotal', label: 'Total Achievements', type: 'number' },
 	{ value: 'playtimeMinutes', label: 'Playtime (minutes)', type: 'number' },
 	{ value: 'playtimeForever', label: 'Playtime (formatted)', type: 'text' },
-	{ value: 'tags', label: 'Tags', type: 'text' },
-	{ value: 'lastPlayedTimestamp', label: 'Last Played', type: 'number' }
+	{ value: 'userRating', label: 'User Rating', type: 'number' },
+	{ value: 'steamRating', label: 'Steam Rating', type: 'number' },
+	{ value: 'difficulty', label: 'Difficulty', type: 'number' },
+	{ value: 'tags', label: 'Tags', type: 'array' },
+	{ value: 'lastPlayedTimestamp', label: 'Last Played', type: 'number' },
+	{ value: 'features', label: 'Features', type: 'array' },
+	{ value: 'highlights', label: 'Highlights', type: 'array' }
 ];
 
 // =============================================================================
