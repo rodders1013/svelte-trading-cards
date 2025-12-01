@@ -57,6 +57,7 @@
 	import type { ContainerContext, CardData } from '$lib/types';
 	import { AnimationWrapper } from '$lib/animations/index.js';
 	import { EffectWrapper } from '$lib/effects/index.js';
+	import FitText from '$lib/utils/FitText.svelte';
 
 	let {
 		rows = [],
@@ -92,6 +93,15 @@
 	const availableHeight = $derived(height - padding * 2);
 	const rowHeight = $derived(rowCount > 0 ? availableHeight / rowCount : 0);
 
+	// Calculate dimensions for label and value areas
+	const labelWidth = $derived((width - padding * 2) * 0.45); // 45% for label
+	const valueWidth = $derived((width - padding * 2) * 0.45); // 45% for value
+	const textRowHeight = $derived.by(() => {
+		// Height for text content, accounting for bar if present
+		const maxBarSpace = rows.some(r => r.showBar) ? barHeight + 4 : 0;
+		return Math.max(16, rowHeight - maxBarSpace);
+	});
+
 	// Resolve row values from data - values must come from data field
 	const resolvedRows = $derived.by(() => {
 		return rows.map(row => {
@@ -121,9 +131,9 @@
 		<g opacity={opacity}>
 			{#each resolvedRows as row, index (index)}
 				{@const y = padding + index * rowHeight}
-				{@const rowCenterY = y + rowHeight / 2}
 				{@const showBarForRow = row.showBar && typeof row.value === 'number'}
-				{@const barY = rowCenterY + valueFontSize / 2 + 4}
+				{@const barY = y + textRowHeight + 2}
+				{@const textHeight = showBarForRow ? textRowHeight - 2 : textRowHeight}
 
 				<!-- Divider line (except for first row) -->
 				{#if divider && index > 0}
@@ -137,31 +147,39 @@
 					/>
 				{/if}
 
-				<!-- Label -->
-				<text
+				<!-- Label - auto-fits to available space -->
+				<FitText
+					text={row.label}
 					x={padding}
-					y={rowCenterY - (showBarForRow ? 2 : 0)}
-					font-family={fontFamily}
-					font-size={labelFontSize}
+					y={y}
+					width={labelWidth}
+					height={textHeight}
+					minSize={6}
+					maxSize={labelFontSize}
+					{fontFamily}
+					fontWeight="normal"
+					horizontalAlign="left"
+					verticalAlign="center"
 					fill={labelColor}
-					dominant-baseline="central"
-				>
-					{row.label}
-				</text>
+					singleLine={true}
+				/>
 
-				<!-- Value -->
-				<text
-					x={width - padding}
-					y={rowCenterY - (showBarForRow ? 2 : 0)}
-					font-family={fontFamily}
-					font-size={valueFontSize}
-					font-weight="600"
+				<!-- Value - auto-fits to available space -->
+				<FitText
+					text={String(row.value)}
+					x={width - padding - valueWidth}
+					y={y}
+					width={valueWidth}
+					height={textHeight}
+					minSize={6}
+					maxSize={valueFontSize}
+					{fontFamily}
+					fontWeight="bold"
+					horizontalAlign="right"
+					verticalAlign="center"
 					fill={valueColor}
-					text-anchor="end"
-					dominant-baseline="central"
-				>
-					{row.value}
-				</text>
+					singleLine={true}
+				/>
 
 				<!-- Bar (if enabled and value is numeric) -->
 				{#if showBarForRow}

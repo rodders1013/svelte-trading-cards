@@ -135,7 +135,7 @@ src/routes/
 | CardCanvas | Main renderer, creates 750x1050 SVG canvas |
 | ComponentRenderer | Renders components from template definitions |
 | Group | Container with position, size, and clipShape support |
-| FitText | Auto-sizing text with binary search algorithm |
+| FitText | Universal auto-sizing text with binary search algorithm, inset/padding support, single-line mode |
 
 ### Backgrounds
 
@@ -372,24 +372,6 @@ Corner and edge decorations:
     color: '#fbbf24',
     opacity: 1,
     size: 'md'                 // sm, md, lg (decoration size)
-  }
-}
-```
-
-### Stamp (Planned)
-
-Seal and certification marks:
-
-```typescript
-{
-  type: 'Stamp',
-  props: {
-    style: 'wax-seal',         // wax-seal, rubber, foil, embossed
-    text: '#001/500',          // Edition number or text
-    icon: { ... },             // Optional center icon
-    color: '#dc2626',
-    rotation: -15,             // Slight rotation for authenticity
-    opacity: 0.9
   }
 }
 ```

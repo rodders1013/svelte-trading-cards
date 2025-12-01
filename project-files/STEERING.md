@@ -233,6 +233,7 @@ npm run test             # Run tests
 |-------|---------|
 | `/` | Demo gallery |
 | `/creator` | Visual template creator |
+| `/test/text-fitting` | Text fitting test page (FitText, components) |
 
 ---
 

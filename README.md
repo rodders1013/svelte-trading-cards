@@ -177,7 +177,7 @@ import {
 
 ### TextField (Auto-Fit)
 
-Text automatically scales between min and max sizes to fit the container:
+Text automatically scales between min and max sizes to fit the container. All text-rendering components (TextField, StatPanel, List, Badge, Ribbon) use the same FitText algorithm ensuring text never overflows.
 
 ```typescript
 {
@@ -426,6 +426,7 @@ npm run build        # Build library
 
 - `/` - Demo gallery
 - `/creator` - Visual template creator
+- `/test/text-fitting` - Text fitting test page
 
 ## Server-Side Export
 

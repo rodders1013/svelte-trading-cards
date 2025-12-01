@@ -81,6 +81,7 @@
 	import { AnimationWrapper } from '$lib/animations/index.js';
 	import { EffectWrapper } from '$lib/effects/index.js';
 	import { sanitizeSvgBody } from '$lib/components/icons/Icon.svelte';
+	import FitText from '$lib/utils/FitText.svelte';
 
 	let {
 		textPreset = 'none',
@@ -215,6 +216,15 @@
 
 	// Sanitize icon body to prevent XSS
 	const sanitizedIconBody = $derived(icon?.body ? sanitizeSvgBody(icon.body) : '');
+
+	// Calculate available text area (accounting for icon, padding, and shape inset)
+	const textPadding = $derived(sizeConfig.padding);
+	const textAreaX = $derived(hasIcon ? cx + textOffset / 2 - (width - textPadding * 2 - textOffset) / 2 : textPadding);
+	const textAreaWidth = $derived.by(() => {
+		const baseWidth = width - textPadding * 2 - bdrWidth * 2;
+		return hasIcon ? baseWidth - textOffset : baseWidth;
+	});
+	const textAreaHeight = $derived(height - textPadding * 2 - bdrWidth * 2);
 </script>
 
 <EffectWrapper {effect} transformOrigin="{cx}px {cy}px">
@@ -273,20 +283,23 @@
 				</svg>
 			{/if}
 
-			<!-- Text -->
+			<!-- Text - auto-fits to available space -->
 			{#if resolvedText}
-				<text
-					x={cx + (hasIcon ? textOffset / 2 : 0)}
-					y={cy}
-					text-anchor="middle"
-					dominant-baseline="central"
-					font-family={fontFamily}
-					font-weight={fontWeight}
-					font-size={sizeConfig.fontSize}
+				<FitText
+					text={resolvedText}
+					x={hasIcon ? cx + textOffset / 2 - textAreaWidth / 2 : textPadding + bdrWidth}
+					y={textPadding + bdrWidth}
+					width={textAreaWidth}
+					height={textAreaHeight}
+					minSize={6}
+					maxSize={sizeConfig.fontSize}
+					{fontFamily}
+					{fontWeight}
+					horizontalAlign="center"
+					verticalAlign="center"
 					fill={txtColor}
-				>
-					{resolvedText}
-				</text>
+					singleLine={true}
+				/>
 			{/if}
 		</g>
 	</AnimationWrapper>

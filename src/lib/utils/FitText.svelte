@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { fitTextToBox } from './textFitting.js';
+	import { fitTextToBox, type TextFitOptions } from './textFitting.js';
 	import { measureText } from './textMeasure.js';
 	import { onMount } from 'svelte';
 
@@ -17,6 +17,14 @@
 		verticalAlign?: 'top' | 'center' | 'bottom';
 		fill?: string;
 		opacity?: number;
+		/** Inset/padding to subtract from available space */
+		inset?: number;
+		/** If true, don't wrap text - keep on single line */
+		singleLine?: boolean;
+		/** Line height multiplier (default 1.2) */
+		lineHeightRatio?: number;
+		/** Debug mode - show bounding box */
+		debug?: boolean;
 	}
 
 	let {
@@ -32,7 +40,11 @@
 		horizontalAlign = 'left',
 		verticalAlign = 'top',
 		fill = '#000000',
-		opacity = 1
+		opacity = 1,
+		inset = 0,
+		singleLine = false,
+		lineHeightRatio = 1.2,
+		debug = false
 	}: Props = $props();
 
 	let fontsLoaded = $state(typeof document === 'undefined');
@@ -44,11 +56,21 @@
 		}
 	});
 
+	const fitOptions: TextFitOptions = $derived({
+		inset,
+		singleLine,
+		lineHeightRatio
+	});
+
 	let fitted = $derived(
 		text && fontsLoaded
-			? fitTextToBox(text, width, height, fontFamily, minSize, maxSize, measureText)
+			? fitTextToBox(text, width, height, fontFamily, minSize, maxSize, measureText, fitOptions)
 			: null
 	);
+
+	// Effective dimensions after inset
+	const effectiveWidth = $derived(width - inset * 2);
+	const effectiveHeight = $derived(height - inset * 2);
 
 	let textAnchor = $derived.by(() => {
 		if (horizontalAlign === 'center') return 'middle';
@@ -57,23 +79,53 @@
 	});
 
 	let textX = $derived.by(() => {
+		const baseX = x + inset;
 		if (horizontalAlign === 'center') return x + width / 2;
-		if (horizontalAlign === 'right') return x + width;
-		return x;
+		if (horizontalAlign === 'right') return x + width - inset;
+		return baseX;
 	});
 
 	let verticalOffset = $derived.by(() => {
-		if (!fitted) return 0;
+		if (!fitted) return inset;
 		const totalTextHeight = fitted.lines.length * fitted.lineHeight;
 
 		if (verticalAlign === 'center') {
 			return (height - totalTextHeight) / 2;
 		} else if (verticalAlign === 'bottom') {
-			return height - totalTextHeight;
+			return height - totalTextHeight - inset;
 		}
-		return 0;
+		return inset;
 	});
 </script>
+
+{#if debug}
+	<!-- Debug: show bounding box -->
+	<rect
+		{x}
+		{y}
+		{width}
+		{height}
+		fill="none"
+		stroke="red"
+		stroke-width="1"
+		stroke-dasharray="4,2"
+		opacity="0.5"
+	/>
+	<!-- Debug: show effective area (after inset) -->
+	{#if inset > 0}
+		<rect
+			x={x + inset}
+			y={y + inset}
+			width={effectiveWidth}
+			height={effectiveHeight}
+			fill="none"
+			stroke="blue"
+			stroke-width="1"
+			stroke-dasharray="2,2"
+			opacity="0.5"
+		/>
+	{/if}
+{/if}
 
 {#if fitted}
 	<text

@@ -6,9 +6,31 @@ export interface TextFitResult {
 	lineWidths: number[];
 	lineHeight: number;
 	fits: boolean;
+	truncated?: boolean;
+}
+
+export interface TextFitOptions {
+	/** Minimum font size */
+	minSize?: number;
+	/** Maximum font size */
+	maxSize?: number;
+	/** Inset/padding to subtract from available space */
+	inset?: number;
+	/** If true, don't wrap text - keep on single line */
+	singleLine?: boolean;
+	/** Line height multiplier (default 1.2) */
+	lineHeightRatio?: number;
 }
 
 type MeasureTextFn = (text: string, fontFamily: string, fontSize: number) => number;
+
+const DEFAULT_OPTIONS: Required<TextFitOptions> = {
+	minSize: 8,
+	maxSize: 72,
+	inset: 0,
+	singleLine: false,
+	lineHeightRatio: 1.2
+};
 
 export function fitTextToBox(
 	text: string,
@@ -17,15 +39,31 @@ export function fitTextToBox(
 	fontFamily: string,
 	minSize: number,
 	maxSize: number,
-	measureTextFn: MeasureTextFn
+	measureTextFn: MeasureTextFn,
+	options?: Partial<TextFitOptions>
 ): TextFitResult {
+	const opts = { ...DEFAULT_OPTIONS, ...options, minSize, maxSize };
+
+	// Apply inset to available space
+	const availableWidth = Math.max(1, boxWidth - opts.inset * 2);
+	const availableHeight = Math.max(1, boxHeight - opts.inset * 2);
+
 	let bestFit: TextFitResult | null = null;
-	let low = minSize;
-	let high = maxSize;
+	let low = opts.minSize;
+	let high = opts.maxSize;
 
 	while (low <= high) {
 		const testSize = Math.round(((low + high) / 2) * 2) / 2;
-		const result = layoutText(text, boxWidth, boxHeight, fontFamily, testSize, measureTextFn);
+		const result = layoutText(
+			text,
+			availableWidth,
+			availableHeight,
+			fontFamily,
+			testSize,
+			measureTextFn,
+			opts.singleLine,
+			opts.lineHeightRatio
+		);
 
 		if (result.fits) {
 			bestFit = result;
@@ -35,7 +73,47 @@ export function fitTextToBox(
 		}
 	}
 
-	return bestFit || layoutText(text, boxWidth, boxHeight, fontFamily, minSize, measureTextFn);
+	// If nothing fits at any size, use the minimum size result
+	// Text will be as small as possible but may still overflow
+	if (!bestFit) {
+		return layoutText(
+			text,
+			availableWidth,
+			availableHeight,
+			fontFamily,
+			opts.minSize,
+			measureTextFn,
+			opts.singleLine,
+			opts.lineHeightRatio
+		);
+	}
+
+	return bestFit;
+}
+
+/**
+ * Simplified version for components that just need auto-fitting
+ * Uses a default measure function
+ */
+export function fitText(
+	text: string,
+	boxWidth: number,
+	boxHeight: number,
+	fontFamily: string,
+	measureTextFn: MeasureTextFn,
+	options?: TextFitOptions
+): TextFitResult {
+	const opts = { ...DEFAULT_OPTIONS, ...options };
+	return fitTextToBox(
+		text,
+		boxWidth,
+		boxHeight,
+		fontFamily,
+		opts.minSize,
+		opts.maxSize,
+		measureTextFn,
+		opts
+	);
 }
 
 function layoutText(
@@ -44,10 +122,15 @@ function layoutText(
 	maxHeight: number,
 	fontFamily: string,
 	fontSize: number,
-	measureTextFn: MeasureTextFn
+	measureTextFn: MeasureTextFn,
+	singleLine: boolean = false,
+	lineHeightRatio: number = 1.2
 ): TextFitResult {
-	const result = breakIntoLines(text, maxWidth, fontFamily, fontSize, measureTextFn);
-	const lineHeight = fontSize * 1.2;
+	const result = singleLine
+		? { lines: [text], lineWidths: [measureTextFn(text, fontFamily, fontSize)] }
+		: breakIntoLines(text, maxWidth, fontFamily, fontSize, measureTextFn);
+
+	const lineHeight = fontSize * lineHeightRatio;
 	const totalHeight = result.lines.length * lineHeight;
 
 	// Check both height AND that all lines fit within width

@@ -315,7 +315,8 @@
 		if (!canUndo) return;
 		isTransitioning = true;
 		historyIndex--;
-		containers = structuredClone(history[historyIndex]);
+		// Use $state.snapshot since history is reactive
+		containers = structuredClone($state.snapshot(history)[historyIndex]);
 		setTimeout(() => (isTransitioning = false), 50);
 	}
 
@@ -323,7 +324,8 @@
 		if (!canRedo) return;
 		isTransitioning = true;
 		historyIndex++;
-		containers = structuredClone(history[historyIndex]);
+		// Use $state.snapshot since history is reactive
+		containers = structuredClone($state.snapshot(history)[historyIndex]);
 		setTimeout(() => (isTransitioning = false), 50);
 	}
 
@@ -645,6 +647,7 @@
 		if (!container || container.locked) return;
 		e.preventDefault();
 		e.stopPropagation();
+		pushHistory(); // Save state BEFORE drag starts
 		selectedContainerId = containerId;
 		canvasInteraction = 'dragging';
 		interactionContainerId = containerId;
@@ -657,6 +660,7 @@
 		if (!container || container.locked) return;
 		e.preventDefault();
 		e.stopPropagation();
+		pushHistory(); // Save state BEFORE resize starts
 		canvasInteraction = 'resizing';
 		interactionContainerId = containerId;
 		activeResizeHandle = handle;
@@ -744,9 +748,7 @@
 	}
 
 	function handleCanvasPointerUp() {
-		if (canvasInteraction !== 'idle' && interactionContainerId) {
-			pushHistory();
-		}
+		// History was already pushed at start of drag/resize
 		canvasInteraction = 'idle';
 		interactionContainerId = null;
 		interactionStart = null;

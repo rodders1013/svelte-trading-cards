@@ -1,7 +1,7 @@
 # svelte-trading-cards Project Tracker
 
-**Last Updated:** 2025-11-30
-**Current Progress:** ~93% (Fonts system complete)
+**Last Updated:** 2025-12-01
+**Current Progress:** ~91% (Beta ready)
 
 ---
 
@@ -9,6 +9,7 @@
 
 ### MVP Foundation
 - [x] FitText utilities (textFitting, textMeasure, FitText.svelte)
+- [x] Enhanced FitText with inset, singleLine props for universal text fitting
 - [x] Type definitions (CardData, CardTemplate, ComponentDefinition, ContainerContext)
 - [x] ComponentRegistry with dynamic registration
 - [x] CardCanvas renderer
@@ -209,17 +210,16 @@
 - [x] Fonts module exported from main index.ts
 
 ### Data Display Components
-- [x] StatPanel (label/value rows with optional bars/icons, combines DetailRow concept)
-- [x] List (array data → bullet/numbered/dash/arrow list, delimiter parsing, overflow handling)
+- [x] StatPanel (label/value rows with optional bars/icons, uses FitText for auto-scaling)
+- [x] List (array data → bullet/numbered/dash/arrow list, uses FitText for items)
 - [x] IconRating (star ratings, hearts, fire, skulls, etc. with half-value support and data binding)
 
 ### Decoration Components
-- [x] Badge (universal badge: shapes, presets for rarity/status/labels)
+- [x] Badge (universal badge: shapes, presets for rarity/status/labels, uses FitText)
 - [x] Divider (decorative separators: lines, ornate, fading)
 - [x] ProgressBar (visual stat bars, HP meters, power gauges)
-- [x] Ribbon (banner/ribbon text overlays: "SOLD", "NEW", "LIMITED")
+- [x] Ribbon (banner/ribbon text overlays, uses FitText with corner-aware text area)
 - [x] Frame (corner/edge decorations, flourishes)
-- [x] Stamp (seal/certification marks, numbered editions)
 - [x] GlowEffect (replaced by Effects System with glow, neon, shadow, etc.)
 
 ### SVG Patterns System - COMPLETE
@@ -237,6 +237,7 @@
 - ~~Emblem~~ - Icon component covers stars/crowns/shields/diamonds via Iconify
 - ~~DetailRow~~ - Merged into StatPanel component
 - ~~RarityBadge~~ - Replaced by universal Badge with rarity presets
+- ~~Stamp~~ - Removed (poor implementation); Badge + Icon can cover edition marks
 
 ---
 
@@ -271,24 +272,23 @@
 |-------|--------|----------|
 | Phase 1: Core Package | Complete | 28/28 |
 | Phase 2: Visual Creator | Complete | 46/46 |
-| Phase 3: Additional Components | In Progress | 39/40 |
+| Phase 3: Additional Components | In Progress | 38/39 |
 | Phase 4: Theming | Not Started | 0/3 |
 | Phase 5: Testing & Docs | Not Started | 0/4 |
 | Phase 6: Publish | In Progress | 1/3 |
-| **Total** | | **114/124 (~92%)** |
+| **Total** | | **113/123 (~92%)** |
 
 ### Phase 3 Component Priority
 
-| Priority | Component | Description | Complexity |
-|----------|-----------|-------------|------------|
-| 1 | Badge | Universal badge with shapes & presets | Medium |
-| 2 | StatPanel | Label/value rows with optional bars | Medium |
-| 3 | Divider | Decorative separators | Low |
-| 4 | ProgressBar | Visual stat bars, meters | Medium |
-| 5 | Ribbon | Banner/ribbon text overlays | Medium |
-| 6 | Frame | Corner/edge decorations | Medium |
-| 7 | Stamp | Seal/certification marks | Medium |
-| 8 | Blend modes | multiply, screen, overlay support | Low |
+| Priority | Component | Description | Complexity | Status |
+|----------|-----------|-------------|------------|--------|
+| 1 | Badge | Universal badge with shapes & presets | Medium | ✓ |
+| 2 | StatPanel | Label/value rows with optional bars | Medium | ✓ |
+| 3 | Divider | Decorative separators | Low | ✓ |
+| 4 | ProgressBar | Visual stat bars, meters | Medium | ✓ |
+| 5 | Ribbon | Banner/ribbon text overlays | Medium | ✓ |
+| 6 | Frame | Corner/edge decorations | Medium | ✓ |
+| 7 | Blend modes | multiply, screen, overlay support | Low | Pending |
 
 ---
 
@@ -334,8 +334,7 @@ src/lib/
 │   │   ├── ProgressBar.svelte    # Visual stat bars
 │   │   ├── Ribbon.svelte         # Banner/ribbon overlays
 │   │   ├── Frame.svelte          # Corner/edge decorations
-│   │   ├── IconRating.svelte     # Star ratings, hearts, etc.
-│   │   └── Stamp.svelte          # Seal/certification marks
+│   │   └── IconRating.svelte     # Star ratings, hearts, etc.
 │   ├── fields/
 │   │   ├── index.ts
 │   │   ├── TextField.svelte
@@ -363,46 +362,55 @@ src/lib/
     ├── textFitting.ts
     └── textMeasure.ts
 
+src/lib/creator/               # Embeddable CardCreator component
+├── index.ts                   # Creator exports
+├── types.ts                   # Type definitions (ContainerState, ComponentItem, etc.)
+├── state.svelte.ts            # Factory functions & helpers
+├── CardCreator.svelte         # Main creator component (~800 lines)
+└── components/
+    ├── HierarchyPanel.svelte       # Left sidebar (zone list, drag-reorder)
+    ├── CanvasControls.svelte       # Zoom, grid, preview mode
+    ├── CanvasPreview.svelte        # Live canvas with selection overlays
+    ├── PropertiesPanel.svelte      # Right sidebar wrapper
+    ├── ComponentPanel.svelte       # Component list per zone
+    ├── ZoneProperties.svelte       # Zone position/size/shape settings
+    ├── AnimationControls.svelte    # Reusable animation panel
+    ├── EffectsControls.svelte      # Reusable effects panel
+    ├── HelpModal.svelte            # Keyboard shortcuts modal
+    ├── HelpTooltip.svelte          # Help text tooltips
+    ├── FieldRemapDialog.svelte     # Dataset field remapping
+    ├── form/                       # Reusable form components (shadcn-based)
+    │   ├── index.ts               # Form component exports
+    │   ├── FormSlider.svelte      # Label + Slider with value display
+    │   ├── FormSelect.svelte      # Label + Select
+    │   ├── FormCheckbox.svelte    # Label + Checkbox
+    │   ├── FormSwitch.svelte      # Label + Switch
+    │   ├── FormInput.svelte       # Label + Input (text/number)
+    │   ├── FormColorPicker.svelte # Label + color input
+    │   ├── FormGrid.svelte        # Grid layout (2/3/4 columns)
+    │   └── PanelEffects.svelte    # Shared effects section footer
+    └── panels/
+        ├── TextPanel.svelte        # Text component properties
+        ├── ImagePanel.svelte       # Image component properties
+        ├── BackgroundPanel.svelte  # Background component properties
+        ├── BorderPanel.svelte      # Border component properties
+        ├── IconPanel.svelte        # Icon component properties
+        ├── BadgePanel.svelte       # Badge component properties
+        ├── DividerPanel.svelte     # Divider component properties
+        ├── ProgressBarPanel.svelte # Progress bar component properties
+        ├── RibbonPanel.svelte      # Ribbon component properties
+        ├── FramePanel.svelte       # Frame component properties
+        ├── IconRatingPanel.svelte  # Icon rating component properties
+        ├── ListPanel.svelte        # List component properties
+        └── StatPanelPanel.svelte   # Stat panel component properties
+
 src/routes/
-├── +page.svelte            # Demo/gallery page
-└── creator/
-    ├── +page.svelte        # Main orchestrator (~800 lines)
-    ├── types.ts            # Type definitions (ContainerState, ComponentItem, etc.)
-    ├── state.svelte.ts     # Factory functions & helpers
-    └── components/
-        ├── HierarchyPanel.svelte       # Left sidebar (zone list, drag-reorder)
-        ├── CanvasControls.svelte       # Zoom, grid, preview mode
-        ├── CanvasPreview.svelte        # Live canvas with selection overlays
-        ├── PropertiesPanel.svelte      # Right sidebar wrapper
-        ├── ZoneProperties.svelte       # Zone position/size/shape settings
-        ├── AnimationControls.svelte    # Reusable animation panel
-        ├── EffectsControls.svelte      # Reusable effects panel
-        ├── HelpModal.svelte            # Keyboard shortcuts modal
-        ├── form/                       # Reusable form components (shadcn-based)
-        │   ├── index.ts               # Form component exports
-        │   ├── FormSlider.svelte      # Label + Slider with value display
-        │   ├── FormSelect.svelte      # Label + NativeSelect
-        │   ├── FormCheckbox.svelte    # Label + Checkbox
-        │   ├── FormSwitch.svelte      # Label + Switch
-        │   ├── FormInput.svelte       # Label + Input (text/number)
-        │   ├── FormColorPicker.svelte # Label + color input
-        │   ├── FormGrid.svelte        # Grid layout (2/3/4 columns)
-        │   └── PanelEffects.svelte    # Shared effects section footer
-        └── panels/
-            ├── TextPanel.svelte        # Text component properties
-            ├── ImagePanel.svelte       # Image component properties
-            ├── BackgroundPanel.svelte  # Background component properties
-            ├── BorderPanel.svelte      # Border component properties
-            ├── IconPanel.svelte        # Icon component properties
-            ├── BadgePanel.svelte       # Badge component properties
-            ├── DividerPanel.svelte     # Divider component properties
-            ├── ProgressBarPanel.svelte # Progress bar component properties
-            ├── RibbonPanel.svelte      # Ribbon component properties
-            ├── FramePanel.svelte       # Frame component properties
-            ├── IconRatingPanel.svelte  # Icon rating component properties
-            ├── ListPanel.svelte        # List component properties
-            ├── StampPanel.svelte       # Stamp component properties
-            └── StatPanelPanel.svelte   # Stat panel component properties
+├── +page.svelte               # Demo/gallery page
+├── creator/
+│   └── +page.svelte           # Simple wrapper that uses CardCreator
+└── test/
+    └── text-fitting/
+        └── +page.svelte       # Text fitting test page (FitText, StatPanel, List, Badge, Ribbon)
 ```
 
 ---
@@ -411,6 +419,7 @@ src/routes/
 
 - **Dev server:** `npm run dev` (http://localhost:5173)
 - **Creator:** http://localhost:5173/creator
+- **Text Fitting Test:** http://localhost:5173/test/text-fitting
 - **Type check:** `npm run check` (0 errors)
 - **Generic data:** CardData is `Record<string, unknown>` - works for any domain
 

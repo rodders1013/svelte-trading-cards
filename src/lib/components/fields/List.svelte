@@ -50,6 +50,7 @@
 	import type { ContainerContext, CardData } from '$lib/types';
 	import { AnimationWrapper } from '$lib/animations/index.js';
 	import { EffectWrapper } from '$lib/effects/index.js';
+	import FitText from '$lib/utils/FitText.svelte';
 
 	let {
 		dataField,
@@ -121,6 +122,12 @@
 
 	// Calculate item height
 	const itemHeight = $derived(fontSize * lineHeight + itemSpacing);
+
+	// Calculate available width for text (accounting for bullet/marker space)
+	const textAreaWidth = $derived.by(() => {
+		if (style === 'none') return width;
+		return width - indent - 4; // Leave some margin after bullet
+	});
 
 	// Calculate total content height
 	const totalContentHeight = $derived.by(() => {
@@ -199,12 +206,13 @@
 		<g {opacity}>
 			{#each displayData.items as item, index (index)}
 				{@const y = startY + index * itemHeight}
+				{@const itemTextHeight = fontSize * lineHeight}
 
 				<!-- Bullet (circle) -->
 				{#if style === 'bullet'}
 					<circle
 						cx={bulletX}
-						cy={y + fontSize * 0.4}
+						cy={y + fontSize * 0.5}
 						r={bulletRadius}
 						fill={effectiveBulletColor}
 					/>
@@ -223,37 +231,44 @@
 					</text>
 				{/if}
 
-				<!-- Item text -->
-				<text
-					x={style === 'none' ? bulletX : textX}
+				<!-- Item text - auto-fits to available space -->
+				<FitText
+					text={item}
+					x={style === 'none' ? 0 : textX}
 					{y}
-					font-family={fontFamily}
-					font-size={fontSize}
-					font-weight={fontWeight}
+					width={textAreaWidth}
+					height={itemTextHeight}
+					minSize={6}
+					maxSize={fontSize}
+					{fontFamily}
+					{fontWeight}
+					horizontalAlign={style === 'none' ? alignment : 'left'}
+					verticalAlign="top"
 					fill={color}
-					dominant-baseline="hanging"
-					text-anchor={style === 'none' && alignment === 'right' ? 'end' : textAnchor}
-				>
-					{item}
-				</text>
+					singleLine={true}
+				/>
 			{/each}
 
 			<!-- Overflow indicator -->
 			{#if displayData.overflow > 0}
 				{@const y = startY + displayData.items.length * itemHeight}
-				<text
-					x={style === 'none' ? bulletX : textX}
+				{@const overflowTextHeight = fontSize * lineHeight}
+				<FitText
+					text={overflowText.replace('{n}', String(displayData.overflow))}
+					x={style === 'none' ? 0 : textX}
 					{y}
-					font-family={fontFamily}
-					font-size={fontSize * 0.9}
-					font-style="italic"
+					width={textAreaWidth}
+					height={overflowTextHeight}
+					minSize={6}
+					maxSize={fontSize * 0.9}
+					{fontFamily}
+					fontWeight="normal"
+					horizontalAlign={style === 'none' ? alignment : 'left'}
+					verticalAlign="top"
 					fill={effectiveOverflowColor}
 					opacity={0.7}
-					dominant-baseline="hanging"
-					text-anchor={style === 'none' && alignment === 'right' ? 'end' : textAnchor}
-				>
-					{overflowText.replace('{n}', String(displayData.overflow))}
-				</text>
+					singleLine={true}
+				/>
 			{/if}
 		</g>
 	</AnimationWrapper>

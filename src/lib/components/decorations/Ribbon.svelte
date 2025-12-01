@@ -52,6 +52,7 @@
 	import type { ContainerContext, CardData } from '$lib/types';
 	import { AnimationWrapper } from '$lib/animations/index.js';
 	import { EffectWrapper } from '$lib/effects/index.js';
+	import FitText from '$lib/utils/FitText.svelte';
 
 	let {
 		textPreset = 'none',
@@ -94,6 +95,30 @@
 	// Calculate ribbon dimensions
 	const rWidth = $derived(ribbonWidth ?? Math.min(width, height) * 0.8);
 	const rHeight = $derived(fontSize * 2);
+
+	// Calculate the fold size (used by folded and banner styles)
+	const foldSize = $derived(rHeight * 0.3);
+
+	// Check if this is a corner ribbon (rotated at angle)
+	const isCorner = $derived(position.includes('-'));
+
+	// Text area dimensions - must account for ribbon shape AND visibility
+	// For corner ribbons at 45°, the ribbon extends outside the container
+	// We need to calculate the VISIBLE text area, not the full ribbon width
+	const textPadding = $derived(fontSize * 0.4);
+	const textAreaWidth = $derived.by(() => {
+		if (isCorner) {
+			// For corner ribbons, calculate the visible portion
+			// The ribbon center is positioned at rWidth * 0.3 from the corner
+			// At 45°, the visible diagonal is roughly: (rWidth * 0.3) * sqrt(2) * 2
+			// Use about 60% of the ribbon width for visible text area
+			const visiblePortion = rWidth * 0.6;
+			return visiblePortion - textPadding * 2;
+		}
+		// For horizontal ribbons (top/bottom), use full width
+		return rWidth - textPadding * 2;
+	});
+	const textAreaHeight = $derived(rHeight - textPadding);
 
 	// Position-based transforms
 	const transform = $derived.by(() => {
@@ -216,20 +241,22 @@
 			<!-- Main ribbon -->
 			<path d={ribbonPath} fill={color} />
 
-			<!-- Text -->
-			<text
-				x={0}
-				y={style === 'bookmark' ? -rHeight * 0.1 : 0}
-				text-anchor="middle"
-				dominant-baseline="central"
-				font-family={fontFamily}
-				font-weight={fontWeight}
-				font-size={fontSize}
+			<!-- Text - auto-fits to available space -->
+			<FitText
+				text={resolvedText.toUpperCase()}
+				x={-textAreaWidth / 2}
+				y={style === 'bookmark' ? -rHeight * 0.5 - textAreaHeight * 0.1 : -textAreaHeight / 2}
+				width={textAreaWidth}
+				height={textAreaHeight}
+				minSize={6}
+				maxSize={fontSize}
+				{fontFamily}
+				{fontWeight}
+				horizontalAlign="center"
+				verticalAlign="center"
 				fill={textColor}
-				letter-spacing="0.05em"
-			>
-				{resolvedText.toUpperCase()}
-			</text>
+				singleLine={true}
+			/>
 		</g>
 	</AnimationWrapper>
 </EffectWrapper>
