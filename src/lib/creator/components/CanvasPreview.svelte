@@ -13,6 +13,7 @@
 		zoomLevel,
 		showGrid,
 		showBleed,
+		gridSize = 25,
 		canvasInteraction,
 		interactionContainerId,
 		activeResizeHandle,
@@ -29,6 +30,7 @@
 		zoomLevel: number;
 		showGrid: boolean;
 		showBleed: boolean;
+		gridSize?: number;
 		canvasInteraction: 'idle' | 'dragging' | 'resizing';
 		interactionContainerId: string | null;
 		activeResizeHandle: ResizeHandle | null;
@@ -37,6 +39,9 @@
 		onStartDrag: (e: PointerEvent, containerId: string) => void;
 		onStartResize: (e: PointerEvent, containerId: string, handle: ResizeHandle) => void;
 	} = $props();
+
+	// Grid sizes: small grid = gridSize, large grid = gridSize * 3
+	const largeGridSize = $derived(gridSize * 3);
 
 	// Bleed calculation: 3mm at 300 DPI on a 63.5mm wide card (750px)
 	// 750px / 63.5mm = 11.811 px/mm, so 3mm = ~35px
@@ -61,14 +66,14 @@
 			<div class="pointer-events-none absolute inset-0">
 				<svg class="h-full w-full" viewBox="0 0 750 1050" preserveAspectRatio="none">
 					<defs>
-						<!-- 25px small grid (375/25=15, 525/25=21 - aligns with center) -->
-						<pattern id="grid-small" width="25" height="25" patternUnits="userSpaceOnUse">
-							<path d="M 25 0 L 0 0 0 25" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="0.5" />
+						<!-- Small grid (dynamic size) -->
+						<pattern id="grid-small" width={gridSize} height={gridSize} patternUnits="userSpaceOnUse">
+							<path d="M {gridSize} 0 L 0 0 0 {gridSize}" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="0.5" />
 						</pattern>
-						<!-- 75px large grid (375/75=5, 525/75=7 - aligns with center) -->
-						<pattern id="grid-large" width="75" height="75" patternUnits="userSpaceOnUse">
-							<rect width="75" height="75" fill="url(#grid-small)" />
-							<path d="M 75 0 L 0 0 0 75" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="1" />
+						<!-- Large grid (3x small grid) -->
+						<pattern id="grid-large" width={largeGridSize} height={largeGridSize} patternUnits="userSpaceOnUse">
+							<rect width={largeGridSize} height={largeGridSize} fill="url(#grid-small)" />
+							<path d="M {largeGridSize} 0 L 0 0 0 {largeGridSize}" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="1" />
 						</pattern>
 					</defs>
 					<rect width="100%" height="100%" fill="url(#grid-large)" />

@@ -8,7 +8,6 @@
 	import Download from '@lucide/svelte/icons/download';
 	import CloudOff from '@lucide/svelte/icons/cloud-off';
 	import Cloud from '@lucide/svelte/icons/cloud';
-	import HelpCircle from '@lucide/svelte/icons/help-circle';
 
 	interface DatasetInfo {
 		id: string;
@@ -32,8 +31,7 @@
 		onDatasetChange,
 		onSaveTemplate,
 		onLoadTemplate,
-		onExport,
-		onShowHelp
+		onExport
 	}: {
 		templateName: string;
 		hasDraft?: boolean;
@@ -47,7 +45,6 @@
 		onSaveTemplate: () => void;
 		onLoadTemplate: (event: Event) => void;
 		onExport?: () => void;
-		onShowHelp?: () => void;
 	} = $props();
 
 	const currentDatasetName = $derived(datasets.find(d => d.id === selectedDataset)?.name ?? '');
@@ -164,14 +161,5 @@
 			</div>
 		{/if}
 
-		<!-- Spacer -->
-		<div class="flex-1"></div>
-
-		<!-- Help -->
-		{#if onShowHelp}
-			<Button variant="ghost" size="sm" onclick={onShowHelp} title="Keyboard Shortcuts (?)">
-				<HelpCircle class="h-4 w-4" />
-			</Button>
-		{/if}
 	</Card.Content>
 </Card.Root>

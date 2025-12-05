@@ -49,8 +49,7 @@
 		getComponentByType,
 		hasComponentType,
 		buildTemplate,
-		buildPreviewData,
-		GRID_SIZE
+		buildPreviewData
 	} from './state.svelte.js';
 
 	// =============================================================================
@@ -277,6 +276,16 @@
 	let zoomLevel = $state(150);
 	const zoomScale = $derived(zoomLevel / 100);
 	const CANVAS_SCALE = $derived((375 * zoomScale) / CARD_WIDTH);
+
+	// Grid size (replaces imported GRID_SIZE constant for reactivity)
+	const GRID_SIZE_OPTIONS = [10, 25, 50] as const;
+	let gridSize = $state<number>(25);
+
+	function cycleGridSize() {
+		const currentIndex = GRID_SIZE_OPTIONS.indexOf(gridSize as 10 | 25 | 50);
+		const nextIndex = (currentIndex + 1) % GRID_SIZE_OPTIONS.length;
+		gridSize = GRID_SIZE_OPTIONS[nextIndex];
+	}
 
 	// Snap to grid
 	let snapToGrid = $state(false);
@@ -876,8 +885,8 @@
 			let newX = Math.round(containerStart.x + dx);
 			let newY = Math.round(containerStart.y + dy);
 			if (snapToGrid) {
-				newX = Math.round(newX / GRID_SIZE) * GRID_SIZE;
-				newY = Math.round(newY / GRID_SIZE) * GRID_SIZE;
+				newX = Math.round(newX / gridSize) * gridSize;
+				newY = Math.round(newY / gridSize) * gridSize;
 			}
 			newX = Math.max(0, Math.min(CARD_WIDTH - containerStart.width, newX));
 			newY = Math.max(0, Math.min(CARD_HEIGHT - containerStart.height, newY));
@@ -893,7 +902,7 @@
 				newX = Math.round(containerStart.x + dx);
 				newWidth = Math.round(containerStart.width - dx);
 				if (snapToGrid) {
-					newX = Math.round(newX / GRID_SIZE) * GRID_SIZE;
+					newX = Math.round(newX / gridSize) * gridSize;
 					newWidth = containerStart.x + containerStart.width - newX;
 				}
 				if (newWidth < minSize) {
@@ -907,7 +916,7 @@
 			} else if (activeResizeHandle.includes('e')) {
 				newWidth = Math.round(containerStart.width + dx);
 				if (snapToGrid) {
-					const newRight = Math.round((containerStart.x + newWidth) / GRID_SIZE) * GRID_SIZE;
+					const newRight = Math.round((containerStart.x + newWidth) / gridSize) * gridSize;
 					newWidth = newRight - containerStart.x;
 				}
 				if (newWidth < minSize) newWidth = minSize;
@@ -918,7 +927,7 @@
 				newY = Math.round(containerStart.y + dy);
 				newHeight = Math.round(containerStart.height - dy);
 				if (snapToGrid) {
-					newY = Math.round(newY / GRID_SIZE) * GRID_SIZE;
+					newY = Math.round(newY / gridSize) * gridSize;
 					newHeight = containerStart.y + containerStart.height - newY;
 				}
 				if (newHeight < minSize) {
@@ -932,7 +941,7 @@
 			} else if (activeResizeHandle.includes('s')) {
 				newHeight = Math.round(containerStart.height + dy);
 				if (snapToGrid) {
-					const newBottom = Math.round((containerStart.y + newHeight) / GRID_SIZE) * GRID_SIZE;
+					const newBottom = Math.round((containerStart.y + newHeight) / gridSize) * gridSize;
 					newHeight = newBottom - containerStart.y;
 				}
 				if (newHeight < minSize) newHeight = minSize;
@@ -1175,7 +1184,6 @@
 		onSaveTemplate={saveTemplate}
 		onLoadTemplate={loadTemplate}
 		onExport={() => { showExportDialog = true; }}
-		onShowHelp={showHelpButton ? () => { showHelp = true; } : undefined}
 	/>
 
 	<!-- Main Content -->
@@ -1206,9 +1214,12 @@
 				bind:zoomLevel
 				bind:showGrid
 				bind:showBleed
+				bind:gridSize
 				onZoomIn={zoomIn}
 				onZoomOut={zoomOut}
 				onResetZoom={resetZoom}
+				onCycleGridSize={cycleGridSize}
+				onShowHelp={showHelpButton ? () => { showHelp = true; } : undefined}
 			/>
 
 			<CanvasPreview
@@ -1220,6 +1231,7 @@
 			{zoomLevel}
 			{showGrid}
 			{showBleed}
+			{gridSize}
 			{canvasInteraction}
 			{interactionContainerId}
 			{activeResizeHandle}
