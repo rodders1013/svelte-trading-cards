@@ -2,6 +2,7 @@ import { json, error } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { svgToPNG } from '$lib/server';
 import { embedImages, hasExternalImages } from '$lib/server/embedImages';
+import { sanitizeFilename } from '$lib/export/downloadSVG.js';
 
 export const POST: RequestHandler = async ({ request }) => {
 	try {
@@ -10,6 +11,9 @@ export const POST: RequestHandler = async ({ request }) => {
 		if (!svg || typeof svg !== 'string') {
 			throw error(400, 'SVG string is required');
 		}
+
+		// Sanitize filename to prevent header injection
+		const safeFilename = sanitizeFilename(filename);
 
 		// Embed external images if present
 		let processedSvg = svg;
@@ -24,7 +28,7 @@ export const POST: RequestHandler = async ({ request }) => {
 		return new Response(new Uint8Array(buffer), {
 			headers: {
 				'Content-Type': 'image/png',
-				'Content-Disposition': `attachment; filename="${filename}.png"`,
+				'Content-Disposition': `attachment; filename="${safeFilename}.png"`,
 				'Cache-Control': 'no-store'
 			}
 		});

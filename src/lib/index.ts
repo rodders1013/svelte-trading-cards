@@ -81,7 +81,8 @@ export {
 	svgToDataURL,
 	svgToBlob,
 	svgToPNGClient,
-	serializeSVG
+	serializeSVG,
+	sanitizeFilename
 } from './export/index.js';
 export type { DownloadOptions } from './export/index.js';
 

@@ -64,6 +64,16 @@
 	// Debounce timer
 	let debounceTimer: ReturnType<typeof setTimeout> | null = null;
 
+	// Cleanup debounce timer on component unmount
+	$effect(() => {
+		return () => {
+			if (debounceTimer) {
+				clearTimeout(debounceTimer);
+				debounceTimer = null;
+			}
+		};
+	});
+
 	// Search icons via Iconify API
 	async function searchIcons() {
 		if (!searchQuery.trim()) {
