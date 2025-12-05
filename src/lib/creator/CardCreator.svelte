@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { PersistedState, PressedKeys, IsIdle } from 'runed';
+	import { MediaQuery } from 'svelte/reactivity';
 	import { registerComponent, Group } from '$lib';
 	import { GradientBackground, Image, PatternBackground, SolidBackground } from '$lib/components/backgrounds';
 	import { Border } from '$lib/components/borders';
@@ -10,6 +11,11 @@
 	import { CARD_WIDTH, CARD_HEIGHT } from '$lib/types';
 	import type { CardTemplate } from '$lib/types';
 	import * as Card from '$lib/components/ui/card';
+	import * as Resizable from '$lib/components/ui/resizable';
+	import * as Drawer from '$lib/components/ui/drawer';
+	import { Button } from '$lib/components/ui/button';
+	import PanelLeft from '@lucide/svelte/icons/panel-left';
+	import Layers from '@lucide/svelte/icons/layers';
 
 	import HierarchyPanel from './components/HierarchyPanel.svelte';
 	import TopBar from './components/TopBar.svelte';
@@ -138,18 +144,7 @@
 		new Set([
 			'hierarchy',
 			'container',
-			'addcomponent',
-			'comp-text',
-			'comp-image',
-			'comp-background',
-			'comp-border',
-			'comp-icon',
-			'comp-badge',
-			'comp-statpanel',
-			'comp-divider',
-			'comp-progressbar',
-			'comp-ribbon',
-			'comp-frame'
+			'addcomponent'
 		])
 	);
 
@@ -272,10 +267,46 @@
 
 	// Canvas view controls
 	let showGrid = $state(false);
-	let showBleed = $state(false);
 	let zoomLevel = $state(150);
 	const zoomScale = $derived(zoomLevel / 100);
 	const CANVAS_SCALE = $derived((375 * zoomScale) / CARD_WIDTH);
+
+	// Dynamic center pane sizing based on card width
+	let paneGroupElement = $state<HTMLElement | null>(null);
+	let paneGroupWidth = $state(1200); // Default fallback
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	let paneGroupApi = $state<any>(null);
+
+	// Card width in pixels = 375 * zoom + padding (border ~2px, container p-1 ~4px each side = ~12px total)
+	const cardWidthPx = $derived(375 * zoomScale + 12);
+	// Convert to percentage of pane group width, with min 30% and max 80%
+	const centerMinSize = $derived(
+		Math.min(80, Math.max(30, Math.ceil((cardWidthPx / paneGroupWidth) * 100)))
+	);
+
+	// Keep center pane exactly at card size by adjusting both side panels equally
+	let lastCenterMinSize = $state(30);
+	$effect(() => {
+		if (!paneGroupApi?.getLayout || centerMinSize === lastCenterMinSize) return;
+
+		const currentLayout = paneGroupApi.getLayout();
+		if (!currentLayout || currentLayout.length !== 3) return;
+
+		const [left, , right] = currentLayout;
+		const totalSides = left + right;
+
+		// Always set center to exactly centerMinSize, distribute remaining space to sides
+		if (totalSides > 0) {
+			const newCenter = centerMinSize;
+			const remainingSpace = 100 - newCenter;
+			const leftRatio = left / totalSides;
+			const newLeft = Math.max(15, Math.min(35, remainingSpace * leftRatio));
+			const newRight = Math.max(15, remainingSpace - newLeft);
+			paneGroupApi.setLayout([newLeft, newCenter, newRight]);
+		}
+
+		lastCenterMinSize = centerMinSize;
+	});
 
 	// Grid size (replaces imported GRID_SIZE constant for reactivity)
 	const GRID_SIZE_OPTIONS = [10, 25, 50] as const;
@@ -299,6 +330,18 @@
 	// Export dialog
 	let showExportDialog = $state(false);
 	let canvasSvgElement = $state<SVGSVGElement | null>(null);
+
+	// =============================================================================
+	// RESPONSIVE BREAKPOINTS
+	// =============================================================================
+
+	const isDesktop = new MediaQuery('min-width: 1024px');
+	const isTablet = new MediaQuery('min-width: 640px');
+	const isMobile = new MediaQuery('max-width: 639px');
+
+	// Drawer state for tablet/mobile
+	let propertiesDrawerOpen = $state(false);
+	let hierarchyDrawerOpen = $state(false);
 
 	// =============================================================================
 	// AUTO-SAVE DRAFT (PersistedState + IsIdle)
@@ -406,6 +449,22 @@
 	// Notify onChange when template changes
 	$effect(() => {
 		onChange?.({ template, editorState: containers });
+	});
+
+	// Track pane group width for dynamic center sizing
+	$effect(() => {
+		if (!paneGroupElement) return;
+
+		const observer = new ResizeObserver((entries) => {
+			for (const entry of entries) {
+				paneGroupWidth = entry.contentRect.width;
+			}
+		});
+
+		observer.observe(paneGroupElement);
+		paneGroupWidth = paneGroupElement.clientWidth;
+
+		return () => observer.disconnect();
 	});
 
 	// =============================================================================
@@ -635,6 +694,10 @@
 	// Selected component ID for visual feedback
 	let selectedComponentId = $state<string | null>(null);
 
+	function selectComponent(componentId: string | null) {
+		selectedComponentId = componentId;
+	}
+
 	/**
 	 * Generic function to add a component to the selected container.
 	 * Prevents duplicate component types per container.
@@ -811,6 +874,17 @@
 			newSet.delete(panelId);
 		} else {
 			newSet.add(panelId);
+		}
+		expandedPanels = newSet;
+	}
+
+	// Clear all component panels (collapse them all)
+	function collapseAllComponentPanels() {
+		const newSet = new Set(expandedPanels);
+		for (const panelId of Array.from(newSet)) {
+			if (panelId.startsWith('comp-')) {
+				newSet.delete(panelId);
+			}
 		}
 		expandedPanels = newSet;
 	}
@@ -1186,117 +1260,431 @@
 		onExport={() => { showExportDialog = true; }}
 	/>
 
-	<!-- Main Content -->
-	<div class="flex flex-1 gap-3 overflow-hidden p-3">
-		<!-- Left: Hierarchy Panel -->
-		<HierarchyPanel
-			{containers}
-			bind:selectedContainerId
-			{expandedPanels}
-			onTogglePanel={togglePanel}
-			onToggleVisibility={toggleVisibility}
-			onToggleComponentVisibility={toggleComponentVisibility}
-			onMoveContainerUp={moveContainerUp}
-			onMoveContainerDown={moveContainerDown}
-			onMoveComponentUp={moveComponentUp}
-			onMoveComponentDown={moveComponentDown}
-			onRenameContainer={renameContainer}
-			onDragStart={handleDragStart}
-			onDragOver={handleDragOver}
-			onDrop={handleDrop}
-			onDragEnd={handleDragEnd}
-			{dragOverContainerId}
-		/>
+	<!-- Main Content - Desktop: Resizable 3-column layout -->
+	{#if isDesktop.current}
+		<div bind:this={paneGroupElement} class="flex-1">
+		<Resizable.PaneGroup direction="horizontal" class="h-full" autoSaveId="card-creator-panels" bind:this={paneGroupApi}>
+			<!-- Left: Properties Panel (editing) -->
+			<Resizable.Pane
+				defaultSize={25}
+				minSize={18}
+				maxSize={35}
+			>
+				<div class="h-full overflow-hidden">
+					<PropertiesPanel
+						container={selectedContainer}
+						dataFields={currentDataFields}
+						datasetId={selectedDataset as import('$lib/presets').DatasetId}
+						{previewData}
+						{expandedPanels}
+						bind:activeTab={propertiesPanelTab}
+						{selectedComponentId}
+						{containers}
+						{canUndo}
+						{canRedo}
+						onAddContainer={addContainer}
+						onAddContainerFromTemplate={addContainerFromTemplate}
+						onDuplicateContainerById={duplicateContainerById}
+						onUndo={undo}
+						onRedo={redo}
+						onTogglePanel={togglePanel}
+						onUpdateContainer={updateContainer}
+						onDuplicateContainer={duplicateContainer}
+						onDeleteContainer={deleteContainer}
+						onAddTextComponent={addTextComponent}
+						onAddImageComponent={addImageComponent}
+						onAddBackgroundComponent={addBackgroundComponent}
+						onAddBorderComponent={addBorderComponent}
+						onAddIconComponent={addIconComponent}
+						onAddBadgeComponent={addBadgeComponent}
+						onAddStatPanelComponent={addStatPanelComponent}
+						onAddDividerComponent={addDividerComponent}
+						onAddProgressBarComponent={addProgressBarComponent}
+						onAddRibbonComponent={addRibbonComponent}
+						onAddFrameComponent={addFrameComponent}
+						onAddListComponent={addListComponent}
+						onAddIconRatingComponent={addIconRatingComponent}
+						onUpdateTextComponent={updateTextComponent}
+						onUpdateImageComponent={updateImageComponent}
+						onUpdateBackgroundComponent={updateBackgroundComponent}
+						onUpdateBorderComponent={updateBorderComponent}
+						onUpdateBorderGlow={updateBorderGlow}
+						onUpdateBorderHolographic={updateBorderHolographic}
+						onUpdateIconComponent={updateIconComponent}
+						onUpdateIconSelection={updateIconSelection}
+						onUpdateBadgeComponent={updateBadgeComponent}
+						onUpdateStatPanelComponent={updateStatPanelComponent}
+						onUpdateDividerComponent={updateDividerComponent}
+						onUpdateProgressBarComponent={updateProgressBarComponent}
+						onUpdateRibbonComponent={updateRibbonComponent}
+						onUpdateFrameComponent={updateFrameComponent}
+						onUpdateListComponent={updateListComponent}
+						onUpdateIconRatingComponent={updateIconRatingComponent}
+						onRemoveComponent={removeComponent}
+						onMoveComponentUp={moveComponentUp}
+						onMoveComponentDown={moveComponentDown}
+						onSelectComponent={selectComponent}
+						onCollapseAllComponentPanels={collapseAllComponentPanels}
+					/>
+				</div>
+			</Resizable.Pane>
 
-		<!-- Center: Canvas -->
-		<div class="flex flex-1 flex-col items-center gap-2">
-			<CanvasControls
-				bind:zoomLevel
-				bind:showGrid
-				bind:showBleed
-				bind:gridSize
-				onZoomIn={zoomIn}
-				onZoomOut={zoomOut}
-				onResetZoom={resetZoom}
-				onCycleGridSize={cycleGridSize}
-				onShowHelp={showHelpButton ? () => { showHelp = true; } : undefined}
-			/>
+			<Resizable.Handle withHandle />
 
-			<CanvasPreview
-			{template}
-			{previewData}
-			{containers}
-			bind:selectedContainerId
-			bind:svgElement={canvasSvgElement}
-			{zoomLevel}
-			{showGrid}
-			{showBleed}
-			{gridSize}
-			{canvasInteraction}
-			{interactionContainerId}
-			{activeResizeHandle}
-			{isTransitioning}
-			canvasScale={CANVAS_SCALE}
-			onStartDrag={startDrag}
-			onStartResize={startResize}
-		/>
-	</div>
+			<!-- Center: Canvas (size is dynamic based on card width at current zoom) -->
+			<Resizable.Pane defaultSize={centerMinSize} minSize={centerMinSize}>
+				<div class="h-full overflow-auto">
+					<div class="flex min-h-full flex-col items-center gap-1 py-1">
+					<CanvasControls
+						bind:zoomLevel
+						bind:showGrid
+						bind:gridSize
+						onZoomIn={zoomIn}
+						onZoomOut={zoomOut}
+						onResetZoom={resetZoom}
+						onCycleGridSize={cycleGridSize}
+						onShowHelp={showHelpButton ? () => { showHelp = true; } : undefined}
+					/>
 
-	<!-- Right: Properties Panel -->
-	<PropertiesPanel
-		container={selectedContainer}
-		dataFields={currentDataFields}
-		datasetId={selectedDataset as import('$lib/presets').DatasetId}
-		{previewData}
-		{expandedPanels}
-		bind:activeTab={propertiesPanelTab}
-		{selectedComponentId}
-		{containers}
-		{canUndo}
-		{canRedo}
-		onAddContainer={addContainer}
-		onAddContainerFromTemplate={addContainerFromTemplate}
-		onDuplicateContainerById={duplicateContainerById}
-		onUndo={undo}
-		onRedo={redo}
-		onTogglePanel={togglePanel}
-		onUpdateContainer={updateContainer}
-		onDuplicateContainer={duplicateContainer}
-		onDeleteContainer={deleteContainer}
-		onAddTextComponent={addTextComponent}
-		onAddImageComponent={addImageComponent}
-		onAddBackgroundComponent={addBackgroundComponent}
-		onAddBorderComponent={addBorderComponent}
-		onAddIconComponent={addIconComponent}
-		onAddBadgeComponent={addBadgeComponent}
-		onAddStatPanelComponent={addStatPanelComponent}
-		onAddDividerComponent={addDividerComponent}
-		onAddProgressBarComponent={addProgressBarComponent}
-		onAddRibbonComponent={addRibbonComponent}
-		onAddFrameComponent={addFrameComponent}
-		onAddListComponent={addListComponent}
-		onAddIconRatingComponent={addIconRatingComponent}
-		onUpdateTextComponent={updateTextComponent}
-		onUpdateImageComponent={updateImageComponent}
-		onUpdateBackgroundComponent={updateBackgroundComponent}
-		onUpdateBorderComponent={updateBorderComponent}
-		onUpdateBorderGlow={updateBorderGlow}
-		onUpdateBorderHolographic={updateBorderHolographic}
-		onUpdateIconComponent={updateIconComponent}
-		onUpdateIconSelection={updateIconSelection}
-		onUpdateBadgeComponent={updateBadgeComponent}
-		onUpdateStatPanelComponent={updateStatPanelComponent}
-		onUpdateDividerComponent={updateDividerComponent}
-		onUpdateProgressBarComponent={updateProgressBarComponent}
-		onUpdateRibbonComponent={updateRibbonComponent}
-		onUpdateFrameComponent={updateFrameComponent}
-		onUpdateListComponent={updateListComponent}
-		onUpdateIconRatingComponent={updateIconRatingComponent}
-		onRemoveComponent={removeComponent}
-		onMoveComponentUp={moveComponentUp}
-		onMoveComponentDown={moveComponentDown}
-	/>
-	</div>
+					<CanvasPreview
+						{template}
+						{previewData}
+						{containers}
+						bind:selectedContainerId
+						bind:svgElement={canvasSvgElement}
+						{zoomLevel}
+						{showGrid}
+							{gridSize}
+						{canvasInteraction}
+						{interactionContainerId}
+						{activeResizeHandle}
+						{isTransitioning}
+						canvasScale={CANVAS_SCALE}
+						onStartDrag={startDrag}
+						onStartResize={startResize}
+					/>
+					</div>
+				</div>
+			</Resizable.Pane>
+
+			<Resizable.Handle withHandle />
+
+			<!-- Right: Hierarchy Panel (layer management) -->
+			<Resizable.Pane
+				defaultSize={25}
+				minSize={15}
+				maxSize={40}
+			>
+				<div class="h-full overflow-hidden">
+					<HierarchyPanel
+						{containers}
+						bind:selectedContainerId
+						{expandedPanels}
+						onTogglePanel={togglePanel}
+						onToggleVisibility={toggleVisibility}
+						onToggleComponentVisibility={toggleComponentVisibility}
+						onMoveContainerUp={moveContainerUp}
+						onMoveContainerDown={moveContainerDown}
+						onMoveComponentUp={moveComponentUp}
+						onMoveComponentDown={moveComponentDown}
+						onRenameContainer={renameContainer}
+						onDragStart={handleDragStart}
+						onDragOver={handleDragOver}
+						onDrop={handleDrop}
+						onDragEnd={handleDragEnd}
+						{dragOverContainerId}
+					/>
+				</div>
+			</Resizable.Pane>
+		</Resizable.PaneGroup>
+		</div>
+	{:else if isTablet.current}
+		<!-- Tablet: Canvas with side drawers -->
+		<div class="flex flex-1 flex-col overflow-hidden">
+			<!-- Tablet toolbar with drawer triggers -->
+			<div class="flex items-center justify-between border-b bg-card px-3 py-2">
+				<Button variant="outline" size="sm" onclick={() => propertiesDrawerOpen = true}>
+					<PanelLeft class="mr-2 h-4 w-4" />
+					Edit
+				</Button>
+				<CanvasControls
+					bind:zoomLevel
+					bind:showGrid
+					bind:gridSize
+					onZoomIn={zoomIn}
+					onZoomOut={zoomOut}
+					onResetZoom={resetZoom}
+					onCycleGridSize={cycleGridSize}
+					onShowHelp={showHelpButton ? () => { showHelp = true; } : undefined}
+				/>
+				<Button variant="outline" size="sm" onclick={() => hierarchyDrawerOpen = true}>
+					<Layers class="mr-2 h-4 w-4" />
+					Layers
+				</Button>
+			</div>
+
+			<!-- Canvas area -->
+			<div class="flex flex-1 items-start justify-center overflow-auto p-3 pt-4">
+				<CanvasPreview
+					{template}
+					{previewData}
+					{containers}
+					bind:selectedContainerId
+					bind:svgElement={canvasSvgElement}
+					{zoomLevel}
+					{showGrid}
+					{gridSize}
+					{canvasInteraction}
+					{interactionContainerId}
+					{activeResizeHandle}
+					{isTransitioning}
+					canvasScale={CANVAS_SCALE}
+					onStartDrag={startDrag}
+					onStartResize={startResize}
+				/>
+			</div>
+		</div>
+
+		<!-- Properties Drawer (Left) -->
+		<Drawer.Root bind:open={propertiesDrawerOpen} direction="left">
+			<Drawer.Content class="h-full w-[85vw] max-w-md">
+				<Drawer.Header class="border-b">
+					<Drawer.Title>Edit Properties</Drawer.Title>
+				</Drawer.Header>
+				<div class="flex-1 overflow-auto p-3">
+					<PropertiesPanel
+						container={selectedContainer}
+						dataFields={currentDataFields}
+						datasetId={selectedDataset as import('$lib/presets').DatasetId}
+						{previewData}
+						{expandedPanels}
+						bind:activeTab={propertiesPanelTab}
+						{selectedComponentId}
+						{containers}
+						{canUndo}
+						{canRedo}
+						onAddContainer={addContainer}
+						onAddContainerFromTemplate={addContainerFromTemplate}
+						onDuplicateContainerById={duplicateContainerById}
+						onUndo={undo}
+						onRedo={redo}
+						onTogglePanel={togglePanel}
+						onUpdateContainer={updateContainer}
+						onDuplicateContainer={duplicateContainer}
+						onDeleteContainer={deleteContainer}
+						onAddTextComponent={addTextComponent}
+						onAddImageComponent={addImageComponent}
+						onAddBackgroundComponent={addBackgroundComponent}
+						onAddBorderComponent={addBorderComponent}
+						onAddIconComponent={addIconComponent}
+						onAddBadgeComponent={addBadgeComponent}
+						onAddStatPanelComponent={addStatPanelComponent}
+						onAddDividerComponent={addDividerComponent}
+						onAddProgressBarComponent={addProgressBarComponent}
+						onAddRibbonComponent={addRibbonComponent}
+						onAddFrameComponent={addFrameComponent}
+						onAddListComponent={addListComponent}
+						onAddIconRatingComponent={addIconRatingComponent}
+						onUpdateTextComponent={updateTextComponent}
+						onUpdateImageComponent={updateImageComponent}
+						onUpdateBackgroundComponent={updateBackgroundComponent}
+						onUpdateBorderComponent={updateBorderComponent}
+						onUpdateBorderGlow={updateBorderGlow}
+						onUpdateBorderHolographic={updateBorderHolographic}
+						onUpdateIconComponent={updateIconComponent}
+						onUpdateIconSelection={updateIconSelection}
+						onUpdateBadgeComponent={updateBadgeComponent}
+						onUpdateStatPanelComponent={updateStatPanelComponent}
+						onUpdateDividerComponent={updateDividerComponent}
+						onUpdateProgressBarComponent={updateProgressBarComponent}
+						onUpdateRibbonComponent={updateRibbonComponent}
+						onUpdateFrameComponent={updateFrameComponent}
+						onUpdateListComponent={updateListComponent}
+						onUpdateIconRatingComponent={updateIconRatingComponent}
+						onRemoveComponent={removeComponent}
+						onMoveComponentUp={moveComponentUp}
+						onMoveComponentDown={moveComponentDown}
+						onSelectComponent={selectComponent}
+						onCollapseAllComponentPanels={collapseAllComponentPanels}
+					/>
+				</div>
+			</Drawer.Content>
+		</Drawer.Root>
+
+		<!-- Hierarchy Drawer (Right) -->
+		<Drawer.Root bind:open={hierarchyDrawerOpen} direction="right">
+			<Drawer.Content class="h-full w-[85vw] max-w-sm">
+				<Drawer.Header class="border-b">
+					<Drawer.Title>Layers</Drawer.Title>
+				</Drawer.Header>
+				<div class="flex-1 overflow-auto p-3">
+					<HierarchyPanel
+						{containers}
+						bind:selectedContainerId
+						{expandedPanels}
+						onTogglePanel={togglePanel}
+						onToggleVisibility={toggleVisibility}
+						onToggleComponentVisibility={toggleComponentVisibility}
+						onMoveContainerUp={moveContainerUp}
+						onMoveContainerDown={moveContainerDown}
+						onMoveComponentUp={moveComponentUp}
+						onMoveComponentDown={moveComponentDown}
+						onRenameContainer={renameContainer}
+						onDragStart={handleDragStart}
+						onDragOver={handleDragOver}
+						onDrop={handleDrop}
+						onDragEnd={handleDragEnd}
+						{dragOverContainerId}
+					/>
+				</div>
+			</Drawer.Content>
+		</Drawer.Root>
+	{:else}
+		<!-- Mobile: Canvas with bottom drawer (Phase 4) -->
+		<div class="flex flex-1 flex-col overflow-hidden">
+			<!-- Mobile toolbar -->
+			<div class="flex items-center justify-center border-b bg-card px-3 py-2">
+				<CanvasControls
+					bind:zoomLevel
+					bind:showGrid
+					bind:gridSize
+					onZoomIn={zoomIn}
+					onZoomOut={zoomOut}
+					onResetZoom={resetZoom}
+					onCycleGridSize={cycleGridSize}
+					onShowHelp={showHelpButton ? () => { showHelp = true; } : undefined}
+				/>
+			</div>
+
+			<!-- Canvas area -->
+			<div class="flex flex-1 items-start justify-center overflow-auto p-3 pt-4">
+				<CanvasPreview
+					{template}
+					{previewData}
+					{containers}
+					bind:selectedContainerId
+					bind:svgElement={canvasSvgElement}
+					{zoomLevel}
+					{showGrid}
+					{gridSize}
+					{canvasInteraction}
+					{interactionContainerId}
+					{activeResizeHandle}
+					{isTransitioning}
+					canvasScale={CANVAS_SCALE}
+					onStartDrag={startDrag}
+					onStartResize={startResize}
+				/>
+			</div>
+
+			<!-- Mobile bottom bar with quick actions -->
+			<div class="flex items-center justify-around border-t bg-card px-3 py-2">
+				<Button variant="ghost" size="sm" onclick={() => propertiesDrawerOpen = true}>
+					<PanelLeft class="h-5 w-5" />
+					<span class="sr-only">Edit</span>
+				</Button>
+				<Button variant="ghost" size="sm" onclick={() => hierarchyDrawerOpen = true}>
+					<Layers class="h-5 w-5" />
+					<span class="sr-only">Layers</span>
+				</Button>
+			</div>
+		</div>
+
+		<!-- Mobile Properties Drawer (Bottom) -->
+		<Drawer.Root bind:open={propertiesDrawerOpen} direction="bottom">
+			<Drawer.Content class="max-h-[85vh]">
+				<Drawer.Header class="border-b">
+					<Drawer.Title>Edit Properties</Drawer.Title>
+				</Drawer.Header>
+				<div class="flex-1 overflow-auto p-3">
+					<PropertiesPanel
+						container={selectedContainer}
+						dataFields={currentDataFields}
+						datasetId={selectedDataset as import('$lib/presets').DatasetId}
+						{previewData}
+						{expandedPanels}
+						bind:activeTab={propertiesPanelTab}
+						{selectedComponentId}
+						{containers}
+						{canUndo}
+						{canRedo}
+						onAddContainer={addContainer}
+						onAddContainerFromTemplate={addContainerFromTemplate}
+						onDuplicateContainerById={duplicateContainerById}
+						onUndo={undo}
+						onRedo={redo}
+						onTogglePanel={togglePanel}
+						onUpdateContainer={updateContainer}
+						onDuplicateContainer={duplicateContainer}
+						onDeleteContainer={deleteContainer}
+						onAddTextComponent={addTextComponent}
+						onAddImageComponent={addImageComponent}
+						onAddBackgroundComponent={addBackgroundComponent}
+						onAddBorderComponent={addBorderComponent}
+						onAddIconComponent={addIconComponent}
+						onAddBadgeComponent={addBadgeComponent}
+						onAddStatPanelComponent={addStatPanelComponent}
+						onAddDividerComponent={addDividerComponent}
+						onAddProgressBarComponent={addProgressBarComponent}
+						onAddRibbonComponent={addRibbonComponent}
+						onAddFrameComponent={addFrameComponent}
+						onAddListComponent={addListComponent}
+						onAddIconRatingComponent={addIconRatingComponent}
+						onUpdateTextComponent={updateTextComponent}
+						onUpdateImageComponent={updateImageComponent}
+						onUpdateBackgroundComponent={updateBackgroundComponent}
+						onUpdateBorderComponent={updateBorderComponent}
+						onUpdateBorderGlow={updateBorderGlow}
+						onUpdateBorderHolographic={updateBorderHolographic}
+						onUpdateIconComponent={updateIconComponent}
+						onUpdateIconSelection={updateIconSelection}
+						onUpdateBadgeComponent={updateBadgeComponent}
+						onUpdateStatPanelComponent={updateStatPanelComponent}
+						onUpdateDividerComponent={updateDividerComponent}
+						onUpdateProgressBarComponent={updateProgressBarComponent}
+						onUpdateRibbonComponent={updateRibbonComponent}
+						onUpdateFrameComponent={updateFrameComponent}
+						onUpdateListComponent={updateListComponent}
+						onUpdateIconRatingComponent={updateIconRatingComponent}
+						onRemoveComponent={removeComponent}
+						onMoveComponentUp={moveComponentUp}
+						onMoveComponentDown={moveComponentDown}
+						onSelectComponent={selectComponent}
+						onCollapseAllComponentPanels={collapseAllComponentPanels}
+					/>
+				</div>
+			</Drawer.Content>
+		</Drawer.Root>
+
+		<!-- Mobile Hierarchy Drawer (Bottom) -->
+		<Drawer.Root bind:open={hierarchyDrawerOpen} direction="bottom">
+			<Drawer.Content class="max-h-[85vh]">
+				<Drawer.Header class="border-b">
+					<Drawer.Title>Layers</Drawer.Title>
+				</Drawer.Header>
+				<div class="flex-1 overflow-auto p-3">
+					<HierarchyPanel
+						{containers}
+						bind:selectedContainerId
+						{expandedPanels}
+						onTogglePanel={togglePanel}
+						onToggleVisibility={toggleVisibility}
+						onToggleComponentVisibility={toggleComponentVisibility}
+						onMoveContainerUp={moveContainerUp}
+						onMoveContainerDown={moveContainerDown}
+						onMoveComponentUp={moveComponentUp}
+						onMoveComponentDown={moveComponentDown}
+						onRenameContainer={renameContainer}
+						onDragStart={handleDragStart}
+						onDragOver={handleDragOver}
+						onDrop={handleDrop}
+						onDragEnd={handleDragEnd}
+						{dragOverContainerId}
+					/>
+				</div>
+			</Drawer.Content>
+		</Drawer.Root>
+	{/if}
 </div>
 
 <HelpModal bind:show={showHelp} />

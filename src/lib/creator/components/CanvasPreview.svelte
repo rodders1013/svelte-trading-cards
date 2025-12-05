@@ -12,7 +12,6 @@
 		svgElement = $bindable<SVGSVGElement | null>(null),
 		zoomLevel,
 		showGrid,
-		showBleed,
 		gridSize = 25,
 		canvasInteraction,
 		interactionContainerId,
@@ -29,7 +28,6 @@
 		svgElement?: SVGSVGElement | null;
 		zoomLevel: number;
 		showGrid: boolean;
-		showBleed: boolean;
 		gridSize?: number;
 		canvasInteraction: 'idle' | 'dragging' | 'resizing';
 		interactionContainerId: string | null;
@@ -43,16 +41,12 @@
 	// Grid sizes: small grid = gridSize, large grid = gridSize * 3
 	const largeGridSize = $derived(gridSize * 3);
 
-	// Bleed calculation: 3mm at 300 DPI on a 63.5mm wide card (750px)
-	// 750px / 63.5mm = 11.811 px/mm, so 3mm = ~35px
-	const BLEED_PX = 35;
-
 	const zoomScale = $derived(zoomLevel / 100);
 	const canvasWidth = $derived(375 * zoomScale);
 </script>
 
-<!-- Canvas Container (scrollable only when zoomed above 150%) -->
-<div class="{zoomLevel > 150 ? 'max-h-[calc(100vh-220px)] overflow-auto' : ''} rounded-xl border border-border bg-white p-4">
+<!-- Canvas Container -->
+<div class="rounded-lg border border-border bg-white p-1">
 	<div
 		class="relative overflow-hidden rounded-xl"
 		style="width: {canvasWidth}px; cursor: {canvasInteraction === 'dragging' ? 'grabbing' : canvasInteraction === 'resizing' && activeResizeHandle ? getResizeCursor(activeResizeHandle) : 'default'};"
@@ -80,53 +74,6 @@
 					<!-- Center lines (more prominent) -->
 					<line x1="375" y1="0" x2="375" y2="1050" stroke="rgba(59,130,246,0.5)" stroke-width="1.5" />
 					<line x1="0" y1="525" x2="750" y2="525" stroke="rgba(59,130,246,0.5)" stroke-width="1.5" />
-				</svg>
-			</div>
-		{/if}
-
-		<!-- Bleed Area Overlay (3mm = 35px at 300 DPI) -->
-		{#if showBleed}
-			<div class="pointer-events-none absolute inset-0">
-				<svg class="h-full w-full" viewBox="0 0 750 1050" preserveAspectRatio="none">
-					<!-- Bleed zone - semi-transparent red overlay on edges -->
-					<!-- Top bleed -->
-					<rect x="0" y="0" width="750" height={BLEED_PX} fill="rgba(239,68,68,0.25)" />
-					<!-- Bottom bleed -->
-					<rect x="0" y={1050 - BLEED_PX} width="750" height={BLEED_PX} fill="rgba(239,68,68,0.25)" />
-					<!-- Left bleed -->
-					<rect x="0" y={BLEED_PX} width={BLEED_PX} height={1050 - BLEED_PX * 2} fill="rgba(239,68,68,0.25)" />
-					<!-- Right bleed -->
-					<rect x={750 - BLEED_PX} y={BLEED_PX} width={BLEED_PX} height={1050 - BLEED_PX * 2} fill="rgba(239,68,68,0.25)" />
-
-					<!-- Bleed line (dashed) - shows where content may be cut -->
-					<rect
-						x={BLEED_PX}
-						y={BLEED_PX}
-						width={750 - BLEED_PX * 2}
-						height={1050 - BLEED_PX * 2}
-						fill="none"
-						stroke="rgba(239,68,68,0.8)"
-						stroke-width="2"
-						stroke-dasharray="8,4"
-						rx="20"
-					/>
-
-					<!-- Corner marks for visual reference -->
-					<!-- Top-left -->
-					<line x1={BLEED_PX} y1="0" x2={BLEED_PX} y2="15" stroke="rgba(239,68,68,0.9)" stroke-width="2" />
-					<line x1="0" y1={BLEED_PX} x2="15" y2={BLEED_PX} stroke="rgba(239,68,68,0.9)" stroke-width="2" />
-					<!-- Top-right -->
-					<line x1={750 - BLEED_PX} y1="0" x2={750 - BLEED_PX} y2="15" stroke="rgba(239,68,68,0.9)" stroke-width="2" />
-					<line x1={750 - 15} y1={BLEED_PX} x2="750" y2={BLEED_PX} stroke="rgba(239,68,68,0.9)" stroke-width="2" />
-					<!-- Bottom-left -->
-					<line x1={BLEED_PX} y1={1050 - 15} x2={BLEED_PX} y2="1050" stroke="rgba(239,68,68,0.9)" stroke-width="2" />
-					<line x1="0" y1={1050 - BLEED_PX} x2="15" y2={1050 - BLEED_PX} stroke="rgba(239,68,68,0.9)" stroke-width="2" />
-					<!-- Bottom-right -->
-					<line x1={750 - BLEED_PX} y1={1050 - 15} x2={750 - BLEED_PX} y2="1050" stroke="rgba(239,68,68,0.9)" stroke-width="2" />
-					<line x1={750 - 15} y1={1050 - BLEED_PX} x2="750" y2={1050 - BLEED_PX} stroke="rgba(239,68,68,0.9)" stroke-width="2" />
-
-					<!-- Label -->
-					<text x="375" y="20" text-anchor="middle" font-size="14" fill="rgba(239,68,68,0.9)" font-weight="500">3mm Bleed Zone</text>
 				</svg>
 			</div>
 		{/if}

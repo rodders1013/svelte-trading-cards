@@ -165,5 +165,31 @@ export type {
 	RibbonComponent,
 	FrameComponent,
 	ListComponent,
-	IconRatingComponent
+	IconRatingComponent,
+	DataFieldOption
 } from './creator/index.js';
+
+// Demo data and types (for reference implementations)
+export {
+	datasets as demoDatasets,
+	getDataFieldsForDataset,
+	findUnmappedFields,
+	templates as demoTemplates,
+	xboxDataFields,
+	playstationDataFields,
+	steamDataFields,
+	suggestFieldMappings
+} from './demo/index.js';
+export type {
+	Dataset,
+	XboxGame,
+	PlayStationGame,
+	SteamGame,
+	XboxDataset,
+	PlayStationDataset,
+	SteamDataset,
+	AnyDataset,
+	AnyCard,
+	FieldMapping,
+	SavedTemplate
+} from './demo/index.js';

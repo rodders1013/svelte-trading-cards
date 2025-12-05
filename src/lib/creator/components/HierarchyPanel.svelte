@@ -145,7 +145,7 @@
 	}
 </script>
 
-<div class="flex w-56 flex-col gap-2">
+<div class="flex h-full w-full flex-col gap-2">
 	<!-- Layers -->
 	<Card.Root class="flex-1 overflow-hidden">
 		<Collapsible.Root open={expandedPanels.has('hierarchy')} onOpenChange={() => onTogglePanel('hierarchy')}>

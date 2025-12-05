@@ -2,8 +2,7 @@
 	import * as Card from '$lib/components/ui/card';
 	import { Button } from '$lib/components/ui/button';
 	import { Separator } from '$lib/components/ui/separator';
-	import * as Tabs from '$lib/components/ui/tabs';
-	import { ScrollArea } from '$lib/components/ui/scroll-area';
+	import * as Accordion from '$lib/components/ui/accordion';
 	import type { IconData } from '$lib/components/icons';
 	import { DEFAULT_DATASET, type DatasetId } from '$lib/presets';
 	import ZoneProperties from './ZoneProperties.svelte';
@@ -93,7 +92,9 @@
 		onUpdateIconRatingComponent,
 		onRemoveComponent,
 		onMoveComponentUp,
-		onMoveComponentDown
+		onMoveComponentDown,
+		onSelectComponent = () => {},
+		onCollapseAllComponentPanels = () => {}
 	}: {
 		container: ContainerState | null;
 		dataFields: DataFieldOption[];
@@ -146,6 +147,8 @@
 		onRemoveComponent: (type: 'text' | 'image' | 'background' | 'border' | 'icon' | 'badge' | 'statpanel' | 'divider' | 'progressbar' | 'ribbon' | 'frame' | 'list' | 'iconrating') => void;
 		onMoveComponentUp: (componentId: string) => void;
 		onMoveComponentDown: (componentId: string) => void;
+		onSelectComponent?: (componentId: string | null) => void;
+		onCollapseAllComponentPanels?: () => void;
 	} = $props();
 
 	// Component selections
@@ -171,9 +174,28 @@
 
 	// Fonts for IconRating value display
 	const fonts = $derived(getAllFontsForDataset(datasetId));
+
+	// Track open accordion sections
+	let openSections = $state<string[]>(['layer', 'components']);
+
+	// Reset key - increment to force component panels to re-mount with fresh state
+	let componentResetKey = $state(0);
+
+	// Handle accordion value changes
+	function handleAccordionChange(newValue: string[]) {
+		const wasComponentsClosed = !openSections.includes('components');
+		const isComponentsNowOpen = newValue.includes('components');
+
+		// Force reset all component panels when Components section is OPENED
+		if (wasComponentsClosed && isComponentsNowOpen) {
+			componentResetKey++;
+		}
+
+		openSections = newValue;
+	}
 </script>
 
-<div class="flex h-full w-96 shrink-0 flex-col overflow-hidden">
+<div class="flex h-full w-full flex-col overflow-hidden">
 	<!-- Sticky Header -->
 	<Card.Root class="shrink-0 rounded-none border-x-0 border-t-0">
 		<Card.Content class="flex items-center gap-2 px-3 py-2">
@@ -224,199 +246,207 @@
 	</Card.Root>
 
 	{#if container}
-		<!-- Tabs -->
-		<Tabs.Root bind:value={activeTab} class="flex flex-1 flex-col overflow-hidden">
-			<Tabs.List class="grid w-full shrink-0 grid-cols-2 rounded-none border-b bg-muted/30">
-				<Tabs.Trigger value="layer" class="rounded-none data-[state=active]:bg-background">
-					Layer
-				</Tabs.Trigger>
-				<Tabs.Trigger value="components" class="rounded-none data-[state=active]:bg-background">
-					Components
-					{#if componentCount > 0}
-						<span class="ml-1.5 rounded-full bg-muted px-1.5 py-0.5 text-xs">{componentCount}</span>
-					{/if}
-				</Tabs.Trigger>
-			</Tabs.List>
+		<!-- Accordion Panels (both can be open at once) -->
+		<div class="min-h-0 flex-1 overflow-auto">
+			<Accordion.Root type="multiple" value={openSections} onValueChange={handleAccordionChange} class="w-full">
+				<!-- Layer Section -->
+				<Accordion.Item value="layer" class="border-b">
+					<Accordion.Trigger class="px-3 py-2 text-sm font-medium hover:bg-muted/50">
+						<span class="flex items-center gap-2">
+							Layer
+							<span class="text-muted-foreground font-normal">— {container.name}</span>
+						</span>
+					</Accordion.Trigger>
+					<Accordion.Content>
+						<div class="px-3 pb-3">
+							<ZoneProperties
+								{container}
+								expanded={expandedPanels.has('container')}
+								onUpdate={onUpdateContainer}
+								onDuplicate={onDuplicateContainer}
+								onDelete={onDeleteContainer}
+								onTogglePanel={() => onTogglePanel('container')}
+							/>
+						</div>
+					</Accordion.Content>
+				</Accordion.Item>
 
-			<!-- Layer Tab -->
-			<Tabs.Content value="layer" class="mt-0 flex-1 overflow-hidden">
-				<ScrollArea class="h-full">
-					<div class="p-3">
-						<ZoneProperties
-							{container}
-							expanded={expandedPanels.has('container')}
-							onUpdate={onUpdateContainer}
-							onDuplicate={onDuplicateContainer}
-							onDelete={onDeleteContainer}
-							onTogglePanel={() => onTogglePanel('container')}
-						/>
-					</div>
-				</ScrollArea>
-			</Tabs.Content>
-
-			<!-- Components Tab -->
-			<Tabs.Content value="components" class="mt-0 flex-1 overflow-hidden">
-				<ScrollArea class="h-full">
-					<div class="flex flex-col">
-						{#if componentCount === 0}
-							<div class="flex flex-col items-center justify-center py-12 text-center">
-								<p class="text-muted-foreground">No components</p>
-								<p class="mt-1 text-sm text-muted-foreground">Click "+ Component" to add components</p>
-							</div>
-						{:else}
-							<!-- Render components in array order -->
-							{#each container.components as component (component.id)}
-								{@const isSelected = selectedComponentId === component.id}
-								<div class={isSelected ? 'ring-2 ring-blue-500 ring-inset' : ''}>
-									{#if component.type === 'background'}
-										<BackgroundPanel
-											{component}
-											expanded={expandedPanels.has('comp-background')}
-											{isCardBase}
-											onUpdate={onUpdateBackgroundComponent}
-											onRemove={() => onRemoveComponent('background')}
-											onMoveUp={() => onMoveComponentUp(component.id)}
-											onMoveDown={() => onMoveComponentDown(component.id)}
-											onToggleVisibility={() => onUpdateBackgroundComponent('visible', !component.visible)}
-										/>
-									{:else if component.type === 'border'}
-										<BorderPanel
-											{component}
-											expanded={expandedPanels.has('comp-border')}
-											{isCardBase}
-											onUpdate={onUpdateBorderComponent}
-											onUpdateGlow={onUpdateBorderGlow}
-											onUpdateHolographic={onUpdateBorderHolographic}
-											onRemove={() => onRemoveComponent('border')}
-											onMoveUp={() => onMoveComponentUp(component.id)}
-											onMoveDown={() => onMoveComponentDown(component.id)}
-											onToggleVisibility={() => onUpdateBorderComponent('visible', !component.visible)}
-										/>
-									{:else if component.type === 'frame'}
-										<FramePanel
-											{component}
-											expanded={expandedPanels.has('comp-frame')}
-											onUpdate={onUpdateFrameComponent}
-											onRemove={() => onRemoveComponent('frame')}
-											onMoveUp={() => onMoveComponentUp(component.id)}
-											onMoveDown={() => onMoveComponentDown(component.id)}
-										/>
-									{:else if component.type === 'image'}
-										<ImagePanel
-											{component}
-											{dataFields}
-											expanded={expandedPanels.has('comp-image')}
-											{isCardBase}
-											onUpdate={onUpdateImageComponent}
-											onRemove={() => onRemoveComponent('image')}
-											onMoveUp={() => onMoveComponentUp(component.id)}
-											onMoveDown={() => onMoveComponentDown(component.id)}
-											onToggleVisibility={() => onUpdateImageComponent('visible', !component.visible)}
-										/>
-									{:else if component.type === 'text'}
-										<TextPanel
-											{component}
-											{dataFields}
-											{datasetId}
-											expanded={expandedPanels.has('comp-text')}
-											onUpdate={onUpdateTextComponent}
-											onRemove={() => onRemoveComponent('text')}
-											onMoveUp={() => onMoveComponentUp(component.id)}
-											onMoveDown={() => onMoveComponentDown(component.id)}
-										/>
-									{:else if component.type === 'list'}
-										<ListPanel
-											{component}
-											{dataFields}
-											{datasetId}
-											expanded={expandedPanels.has('comp-list')}
-											onUpdate={onUpdateListComponent}
-											onRemove={() => onRemoveComponent('list')}
-											onMoveUp={() => onMoveComponentUp(component.id)}
-											onMoveDown={() => onMoveComponentDown(component.id)}
-										/>
-									{:else if component.type === 'icon'}
-										<IconPanel
-											{component}
-											expanded={expandedPanels.has('comp-icon')}
-											onUpdate={onUpdateIconComponent}
-											onUpdateIcon={onUpdateIconSelection}
-											onRemove={() => onRemoveComponent('icon')}
-											onMoveUp={() => onMoveComponentUp(component.id)}
-											onMoveDown={() => onMoveComponentDown(component.id)}
-										/>
-									{:else if component.type === 'badge'}
-										<BadgePanel
-											{component}
-											{dataFields}
-											{datasetId}
-											expanded={expandedPanels.has('comp-badge')}
-											onUpdate={onUpdateBadgeComponent}
-											onRemove={() => onRemoveComponent('badge')}
-											onMoveUp={() => onMoveComponentUp(component.id)}
-											onMoveDown={() => onMoveComponentDown(component.id)}
-										/>
-									{:else if component.type === 'statpanel'}
-										<StatPanelPanel
-											{component}
-											{dataFields}
-											{datasetId}
-											expanded={expandedPanels.has('comp-statpanel')}
-											onUpdate={onUpdateStatPanelComponent}
-											onRemove={() => onRemoveComponent('statpanel')}
-											onMoveUp={() => onMoveComponentUp(component.id)}
-											onMoveDown={() => onMoveComponentDown(component.id)}
-										/>
-									{:else if component.type === 'progressbar'}
-										<ProgressBarPanel
-											{component}
-											{dataFields}
-											expanded={expandedPanels.has('comp-progressbar')}
-											onUpdate={onUpdateProgressBarComponent}
-											onRemove={() => onRemoveComponent('progressbar')}
-											onMoveUp={() => onMoveComponentUp(component.id)}
-											onMoveDown={() => onMoveComponentDown(component.id)}
-										/>
-									{:else if component.type === 'iconrating'}
-										<IconRatingPanel
-											{component}
-											{dataFields}
-											{fonts}
-											{previewData}
-											expanded={expandedPanels.has('comp-iconrating')}
-											onUpdate={onUpdateIconRatingComponent}
-											onRemove={() => onRemoveComponent('iconrating')}
-											onMoveUp={() => onMoveComponentUp(component.id)}
-											onMoveDown={() => onMoveComponentDown(component.id)}
-										/>
-									{:else if component.type === 'divider'}
-										<DividerPanel
-											{component}
-											expanded={expandedPanels.has('comp-divider')}
-											onUpdate={onUpdateDividerComponent}
-											onRemove={() => onRemoveComponent('divider')}
-											onMoveUp={() => onMoveComponentUp(component.id)}
-											onMoveDown={() => onMoveComponentDown(component.id)}
-										/>
-									{:else if component.type === 'ribbon'}
-										<RibbonPanel
-											{component}
-											{dataFields}
-											{datasetId}
-											expanded={expandedPanels.has('comp-ribbon')}
-											onUpdate={onUpdateRibbonComponent}
-											onRemove={() => onRemoveComponent('ribbon')}
-											onMoveUp={() => onMoveComponentUp(component.id)}
-											onMoveDown={() => onMoveComponentDown(component.id)}
-										/>
-									{/if}
+				<!-- Components Section -->
+				<Accordion.Item value="components" class="border-b">
+					<Accordion.Trigger class="px-3 py-2 text-sm font-medium hover:bg-muted/50">
+						<span class="flex items-center gap-2">
+							Components
+							{#if componentCount > 0}
+								<span class="rounded-full bg-muted px-1.5 py-0.5 text-xs">{componentCount}</span>
+							{/if}
+						</span>
+					</Accordion.Trigger>
+					<Accordion.Content>
+						<div class="flex flex-col">
+							{#if componentCount === 0}
+								<div class="flex flex-col items-center justify-center py-12 text-center">
+									<p class="text-muted-foreground">No components</p>
+									<p class="mt-1 text-sm text-muted-foreground">Click "+ Component" to add components</p>
 								</div>
-							{/each}
-						{/if}
-					</div>
-				</ScrollArea>
-			</Tabs.Content>
-		</Tabs.Root>
+							{:else}
+								<!-- Render components in array order (reset key forces re-mount when accordion reopens) -->
+								{#each container.components as component (`${component.id}-${componentResetKey}`)}
+									{@const isSelected = selectedComponentId === component.id}
+									<!-- svelte-ignore a11y_click_events_have_key_events a11y_no_static_element_interactions -->
+									<div
+										class={isSelected ? 'ring-2 ring-blue-500 ring-inset cursor-pointer' : 'cursor-pointer hover:bg-muted/30'}
+										onclick={() => onSelectComponent(component.id)}
+									>
+										{#if component.type === 'background'}
+											<BackgroundPanel
+												{component}
+												expanded={expandedPanels.has('comp-background')}
+												{isCardBase}
+												onUpdate={onUpdateBackgroundComponent}
+												onRemove={() => onRemoveComponent('background')}
+												onMoveUp={() => onMoveComponentUp(component.id)}
+												onMoveDown={() => onMoveComponentDown(component.id)}
+												onToggleVisibility={() => onUpdateBackgroundComponent('visible', !component.visible)}
+											/>
+										{:else if component.type === 'border'}
+											<BorderPanel
+												{component}
+												expanded={expandedPanels.has('comp-border')}
+												{isCardBase}
+												onUpdate={onUpdateBorderComponent}
+												onUpdateGlow={onUpdateBorderGlow}
+												onUpdateHolographic={onUpdateBorderHolographic}
+												onRemove={() => onRemoveComponent('border')}
+												onMoveUp={() => onMoveComponentUp(component.id)}
+												onMoveDown={() => onMoveComponentDown(component.id)}
+												onToggleVisibility={() => onUpdateBorderComponent('visible', !component.visible)}
+											/>
+										{:else if component.type === 'frame'}
+											<FramePanel
+												{component}
+												expanded={expandedPanels.has('comp-frame')}
+												onUpdate={onUpdateFrameComponent}
+												onRemove={() => onRemoveComponent('frame')}
+												onMoveUp={() => onMoveComponentUp(component.id)}
+												onMoveDown={() => onMoveComponentDown(component.id)}
+											/>
+										{:else if component.type === 'image'}
+											<ImagePanel
+												{component}
+												{dataFields}
+												expanded={expandedPanels.has('comp-image')}
+												{isCardBase}
+												onUpdate={onUpdateImageComponent}
+												onRemove={() => onRemoveComponent('image')}
+												onMoveUp={() => onMoveComponentUp(component.id)}
+												onMoveDown={() => onMoveComponentDown(component.id)}
+												onToggleVisibility={() => onUpdateImageComponent('visible', !component.visible)}
+											/>
+										{:else if component.type === 'text'}
+											<TextPanel
+												{component}
+												{dataFields}
+												{datasetId}
+												expanded={expandedPanels.has('comp-text')}
+												onUpdate={onUpdateTextComponent}
+												onRemove={() => onRemoveComponent('text')}
+												onMoveUp={() => onMoveComponentUp(component.id)}
+												onMoveDown={() => onMoveComponentDown(component.id)}
+											/>
+										{:else if component.type === 'list'}
+											<ListPanel
+												{component}
+												{dataFields}
+												{datasetId}
+												expanded={expandedPanels.has('comp-list')}
+												onUpdate={onUpdateListComponent}
+												onRemove={() => onRemoveComponent('list')}
+												onMoveUp={() => onMoveComponentUp(component.id)}
+												onMoveDown={() => onMoveComponentDown(component.id)}
+											/>
+										{:else if component.type === 'icon'}
+											<IconPanel
+												{component}
+												expanded={expandedPanels.has('comp-icon')}
+												onUpdate={onUpdateIconComponent}
+												onUpdateIcon={onUpdateIconSelection}
+												onRemove={() => onRemoveComponent('icon')}
+												onMoveUp={() => onMoveComponentUp(component.id)}
+												onMoveDown={() => onMoveComponentDown(component.id)}
+											/>
+										{:else if component.type === 'badge'}
+											<BadgePanel
+												{component}
+												{dataFields}
+												{datasetId}
+												expanded={expandedPanels.has('comp-badge')}
+												onUpdate={onUpdateBadgeComponent}
+												onRemove={() => onRemoveComponent('badge')}
+												onMoveUp={() => onMoveComponentUp(component.id)}
+												onMoveDown={() => onMoveComponentDown(component.id)}
+											/>
+										{:else if component.type === 'statpanel'}
+											<StatPanelPanel
+												{component}
+												{dataFields}
+												{datasetId}
+												expanded={expandedPanels.has('comp-statpanel')}
+												onUpdate={onUpdateStatPanelComponent}
+												onRemove={() => onRemoveComponent('statpanel')}
+												onMoveUp={() => onMoveComponentUp(component.id)}
+												onMoveDown={() => onMoveComponentDown(component.id)}
+											/>
+										{:else if component.type === 'progressbar'}
+											<ProgressBarPanel
+												{component}
+												{dataFields}
+												expanded={expandedPanels.has('comp-progressbar')}
+												onUpdate={onUpdateProgressBarComponent}
+												onRemove={() => onRemoveComponent('progressbar')}
+												onMoveUp={() => onMoveComponentUp(component.id)}
+												onMoveDown={() => onMoveComponentDown(component.id)}
+											/>
+										{:else if component.type === 'iconrating'}
+											<IconRatingPanel
+												{component}
+												{dataFields}
+												{fonts}
+												{previewData}
+												expanded={expandedPanels.has('comp-iconrating')}
+												onUpdate={onUpdateIconRatingComponent}
+												onRemove={() => onRemoveComponent('iconrating')}
+												onMoveUp={() => onMoveComponentUp(component.id)}
+												onMoveDown={() => onMoveComponentDown(component.id)}
+											/>
+										{:else if component.type === 'divider'}
+											<DividerPanel
+												{component}
+												expanded={expandedPanels.has('comp-divider')}
+												onUpdate={onUpdateDividerComponent}
+												onRemove={() => onRemoveComponent('divider')}
+												onMoveUp={() => onMoveComponentUp(component.id)}
+												onMoveDown={() => onMoveComponentDown(component.id)}
+											/>
+										{:else if component.type === 'ribbon'}
+											<RibbonPanel
+												{component}
+												{dataFields}
+												{datasetId}
+												expanded={expandedPanels.has('comp-ribbon')}
+												onUpdate={onUpdateRibbonComponent}
+												onRemove={() => onRemoveComponent('ribbon')}
+												onMoveUp={() => onMoveComponentUp(component.id)}
+												onMoveDown={() => onMoveComponentDown(component.id)}
+											/>
+										{/if}
+									</div>
+								{/each}
+							{/if}
+						</div>
+					</Accordion.Content>
+				</Accordion.Item>
+			</Accordion.Root>
+		</div>
 	{:else}
 		<!-- No selection -->
 		<div class="flex flex-1 flex-col items-center justify-center">

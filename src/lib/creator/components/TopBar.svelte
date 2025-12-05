@@ -61,52 +61,52 @@
 	});
 </script>
 
-<Card.Root class="rounded-none border-x-0 border-t-0">
-	<Card.Content class="flex items-center gap-3 px-4 py-2">
+<Card.Root class="gap-0 rounded-none border-x-0 border-t-0 py-0">
+	<Card.Content class="flex flex-wrap items-center gap-x-2 gap-y-1.5 px-2 py-1.5 sm:gap-x-3 sm:px-4">
 		<!-- Template Section -->
-		<div class="flex items-center gap-2">
+		<div class="flex items-center gap-1.5 sm:gap-2">
 			<input
 				type="text"
 				bind:value={templateName}
-				class="h-8 w-48 rounded border border-input bg-background px-2 text-sm font-medium"
+				class="h-8 w-24 min-w-0 truncate rounded border border-input bg-background px-2 text-sm font-medium sm:w-36 lg:w-44"
 				placeholder="Template name"
 			/>
-			<label class="inline-flex h-8 cursor-pointer items-center justify-center gap-1.5 rounded-md border border-input bg-background px-3 text-sm font-medium shadow-xs hover:bg-accent hover:text-accent-foreground">
+			<label class="inline-flex h-8 cursor-pointer items-center justify-center rounded-md border border-input bg-background px-2 text-sm font-medium shadow-xs hover:bg-accent hover:text-accent-foreground sm:gap-1.5 sm:px-3">
 				<Upload class="h-4 w-4" />
 				<input type="file" accept=".json" class="hidden" onchange={onLoadTemplate} />
-				Load
+				<span class="hidden sm:inline">Load</span>
 			</label>
-			<Button size="sm" onclick={onSaveTemplate} class="gap-1.5">
+			<Button size="sm" onclick={onSaveTemplate} class="gap-1.5 px-2 sm:px-3">
 				<Save class="h-4 w-4" />
-				Save
+				<span class="hidden sm:inline">Save</span>
 			</Button>
 			{#if onExport}
-				<Button size="sm" variant="outline" onclick={onExport} class="gap-1.5">
+				<Button size="sm" variant="outline" onclick={onExport} class="gap-1.5 px-2 sm:px-3">
 					<Download class="h-4 w-4" />
-					Export
+					<span class="hidden sm:inline">Export</span>
 				</Button>
 			{/if}
 		</div>
 
 		<!-- Auto-save indicator -->
-		<div class="flex items-center gap-1.5" title={hasDraft ? `Draft saved ${savedTimeAgo()}` : 'No draft saved'}>
+		<div class="hidden items-center gap-1.5 sm:flex" title={hasDraft ? `Draft saved ${savedTimeAgo()}` : 'No draft saved'}>
 			{#if hasDraft}
 				<Cloud class="h-4 w-4 text-green-500" />
-				<span class="text-xs text-muted-foreground">Draft saved</span>
+				<span class="hidden text-xs text-muted-foreground lg:inline">Draft saved</span>
 			{:else}
 				<CloudOff class="h-4 w-4 text-muted-foreground" />
 			{/if}
 		</div>
 
-		<Separator orientation="vertical" class="h-6" />
+		<Separator orientation="vertical" class="hidden h-6 sm:block" />
 
 		<!-- Dataset Section -->
 		{#if hasDatasets}
-			<div class="flex items-center gap-2">
-				<span class="text-xs text-muted-foreground">Dataset:</span>
+			<div class="flex items-center gap-1.5 sm:gap-2">
+				<span class="hidden text-xs text-muted-foreground lg:inline">Dataset:</span>
 				<Select.Root type="single" value={selectedDataset} onValueChange={(v) => v && onDatasetChange?.(v)}>
-					<Select.Trigger class="h-8 w-40 text-sm">
-						{currentDatasetName || 'Select'}
+					<Select.Trigger class="h-8 w-28 truncate text-sm sm:w-32 lg:w-40">
+						<span class="truncate">{currentDatasetName || 'Select'}</span>
 					</Select.Trigger>
 					<Select.Content>
 						{#each datasets as dataset (dataset.id)}
@@ -116,17 +116,17 @@
 				</Select.Root>
 			</div>
 
-			<Separator orientation="vertical" class="h-6" />
+			<Separator orientation="vertical" class="hidden h-6 sm:block" />
 		{/if}
 
 		<!-- Preview Mode -->
-		<div class="flex items-center gap-2">
-			<span class="text-xs text-muted-foreground">Preview:</span>
+		<div class="flex items-center gap-1.5 sm:gap-2">
+			<span class="hidden text-xs text-muted-foreground lg:inline">Preview:</span>
 			<div class="flex">
 				<Button
 					variant={previewMode === 'fields' ? 'default' : 'outline'}
 					size="sm"
-					class="rounded-r-none"
+					class="rounded-r-none px-2 sm:px-3"
 					onclick={() => (previewMode = 'fields')}
 					title="Show field placeholders"
 				>
@@ -135,7 +135,7 @@
 				<Button
 					variant={previewMode === 'data' ? 'default' : 'outline'}
 					size="sm"
-					class="rounded-l-none border-l-0"
+					class="rounded-l-none border-l-0 px-2 sm:px-3"
 					onclick={() => (previewMode = 'data')}
 					title="Show sample data"
 				>
@@ -146,11 +146,11 @@
 
 		<!-- Card selector (only in data mode) -->
 		{#if hasDatasets && previewMode === 'data'}
-			<div class="flex items-center gap-2">
-				<span class="text-muted-foreground">→</span>
+			<div class="flex items-center gap-1.5 sm:gap-2">
+				<span class="hidden text-muted-foreground sm:inline">→</span>
 				<Select.Root type="single" value={String(selectedCardIndex)} onValueChange={(v) => v && (selectedCardIndex = parseInt(v))}>
-					<Select.Trigger class="h-8 w-48 text-sm">
-						{currentCardName || 'Select card'}
+					<Select.Trigger class="h-8 w-32 truncate text-sm sm:w-40 lg:w-48">
+						<span class="truncate">{currentCardName || 'Select card'}</span>
 					</Select.Trigger>
 					<Select.Content>
 						{#each cards as card (card.index)}

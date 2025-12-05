@@ -3,13 +3,11 @@
 	import ZoomIn from '@lucide/svelte/icons/zoom-in';
 	import ZoomOut from '@lucide/svelte/icons/zoom-out';
 	import Grid3x3 from '@lucide/svelte/icons/grid-3x3';
-	import Scan from '@lucide/svelte/icons/scan';
 	import HelpCircle from '@lucide/svelte/icons/help-circle';
 
 	let {
 		zoomLevel = $bindable(100),
 		showGrid = $bindable(false),
-		showBleed = $bindable(false),
 		gridSize = $bindable(25),
 		onZoomIn,
 		onZoomOut,
@@ -19,7 +17,6 @@
 	}: {
 		zoomLevel: number;
 		showGrid: boolean;
-		showBleed: boolean;
 		gridSize: number;
 		onZoomIn: () => void;
 		onZoomOut: () => void;
@@ -71,18 +68,6 @@
 			</button>
 		{/if}
 	</div>
-
-	<!-- Bleed Toggle -->
-	<Button
-		variant={showBleed ? 'default' : 'ghost'}
-		size="sm"
-		class="h-7 gap-1.5 px-2"
-		onclick={() => (showBleed = !showBleed)}
-		title="Show Bleed Area"
-	>
-		<Scan class="h-4 w-4" />
-		<span class="text-xs">Bleed</span>
-	</Button>
 
 	{#if onShowHelp}
 		<div class="h-4 w-px bg-border"></div>
