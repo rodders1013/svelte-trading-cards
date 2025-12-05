@@ -1,7 +1,7 @@
 # svelte-trading-cards Project Tracker
 
-**Last Updated:** 2025-12-01
-**Current Progress:** ~91% (Beta ready)
+**Last Updated:** 2025-12-05
+**Current Progress:** ~93% (Beta ready)
 
 ---
 
@@ -150,6 +150,33 @@
 - [x] White card canvas background
 - [x] Styled Duplicate/Delete buttons
 
+### Card Base Layer System - NEW
+- [x] Dedicated Card Base layer (always at bottom, cannot delete/move)
+- [x] Card Base covers full bleed area (-35,-35 to 785,1085)
+- [x] Pre-populated components: Image (hidden), Background, Border
+- [x] Components cannot be added/removed, only visibility toggled
+- [x] Card Base locked on canvas (no drag/resize)
+- [x] Special UI in hierarchy panel (lock icon, no reorder)
+- [x] Info panel in properties (explains Card Base purpose)
+
+### Bleed System for Print Export - NEW
+- [x] 3mm bleed support (35px at 300 DPI)
+- [x] Card Base layer extends to bleed automatically
+- [x] Bleed preview overlay (toggle in canvas controls)
+- [x] Export dialog with bleed options (0mm, 1mm, 2mm, 3mm)
+- [x] SVG export with bleed support
+- [x] PNG export with bleed support (+ resolution options)
+- [x] `applyBleed()` function extends Card Base during export
+
+### TopBar UI Reorganization - NEW
+- [x] Full-width TopBar component
+- [x] Template name input with Load/Save buttons
+- [x] Auto-save draft indicator (cloud icon)
+- [x] Dataset selector and Preview mode toggle
+- [x] Card selector (when in data mode)
+- [x] Export button opens export dialog
+- [x] Canvas controls moved below TopBar (zoom, grid, bleed)
+
 ---
 
 ## PHASE 3: ADDITIONAL COMPONENTS
@@ -271,12 +298,12 @@
 | Phase | Status | Progress |
 |-------|--------|----------|
 | Phase 1: Core Package | Complete | 28/28 |
-| Phase 2: Visual Creator | Complete | 46/46 |
+| Phase 2: Visual Creator | Complete | 68/68 |
 | Phase 3: Additional Components | In Progress | 38/39 |
 | Phase 4: Theming | Not Started | 0/3 |
 | Phase 5: Testing & Docs | Not Started | 0/4 |
 | Phase 6: Publish | In Progress | 1/3 |
-| **Total** | | **113/123 (~92%)** |
+| **Total** | | **135/145 (~93%)** |
 
 ### Phase 3 Component Priority
 
@@ -365,20 +392,25 @@ src/lib/
 src/lib/creator/               # Embeddable CardCreator component
 ├── index.ts                   # Creator exports
 ├── types.ts                   # Type definitions (ContainerState, ComponentItem, etc.)
-├── state.svelte.ts            # Factory functions & helpers
-├── CardCreator.svelte         # Main creator component (~800 lines)
+├── state.svelte.ts            # Factory functions & helpers (includes bleed constants)
+├── CardCreator.svelte         # Main creator component (~1300 lines)
 └── components/
+    ├── TopBar.svelte               # Top bar (template name, save/load, export, dataset)
     ├── HierarchyPanel.svelte       # Left sidebar (zone list, drag-reorder)
-    ├── CanvasControls.svelte       # Zoom, grid, preview mode
-    ├── CanvasPreview.svelte        # Live canvas with selection overlays
+    ├── CanvasControls.svelte       # Zoom, grid, bleed toggle
+    ├── CanvasPreview.svelte        # Live canvas with selection overlays + bleed preview
     ├── PropertiesPanel.svelte      # Right sidebar wrapper
-    ├── ComponentPanel.svelte       # Component list per zone
+    ├── ComponentPanel.svelte       # Component panel with visibility toggle
     ├── ZoneProperties.svelte       # Zone position/size/shape settings
+    ├── AddLayerPopover.svelte      # Add layer popover with templates
+    ├── AddComponentPopover.svelte  # Add component popover
     ├── AnimationControls.svelte    # Reusable animation panel
     ├── EffectsControls.svelte      # Reusable effects panel
     ├── HelpModal.svelte            # Keyboard shortcuts modal
     ├── HelpTooltip.svelte          # Help text tooltips
     ├── FieldRemapDialog.svelte     # Dataset field remapping
+    ├── RestoreDraftDialog.svelte   # Draft restoration dialog
+    ├── ExportDialog.svelte         # Export dialog with bleed options
     ├── form/                       # Reusable form components (shadcn-based)
     │   ├── index.ts               # Form component exports
     │   ├── FormSlider.svelte      # Label + Slider with value display

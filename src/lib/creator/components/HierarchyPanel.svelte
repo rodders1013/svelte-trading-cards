@@ -4,16 +4,44 @@
 	import * as Collapsible from '$lib/components/ui/collapsible';
 	import { ScrollArea } from '$lib/components/ui/scroll-area';
 	import ChevronDown from '@lucide/svelte/icons/chevron-down';
+	import ChevronRight from '@lucide/svelte/icons/chevron-right';
+	import Eye from '@lucide/svelte/icons/eye';
+	import EyeOff from '@lucide/svelte/icons/eye-off';
+	import ArrowUp from '@lucide/svelte/icons/arrow-up';
+	import ArrowDown from '@lucide/svelte/icons/arrow-down';
+	import GripVertical from '@lucide/svelte/icons/grip-vertical';
+	import Square from '@lucide/svelte/icons/square';
+	import Circle from '@lucide/svelte/icons/circle';
+	import Hexagon from '@lucide/svelte/icons/hexagon';
+	import Star from '@lucide/svelte/icons/star';
+	import Diamond from '@lucide/svelte/icons/diamond';
+	import Octagon from '@lucide/svelte/icons/octagon';
+	import Shield from '@lucide/svelte/icons/shield';
+	import Layers from '@lucide/svelte/icons/layers';
+	import Sparkles from '@lucide/svelte/icons/sparkles';
+	import CreditCard from '@lucide/svelte/icons/credit-card';
+	import Lock from '@lucide/svelte/icons/lock';
+	import Type from '@lucide/svelte/icons/type';
+	import ImageIcon from '@lucide/svelte/icons/image';
+	import PaintBucket from '@lucide/svelte/icons/paint-bucket';
+	import SquareDashed from '@lucide/svelte/icons/square-dashed';
+	import Smile from '@lucide/svelte/icons/smile';
+	import Award from '@lucide/svelte/icons/award';
+	import BarChart3 from '@lucide/svelte/icons/bar-chart-3';
+	import Minus from '@lucide/svelte/icons/minus';
+	import Gauge from '@lucide/svelte/icons/gauge';
+	import Ribbon from '@lucide/svelte/icons/ribbon';
+	import Frame from '@lucide/svelte/icons/frame';
+	import List from '@lucide/svelte/icons/list';
+	import StarIcon from '@lucide/svelte/icons/star';
 	import HelpTooltip from './HelpTooltip.svelte';
 	import type { ContainerState } from '../types';
-	import { getComponentIcon } from '../state.svelte';
+	import type { Component } from 'svelte';
 
 	let {
 		containers,
 		selectedContainerId = $bindable<string | null>(null),
 		expandedPanels,
-		templateName = $bindable(''),
-		template,
 		onTogglePanel,
 		onToggleVisibility,
 		onToggleComponentVisibility,
@@ -21,19 +49,16 @@
 		onMoveContainerDown,
 		onMoveComponentUp,
 		onMoveComponentDown,
+		onRenameContainer,
 		onDragStart,
 		onDragOver,
 		onDrop,
 		onDragEnd,
-		onSaveTemplate,
-		onLoadTemplate,
 		dragOverContainerId
 	}: {
 		containers: ContainerState[];
 		selectedContainerId: string | null;
 		expandedPanels: Set<string>;
-		templateName: string;
-		template: unknown;
 		onTogglePanel: (panelId: string) => void;
 		onToggleVisibility: (id: string) => void;
 		onToggleComponentVisibility: (componentId: string) => void;
@@ -41,36 +66,86 @@
 		onMoveContainerDown: (id: string) => void;
 		onMoveComponentUp: (componentId: string) => void;
 		onMoveComponentDown: (componentId: string) => void;
+		onRenameContainer: (id: string, name: string) => void;
 		onDragStart: (id: string) => void;
 		onDragOver: (e: DragEvent, id: string) => void;
 		onDrop: (e: DragEvent, targetId: string) => void;
 		onDragEnd: () => void;
-		onSaveTemplate: () => void;
-		onLoadTemplate: (event: Event) => void;
 		dragOverContainerId: string | null;
 	} = $props();
+
+	// Track expanded state per layer
+	let expandedLayers = $state<Set<string>>(new Set());
+
+	// Track which layer is being edited
+	let editingLayerId = $state<string | null>(null);
+	let editingName = $state('');
+
+	function toggleLayerExpand(layerId: string) {
+		const newSet = new Set(expandedLayers);
+		if (newSet.has(layerId)) {
+			newSet.delete(layerId);
+		} else {
+			newSet.add(layerId);
+		}
+		expandedLayers = newSet;
+	}
+
+	function startEditing(container: ContainerState) {
+		editingLayerId = container.id;
+		editingName = container.name;
+	}
+
+	function finishEditing() {
+		if (editingLayerId && editingName.trim()) {
+			onRenameContainer(editingLayerId, editingName.trim());
+		}
+		editingLayerId = null;
+		editingName = '';
+	}
+
+	function cancelEditing() {
+		editingLayerId = null;
+		editingName = '';
+	}
+
+	// Get shape icon component
+	function getShapeIcon(shape: string) {
+		switch (shape) {
+			case 'rect': return Square;
+			case 'circle': return Circle;
+			case 'ellipse': return Circle;
+			case 'hexagon': return Hexagon;
+			case 'octagon': return Octagon;
+			case 'diamond': return Diamond;
+			case 'shield': return Shield;
+			case 'star': return Star;
+			default: return Layers;
+		}
+	}
+
+	// Get component icon
+	function getCompIcon(type: string) {
+		switch (type) {
+			case 'text': return Type;
+			case 'image': return ImageIcon;
+			case 'background': return PaintBucket;
+			case 'border': return SquareDashed;
+			case 'icon': return Smile;
+			case 'badge': return Award;
+			case 'statpanel': return BarChart3;
+			case 'divider': return Minus;
+			case 'progressbar': return Gauge;
+			case 'ribbon': return Ribbon;
+			case 'frame': return Frame;
+			case 'list': return List;
+			case 'iconrating': return StarIcon;
+			default: return Layers;
+		}
+	}
 </script>
 
-<div class="flex w-64 flex-col gap-2">
-	<!-- Template Load/Save -->
-	<Card.Root>
-		<Card.Content class="flex items-center justify-between gap-2 px-2 py-2">
-			<input
-				type="text"
-				bind:value={templateName}
-				class="min-w-0 flex-1 rounded border border-input bg-background px-2 py-1 text-sm font-medium"
-				placeholder="Template name"
-			/>
-			<div class="flex gap-1">
-				<label class="inline-flex h-8 cursor-pointer items-center justify-center rounded-md border border-input bg-background px-2 text-sm font-medium shadow-xs hover:bg-accent hover:text-accent-foreground">
-					<input type="file" accept=".json" class="hidden" onchange={onLoadTemplate} />
-					Load
-				</label>
-				<Button size="sm" onclick={onSaveTemplate}>Save</Button>
-			</div>
-		</Card.Content>
-	</Card.Root>
-
+<div class="flex w-56 flex-col gap-2">
 	<!-- Layers -->
 	<Card.Root class="flex-1 overflow-hidden">
 		<Collapsible.Root open={expandedPanels.has('hierarchy')} onOpenChange={() => onTogglePanel('hierarchy')}>
@@ -82,197 +157,231 @@
 					Layers
 					<HelpTooltip text="Layers group components together. Animation on a layer affects all its components." />
 				</span>
-				<span class="text-sm text-muted-foreground">{containers.length}</span>
+				<span class="rounded-full bg-muted px-1.5 py-0.5 text-xs text-muted-foreground">{containers.length}</span>
 			</Collapsible.Trigger>
 
 			<Collapsible.Content>
-				<div class="border-t px-1 py-1">
-					{#each [...containers].reverse() as container, i (container.id)}
-						{@const realIndex = containers.length - 1 - i}
-						<div
-							class="group flex items-center gap-1 rounded px-2 py-1.5 text-sm transition-colors"
-							class:bg-primary={selectedContainerId === container.id}
-							class:text-primary-foreground={selectedContainerId === container.id}
-							class:hover:bg-muted={selectedContainerId !== container.id}
-							class:opacity-50={!container.visible}
-							class:border-t-2={dragOverContainerId === container.id}
-							class:border-primary={dragOverContainerId === container.id}
-							draggable="true"
-							ondragstart={() => onDragStart(container.id)}
-							ondragover={(e) => onDragOver(e, container.id)}
-							ondrop={(e) => onDrop(e, container.id)}
-							ondragend={onDragEnd}
-							role="listitem"
-						>
-							<!-- Drag handle -->
-							<span class="cursor-grab opacity-40 hover:opacity-100" title="Drag to reorder">::</span>
+				<ScrollArea class="max-h-[400px]">
+					<div class="border-t px-1 py-1">
+						{#each [...containers].reverse() as container, i (container.id)}
+							{@const realIndex = containers.length - 1 - i}
+							{@const isExpanded = expandedLayers.has(container.id)}
+							{@const isSelected = selectedContainerId === container.id}
+							{@const isCardBase = container.isCardBase === true}
+							{@const ShapeIcon = isCardBase ? CreditCard : getShapeIcon(container.clipShape)}
 
-							<!-- Container type icon -->
-							<span class="w-4 text-center">
-								{#if container.clipShape === 'rect'}
-									rect
-								{:else if container.clipShape === 'circle'}
-									circ
-								{:else if container.clipShape === 'hexagon'}
-									hex
-								{:else if container.clipShape === 'star'}
-									star
-								{:else}
-									shp
-								{/if}
-							</span>
-
-							<!-- Name (editable when selected) -->
-							<button
-								class="flex-1 truncate text-left"
-								onclick={() => (selectedContainerId = container.id)}
+							<!-- Layer Row -->
+							<div
+								class="group flex items-center gap-1 rounded px-1 py-1 text-sm transition-colors"
+								class:bg-primary={isSelected}
+								class:text-primary-foreground={isSelected}
+								class:hover:bg-muted={!isSelected}
+								class:opacity-50={!container.visible}
+								class:border-t-2={dragOverContainerId === container.id && !isCardBase}
+								class:border-primary={dragOverContainerId === container.id && !isCardBase}
+								draggable={!isCardBase}
+								ondragstart={() => !isCardBase && onDragStart(container.id)}
+								ondragover={(e) => !isCardBase && onDragOver(e, container.id)}
+								ondrop={(e) => !isCardBase && onDrop(e, container.id)}
+								ondragend={onDragEnd}
+								role="listitem"
 							>
-								{container.name}
-							</button>
-
-							<!-- Animation indicator (layer-level) -->
-							{#if container.animation && container.animation.type !== 'none'}
-								<span class="text-blue-400" title="Layer has animation: {container.animation.type}">
-									<svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-										<path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
-									</svg>
-								</span>
-							{/if}
-
-							<!-- Component count badge -->
-							<span
-								class="rounded bg-muted px-1 text-sm text-muted-foreground"
-								class:bg-primary-foreground={selectedContainerId === container.id}
-								class:text-primary={selectedContainerId === container.id}
-							>
-								{container.components.length}
-							</span>
-
-							<!-- Actions -->
-							<div class="flex gap-0.5 opacity-0 group-hover:opacity-100">
+								<!-- Expand/Collapse Toggle -->
 								<button
-									class="rounded p-0.5 hover:bg-black/10"
+									class="flex h-5 w-5 shrink-0 items-center justify-center rounded hover:bg-black/10"
 									onclick={(e) => {
 										e.stopPropagation();
-										onToggleVisibility(container.id);
+										toggleLayerExpand(container.id);
 									}}
-									title={container.visible ? 'Hide' : 'Show'}
+									title={isExpanded ? 'Collapse' : 'Expand'}
 								>
-									{container.visible ? 'vis' : 'hid'}
-								</button>
-								<button
-									class="rounded p-0.5 hover:bg-black/10"
-									onclick={(e) => {
-										e.stopPropagation();
-										onMoveContainerUp(container.id);
-									}}
-									title="Move up (forward)"
-									disabled={realIndex === containers.length - 1}
-								>
-									up
-								</button>
-								<button
-									class="rounded p-0.5 hover:bg-black/10"
-									onclick={(e) => {
-										e.stopPropagation();
-										onMoveContainerDown(container.id);
-									}}
-									title="Move down (backward)"
-									disabled={realIndex === 0}
-								>
-									dn
-								</button>
-							</div>
-						</div>
-
-						<!-- Show children components in render order -->
-						{#if selectedContainerId === container.id && container.components.length > 0}
-							<div class="mb-1 ml-6 border-l border-muted pl-2">
-								{#each container.components as comp, idx (comp.id)}
-									<div
-										class="group/comp flex items-center gap-2 py-0.5 text-sm text-muted-foreground"
-										class:opacity-50={!comp.visible}
-									>
-										<span class="w-3 text-right opacity-50">{idx + 1}</span>
-										<span>{getComponentIcon(comp.type)}</span>
-										<span class="flex-1 capitalize">{comp.type}</span>
-										<!-- Effect indicator (component-level) -->
-										{#if comp.effect}
-											<span class="text-purple-400" title="Component has effect: {comp.effect.type}">
-												<svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-													<circle cx="12" cy="12" r="3"/>
-													<path d="M12 2v2M12 20v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M2 12h2M20 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>
-												</svg>
-											</span>
+									{#if container.components.length > 0}
+										{#if isExpanded}
+											<ChevronDown class="h-3 w-3" />
+										{:else}
+											<ChevronRight class="h-3 w-3" />
 										{/if}
-										<!-- Component actions -->
-										<div class="flex gap-0.5 opacity-0 group-hover/comp:opacity-100">
-											<button
-												class="rounded p-0.5 hover:bg-black/10"
-												onclick={(e) => {
-													e.stopPropagation();
-													onToggleComponentVisibility(comp.id);
-												}}
-												title={comp.visible ? 'Hide' : 'Show'}
-											>
-												{comp.visible ? 'vis' : 'hid'}
-											</button>
-											<button
-												class="rounded p-0.5 hover:bg-black/10"
-												onclick={(e) => {
-													e.stopPropagation();
-													onMoveComponentUp(comp.id);
-												}}
-												title="Move up"
-												disabled={idx === 0}
-											>
-												up
-											</button>
-											<button
-												class="rounded p-0.5 hover:bg-black/10"
-												onclick={(e) => {
-													e.stopPropagation();
-													onMoveComponentDown(comp.id);
-												}}
-												title="Move down"
-												disabled={idx === container.components.length - 1}
-											>
-												dn
-											</button>
-										</div>
-									</div>
-								{/each}
+									{/if}
+								</button>
+
+								<!-- Drag handle (hidden for Card Base) -->
+								{#if isCardBase}
+									<span class="opacity-40" title="Card Base layer (fixed)">
+										<Lock class="h-3 w-3" />
+									</span>
+								{:else}
+									<span class="cursor-grab opacity-40 hover:opacity-100" title="Drag to reorder">
+										<GripVertical class="h-3 w-3" />
+									</span>
+								{/if}
+
+								<!-- Shape icon (Card icon for Card Base, shape icon for others) -->
+								<ShapeIcon
+									class="h-3.5 w-3.5 shrink-0 {isCardBase ? 'opacity-100' : container.clipContent ? 'opacity-100' : 'opacity-60'}"
+									fill={isCardBase ? 'none' : container.clipContent ? 'currentColor' : 'none'}
+								/>
+
+								<!-- Name (editable on double-click, but not for Card Base) -->
+								{#if editingLayerId === container.id && !isCardBase}
+									<input
+										type="text"
+										bind:value={editingName}
+										class="flex-1 rounded border border-input bg-background px-1 text-xs text-foreground"
+										onblur={finishEditing}
+										onkeydown={(e) => {
+											if (e.key === 'Enter') finishEditing();
+											if (e.key === 'Escape') cancelEditing();
+										}}
+										onclick={(e) => e.stopPropagation()}
+										autofocus
+									/>
+								{:else}
+									<button
+										class="flex-1 truncate text-left text-xs"
+										onclick={() => (selectedContainerId = container.id)}
+										ondblclick={(e) => {
+											if (isCardBase) return;
+											e.stopPropagation();
+											startEditing(container);
+										}}
+										title={isCardBase ? 'Card Base layer (extends to bleed for printing)' : 'Double-click to rename'}
+									>
+										{container.name}
+									</button>
+								{/if}
+
+								<!-- Animation indicator -->
+								{#if container.animation && container.animation.type !== 'none'}
+									<Sparkles class="h-3 w-3 shrink-0 text-blue-400" />
+								{/if}
+
+								<!-- Component count -->
+								<span
+									class="rounded px-1 text-xs"
+									class:bg-primary-foreground={isSelected}
+									class:text-primary={isSelected}
+									class:bg-muted={!isSelected}
+									class:text-muted-foreground={!isSelected}
+								>
+									{container.components.length}
+								</span>
+
+								<!-- Actions (limited for Card Base) -->
+								<div class="flex shrink-0 items-center gap-0.5 opacity-0 transition-opacity group-hover:opacity-100">
+									<button
+										class="flex h-5 w-5 items-center justify-center rounded hover:bg-black/10"
+										onclick={(e) => {
+											e.stopPropagation();
+											onToggleVisibility(container.id);
+										}}
+										title={container.visible ? 'Hide layer' : 'Show layer'}
+									>
+										{#if container.visible}
+											<Eye class="h-3 w-3" />
+										{:else}
+											<EyeOff class="h-3 w-3" />
+										{/if}
+									</button>
+									{#if !isCardBase}
+										<button
+											class="flex h-5 w-5 items-center justify-center rounded hover:bg-black/10 disabled:opacity-30"
+											onclick={(e) => {
+												e.stopPropagation();
+												onMoveContainerUp(container.id);
+											}}
+											title="Move up (forward)"
+											disabled={realIndex === containers.length - 1}
+										>
+											<ArrowUp class="h-3 w-3" />
+										</button>
+										<button
+											class="flex h-5 w-5 items-center justify-center rounded hover:bg-black/10 disabled:opacity-30"
+											onclick={(e) => {
+												e.stopPropagation();
+												onMoveContainerDown(container.id);
+											}}
+											title="Move down (backward)"
+											disabled={realIndex === 0}
+										>
+											<ArrowDown class="h-3 w-3" />
+										</button>
+									{/if}
+								</div>
 							</div>
+
+							<!-- Components (expandable) -->
+							{#if isExpanded && container.components.length > 0}
+								<div class="mb-1 ml-4 border-l border-muted pl-2">
+									{#each container.components as comp, idx (comp.id)}
+									{@const CompIcon = getCompIcon(comp.type)}
+										<div
+											class="group/comp flex items-center gap-1.5 rounded px-1 py-0.5 text-xs text-muted-foreground hover:bg-muted/50"
+											class:opacity-50={!comp.visible}
+										>
+											<!-- Index -->
+											<span class="w-3 text-right opacity-40">{idx + 1}</span>
+
+											<!-- Component icon -->
+											<CompIcon class="h-3 w-3 shrink-0 opacity-60" />
+
+											<!-- Component name -->
+											<span class="flex-1 truncate capitalize">{comp.type}</span>
+
+											<!-- Effect indicator -->
+											{#if comp.effect && comp.effect.type !== 'none'}
+												<Sparkles class="h-2.5 w-2.5 shrink-0 text-purple-400" />
+											{/if}
+
+											<!-- Component actions -->
+											<div class="flex shrink-0 items-center gap-0.5 opacity-0 transition-opacity group-hover/comp:opacity-100">
+												<button
+													class="flex h-4 w-4 items-center justify-center rounded hover:bg-black/10"
+													onclick={(e) => {
+														e.stopPropagation();
+														onToggleComponentVisibility(comp.id);
+													}}
+													title={comp.visible ? 'Hide' : 'Show'}
+												>
+													{#if comp.visible}
+														<Eye class="h-2.5 w-2.5" />
+													{:else}
+														<EyeOff class="h-2.5 w-2.5" />
+													{/if}
+												</button>
+												<button
+													class="flex h-4 w-4 items-center justify-center rounded hover:bg-black/10 disabled:opacity-30"
+													onclick={(e) => {
+														e.stopPropagation();
+														onMoveComponentUp(comp.id);
+													}}
+													title="Move up"
+													disabled={idx === 0}
+												>
+													<ArrowUp class="h-2.5 w-2.5" />
+												</button>
+												<button
+													class="flex h-4 w-4 items-center justify-center rounded hover:bg-black/10 disabled:opacity-30"
+													onclick={(e) => {
+														e.stopPropagation();
+														onMoveComponentDown(comp.id);
+													}}
+													title="Move down"
+													disabled={idx === container.components.length - 1}
+												>
+													<ArrowDown class="h-2.5 w-2.5" />
+												</button>
+											</div>
+										</div>
+									{/each}
+								</div>
+							{/if}
+						{/each}
+
+						{#if containers.length === 0}
+							<p class="py-4 text-center text-sm text-muted-foreground">Click "+ Layer" to add a layer</p>
 						{/if}
-					{/each}
-
-					{#if containers.length === 0}
-						<p class="py-4 text-center text-sm text-muted-foreground">Click + to add a layer</p>
-					{/if}
-				</div>
-			</Collapsible.Content>
-		</Collapsible.Root>
-	</Card.Root>
-
-	<!-- Template JSON Preview (collapsible) -->
-	<Card.Root>
-		<Collapsible.Root open={expandedPanels.has('json')} onOpenChange={() => onTogglePanel('json')}>
-			<Collapsible.Trigger class="flex w-full items-center justify-between px-3 py-2 hover:bg-muted/50">
-				<span class="flex items-center gap-2 text-sm font-medium">
-					<ChevronDown
-						class="h-3 w-3 shrink-0 transition-transform duration-200 {expandedPanels.has('json') ? '' : '-rotate-90'}"
-					/>
-					Template JSON
-				</span>
-			</Collapsible.Trigger>
-			<Collapsible.Content>
-				<Card.Content class="border-t">
-					<div class="h-40 overflow-hidden rounded bg-muted">
-						<ScrollArea class="h-full">
-							<pre class="p-2 text-sm">{JSON.stringify(template, null, 2)}</pre>
-						</ScrollArea>
 					</div>
-				</Card.Content>
+				</ScrollArea>
 			</Collapsible.Content>
 		</Collapsible.Root>
 	</Card.Root>

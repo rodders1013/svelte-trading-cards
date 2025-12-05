@@ -7,18 +7,22 @@
 		component,
 		dataFields,
 		expanded = $bindable(true),
+		isCardBase = false,
 		onUpdate,
 		onRemove,
 		onMoveUp,
-		onMoveDown
+		onMoveDown,
+		onToggleVisibility
 	}: {
 		component: ImageComponent;
 		dataFields: DataFieldOption[];
 		expanded: boolean;
+		isCardBase?: boolean;
 		onUpdate: (key: keyof Omit<ImageComponent, 'type' | 'id'>, value: unknown) => void;
 		onRemove: () => void;
 		onMoveUp: () => void;
 		onMoveDown: () => void;
+		onToggleVisibility?: () => void;
 	} = $props();
 
 	// Filter to image fields based on type or naming convention
@@ -37,9 +41,14 @@
 	title="Image"
 	badge={{ text: 'img', color: 'bg-pink-600' }}
 	bind:expanded
+	visible={component.visible}
+	showVisibilityToggle={isCardBase}
+	canRemove={!isCardBase}
+	canMove={!isCardBase}
 	{onRemove}
 	{onMoveUp}
 	{onMoveDown}
+	{onToggleVisibility}
 >
 	<FormSelect
 		label="Data Field"

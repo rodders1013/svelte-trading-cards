@@ -133,6 +133,21 @@ The `CardCreator` component is a full-featured template designer you can embed i
 <button onclick={() => downloadPNGClient(svgElement)}>Download PNG</button>
 ```
 
+### 4. Export with Bleed (for Print)
+
+```typescript
+// SVG with 3mm bleed
+downloadSVG(svgElement, { filename: 'my-card', bleedMm: 3 });
+
+// PNG at 2x resolution with 3mm bleed
+downloadPNGClient(svgElement, { filename: 'my-card', bleedMm: 3, scale: 2 });
+```
+
+The visual creator includes an **Export** button that opens a dialog with:
+- Format selection (PNG/SVG)
+- Bleed options (0mm, 1mm, 2mm, 3mm)
+- Resolution options for PNG (1x, 2x, 3x)
+
 ## Fonts System
 
 The library includes 37+ web-safe fonts organized by category, plus dataset-specific brand fonts.
@@ -412,6 +427,18 @@ All visual components support both `animation` and `effect` props:
 | Height | 1050px |
 | Corner Radius | 26px |
 | Physical | 2.5" x 3.5" at 300 DPI |
+
+### Bleed for Print
+
+For professional printing, cards support bleed areas:
+
+| Property | Value |
+|----------|-------|
+| Max Bleed | 3mm (35px) |
+| Bleed Width | 820px |
+| Bleed Height | 1120px |
+
+The **Card Base layer** automatically covers the bleed area. When you add a background image, it fills the bleed from the start - no manual adjustment needed.
 
 ## Development
 

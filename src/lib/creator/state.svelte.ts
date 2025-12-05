@@ -1,4 +1,13 @@
 import { CARD_WIDTH, CARD_HEIGHT } from '$lib/types';
+
+// Bleed constants - 3mm max bleed at 300 DPI (11.811 px/mm)
+export const MAX_BLEED_MM = 3;
+export const PX_PER_MM = 11.811;
+export const MAX_BLEED_PX = Math.round(MAX_BLEED_MM * PX_PER_MM); // ~35px
+
+// Card Base dimensions (includes bleed area)
+export const CARD_BASE_WIDTH = CARD_WIDTH + MAX_BLEED_PX * 2;   // 820
+export const CARD_BASE_HEIGHT = CARD_HEIGHT + MAX_BLEED_PX * 2; // 1120
 import type { CardTemplate, ComponentDefinition } from '$lib/types';
 import type { IconData } from '$lib/components/icons';
 import type {
@@ -34,20 +43,34 @@ export function generateId(): string {
 }
 
 // Create initial card background layer
+// Card Base covers the full bleed area (-35,-35 to 785,1085) but displays clipped to 750x1050
 export function createInitialCardBackground(): ContainerState {
 	return {
 		id: 'card-base',
 		name: 'Card Base',
 		visible: true,
 		locked: false,
-		x: 0,
-		y: 0,
-		width: 750,
-		height: 1050,
+		// Position at negative bleed offset so it covers bleed area
+		x: -MAX_BLEED_PX,
+		y: -MAX_BLEED_PX,
+		// Size includes bleed on all sides
+		width: CARD_BASE_WIDTH,
+		height: CARD_BASE_HEIGHT,
 		clipShape: 'rect',
-		radius: 26,
+		radius: 26 + MAX_BLEED_PX, // Extend radius to account for bleed
 		clipContent: false,
+		isCardBase: true,
 		components: [
+			// Image layer (hidden by default) - for background images
+			{
+				type: 'image',
+				id: generateComponentId('image'),
+				visible: false,
+				dataField: '',
+				opacity: 1,
+				preserveAspectRatio: 'xMidYMid slice'
+			},
+			// Background fill
 			{
 				type: 'background',
 				id: generateComponentId('background'),
@@ -61,12 +84,13 @@ export function createInitialCardBackground(): ContainerState {
 				patternColor: '#ffffff',
 				patternOpacity: 0.3
 			},
+			// Border - width includes bleed so it extends to edge when exported
 			{
 				type: 'border',
 				id: generateComponentId('border'),
 				visible: true,
 				color: '#3b82f6',
-				width: 8,
+				width: 8 + MAX_BLEED_PX, // 8px visible + 35px bleed = 43px total
 				opacity: 1,
 				glow: { enabled: false, color: '#3b82f6', intensity: 0.5, blur: 10, animated: false, speed: 2 },
 				holographic: { enabled: false, secondaryColor: '#ec4899', speed: 3 },

@@ -38,9 +38,9 @@
 </script>
 
 <div class={className}>
-	<Label class="mb-1 text-sm text-muted-foreground">{label}</Label>
+	<Label class="mb-0.5 text-xs text-muted-foreground">{label}</Label>
 	<Select.Root type="single" {value} onValueChange={handleValueChange}>
-		<Select.Trigger class="w-full">
+		<Select.Trigger class="h-8 w-full text-sm">
 			{#if value}
 				{selectedLabel}
 			{:else}

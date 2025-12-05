@@ -20,7 +20,7 @@
 	}
 </script>
 
-<div class="flex items-center justify-between gap-2 {className}">
-	<Label class="text-sm">{label}</Label>
+<div class="flex items-center justify-between gap-1.5 {className}">
+	<Label class="text-xs">{label}</Label>
 	<Switch {checked} onCheckedChange={handleChange} />
 </div>

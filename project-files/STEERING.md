@@ -68,6 +68,25 @@
 | Corner Radius | 26px |
 | Physical Size | 2.5" x 3.5" at 300 DPI |
 
+### Bleed Constants (for print export)
+
+| Constant | Value | Location |
+|----------|-------|----------|
+| `MAX_BLEED_MM` | 3 | state.svelte.ts |
+| `PX_PER_MM` | 11.811 | state.svelte.ts |
+| `MAX_BLEED_PX` | 35 | state.svelte.ts |
+| `CARD_BASE_WIDTH` | 820 | state.svelte.ts |
+| `CARD_BASE_HEIGHT` | 1120 | state.svelte.ts |
+
+### Card Base Layer
+
+The Card Base layer is a special protected layer:
+- Position: (-35, -35) to cover bleed area
+- Size: 820 x 1120 (includes bleed)
+- `isCardBase: true` flag in ContainerState
+- Cannot be deleted, moved, resized, or renamed
+- Has 3 fixed components: Image, Background, Border
+
 ---
 
 ## Component Development

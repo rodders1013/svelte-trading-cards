@@ -7,11 +7,23 @@
 
 import { CARD_WIDTH, CARD_HEIGHT } from '../types/CardTemplate.js';
 
+/** Pixels per millimeter at 300 DPI (750px / 63.5mm = 11.811) */
+const PX_PER_MM = 11.811;
+
 export interface DownloadOptions {
 	/** Filename without extension. Defaults to 'card' */
 	filename?: string;
 	/** Include XML declaration and doctype. Defaults to true */
 	includeDeclaration?: boolean;
+	/** Bleed amount in millimeters (0-3). Defaults to 0 (no bleed) */
+	bleedMm?: number;
+}
+
+export interface BleedOptions {
+	/** Bleed amount in millimeters */
+	bleedMm: number;
+	/** ID of the Card Base layer group (defaults to 'card-base') */
+	cardBaseId?: string;
 }
 
 /**
@@ -33,6 +45,129 @@ export function sanitizeFilename(filename: string): string {
 			// Trim whitespace
 			.trim() || 'card'
 	);
+}
+
+/**
+ * Applies bleed to an SVG element by expanding the canvas and extending the Card Base layer.
+ * Returns a new SVG element - does not modify the original.
+ *
+ * @param svgElement - The original SVG element
+ * @param options - Bleed options
+ * @returns A new SVG element with bleed applied
+ */
+export function applyBleed(svgElement: SVGSVGElement, options: BleedOptions): SVGSVGElement {
+	const { bleedMm, cardBaseId = 'card-base' } = options;
+
+	if (bleedMm <= 0) {
+		return svgElement;
+	}
+
+	// Calculate bleed in pixels
+	const bleedPx = Math.round(bleedMm * PX_PER_MM);
+
+	// Clone the SVG
+	const clonedSvg = svgElement.cloneNode(true) as SVGSVGElement;
+
+	// Calculate new dimensions
+	const newWidth = CARD_WIDTH + bleedPx * 2;
+	const newHeight = CARD_HEIGHT + bleedPx * 2;
+
+	// Update SVG dimensions and viewBox
+	clonedSvg.setAttribute('width', String(newWidth));
+	clonedSvg.setAttribute('height', String(newHeight));
+	clonedSvg.setAttribute('viewBox', `0 0 ${newWidth} ${newHeight}`);
+
+	// Find all top-level groups and process them
+	const groups = clonedSvg.querySelectorAll(':scope > g');
+
+	groups.forEach((group) => {
+		const groupId = group.getAttribute('id') || '';
+		const isCardBase = groupId === cardBaseId;
+
+		if (isCardBase) {
+			// Extend the Card Base to cover the bleed area
+			// Update the group's clip path and children
+
+			// Find and update the clip path definition
+			const clipPathId = `clip-${groupId}`;
+			const clipPath = clonedSvg.querySelector(`#${clipPathId}`);
+			if (clipPath) {
+				// Update clip path dimensions
+				const clipRect = clipPath.querySelector('rect');
+				if (clipRect) {
+					clipRect.setAttribute('x', '0');
+					clipRect.setAttribute('y', '0');
+					clipRect.setAttribute('width', String(newWidth));
+					clipRect.setAttribute('height', String(newHeight));
+				}
+			}
+
+			// Update the group's transform to position at 0,0
+			group.setAttribute('transform', 'translate(0, 0)');
+
+			// Find and extend background elements
+			const backgrounds = group.querySelectorAll('rect[fill], rect[class*="background"]');
+			backgrounds.forEach((bg) => {
+				const rect = bg as SVGRectElement;
+				// If rect is at 0,0 and full size, extend it to bleed size
+				const x = parseFloat(rect.getAttribute('x') || '0');
+				const y = parseFloat(rect.getAttribute('y') || '0');
+				const w = parseFloat(rect.getAttribute('width') || '0');
+				const h = parseFloat(rect.getAttribute('height') || '0');
+
+				if (x === 0 && y === 0 && w >= CARD_WIDTH - 10 && h >= CARD_HEIGHT - 10) {
+					rect.setAttribute('width', String(newWidth));
+					rect.setAttribute('height', String(newHeight));
+				}
+			});
+
+			// Find and extend border elements (typically stroke rects)
+			const borders = group.querySelectorAll('rect[stroke]');
+			borders.forEach((border) => {
+				const rect = border as SVGRectElement;
+				const x = parseFloat(rect.getAttribute('x') || '0');
+				const y = parseFloat(rect.getAttribute('y') || '0');
+				const w = parseFloat(rect.getAttribute('width') || '0');
+				const h = parseFloat(rect.getAttribute('height') || '0');
+				const strokeWidth = parseFloat(rect.getAttribute('stroke-width') || '0');
+
+				// If this is an edge-to-edge border, extend it
+				if (x <= strokeWidth && y <= strokeWidth && w >= CARD_WIDTH - strokeWidth * 2 && h >= CARD_HEIGHT - strokeWidth * 2) {
+					rect.setAttribute('x', String(strokeWidth / 2));
+					rect.setAttribute('y', String(strokeWidth / 2));
+					rect.setAttribute('width', String(newWidth - strokeWidth));
+					rect.setAttribute('height', String(newHeight - strokeWidth));
+				}
+			});
+
+			// Also handle pattern backgrounds (foreignObject or pattern fills)
+			const patterns = group.querySelectorAll('pattern');
+			patterns.forEach((pattern) => {
+				// Patterns automatically tile, but we may need to update their parent rect
+				const parentRect = pattern.parentElement?.querySelector('rect[fill*="url"]');
+				if (parentRect) {
+					parentRect.setAttribute('width', String(newWidth));
+					parentRect.setAttribute('height', String(newHeight));
+				}
+			});
+		} else {
+			// Offset non-Card Base groups by bleed amount
+			const currentTransform = group.getAttribute('transform') || '';
+			const translateMatch = currentTransform.match(/translate\(([^,)]+),?\s*([^)]*)\)/);
+
+			let x = 0;
+			let y = 0;
+			if (translateMatch) {
+				x = parseFloat(translateMatch[1]) || 0;
+				y = parseFloat(translateMatch[2]) || 0;
+			}
+
+			// Add bleed offset to position
+			group.setAttribute('transform', `translate(${x + bleedPx}, ${y + bleedPx})`);
+		}
+	});
+
+	return clonedSvg;
 }
 
 /**
@@ -87,7 +222,7 @@ export function svgToBlob(svgElement: SVGSVGElement): Blob {
  * The SVG is serialized from the DOM and downloaded directly.
  *
  * @param svgElement - The SVG element to download (from CardCanvas)
- * @param options - Download options
+ * @param options - Download options including bleed
  *
  * @example
  * ```svelte
@@ -97,7 +232,7 @@ export function svgToBlob(svgElement: SVGSVGElement): Blob {
  *   let svgElement: SVGSVGElement;
  *
  *   function handleDownload() {
- *     downloadSVG(svgElement, { filename: 'my-card' });
+ *     downloadSVG(svgElement, { filename: 'my-card', bleedMm: 3 });
  *   }
  * </script>
  *
@@ -106,10 +241,13 @@ export function svgToBlob(svgElement: SVGSVGElement): Blob {
  * ```
  */
 export function downloadSVG(svgElement: SVGSVGElement, options: DownloadOptions = {}): void {
-	const { filename = 'card', includeDeclaration = true } = options;
+	const { filename = 'card', bleedMm = 0 } = options;
 	const safeFilename = sanitizeFilename(filename);
 
-	const blob = svgToBlob(svgElement);
+	// Apply bleed if specified
+	const svgToExport = bleedMm > 0 ? applyBleed(svgElement, { bleedMm }) : svgElement;
+
+	const blob = svgToBlob(svgToExport);
 	const url = URL.createObjectURL(blob);
 
 	const link = document.createElement('a');
@@ -131,16 +269,20 @@ export function downloadSVG(svgElement: SVGSVGElement, options: DownloadOptions 
  *
  * @param svgElement - The SVG element to convert
  * @param scale - Scale factor for the output (default: 1)
+ * @param bleedMm - Bleed amount in millimeters (default: 0)
  * @returns A promise that resolves to a Blob containing the PNG
  *
  * @example
  * ```typescript
- * const pngBlob = await svgToPNGClient(svgElement, 2); // 2x resolution
+ * const pngBlob = await svgToPNGClient(svgElement, 2, 3); // 2x resolution with 3mm bleed
  * ```
  */
-export async function svgToPNGClient(svgElement: SVGSVGElement, scale = 1): Promise<Blob> {
-	const width = (svgElement.width.baseVal.value || CARD_WIDTH) * scale;
-	const height = (svgElement.height.baseVal.value || CARD_HEIGHT) * scale;
+export async function svgToPNGClient(svgElement: SVGSVGElement, scale = 1, bleedMm = 0): Promise<Blob> {
+	// Apply bleed if specified
+	const svgToRender = bleedMm > 0 ? applyBleed(svgElement, { bleedMm }) : svgElement;
+
+	const width = (svgToRender.width.baseVal.value || CARD_WIDTH) * scale;
+	const height = (svgToRender.height.baseVal.value || CARD_HEIGHT) * scale;
 
 	const canvas = document.createElement('canvas');
 	canvas.width = width;
@@ -151,7 +293,7 @@ export async function svgToPNGClient(svgElement: SVGSVGElement, scale = 1): Prom
 		throw new Error('Could not get canvas context');
 	}
 
-	const svgString = serializeSVG(svgElement, true);
+	const svgString = serializeSVG(svgToRender, true);
 	const svgBlob = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' });
 	const url = URL.createObjectURL(svgBlob);
 
@@ -188,16 +330,16 @@ export async function svgToPNGClient(svgElement: SVGSVGElement, scale = 1): Prom
  * For production use with custom fonts, use server-side rendering.
  *
  * @param svgElement - The SVG element to download
- * @param options - Download options including scale
+ * @param options - Download options including scale and bleed
  */
 export async function downloadPNGClient(
 	svgElement: SVGSVGElement,
 	options: DownloadOptions & { scale?: number } = {}
 ): Promise<void> {
-	const { filename = 'card', scale = 1 } = options;
+	const { filename = 'card', scale = 1, bleedMm = 0 } = options;
 	const safeFilename = sanitizeFilename(filename);
 
-	const blob = await svgToPNGClient(svgElement, scale);
+	const blob = await svgToPNGClient(svgElement, scale, bleedMm);
 	const url = URL.createObjectURL(blob);
 
 	const link = document.createElement('a');

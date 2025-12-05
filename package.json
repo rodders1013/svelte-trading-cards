@@ -86,6 +86,7 @@
 	"dependencies": {
 		"@iconify/utils": "^3.1.0",
 		"@resvg/resvg-js": "^2.6.2",
+		"runed": "^0.37.0",
 		"zod": "^4.1.13"
 	}
 }

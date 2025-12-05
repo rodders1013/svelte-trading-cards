@@ -9,8 +9,10 @@
 		previewData,
 		containers,
 		selectedContainerId = $bindable<string | null>(null),
+		svgElement = $bindable<SVGSVGElement | null>(null),
 		zoomLevel,
 		showGrid,
+		showBleed,
 		canvasInteraction,
 		interactionContainerId,
 		activeResizeHandle,
@@ -23,8 +25,10 @@
 		previewData: Record<string, unknown>;
 		containers: ContainerState[];
 		selectedContainerId: string | null;
+		svgElement?: SVGSVGElement | null;
 		zoomLevel: number;
 		showGrid: boolean;
+		showBleed: boolean;
 		canvasInteraction: 'idle' | 'dragging' | 'resizing';
 		interactionContainerId: string | null;
 		activeResizeHandle: ResizeHandle | null;
@@ -33,6 +37,10 @@
 		onStartDrag: (e: PointerEvent, containerId: string) => void;
 		onStartResize: (e: PointerEvent, containerId: string, handle: ResizeHandle) => void;
 	} = $props();
+
+	// Bleed calculation: 3mm at 300 DPI on a 63.5mm wide card (750px)
+	// 750px / 63.5mm = 11.811 px/mm, so 3mm = ~35px
+	const BLEED_PX = 35;
 
 	const zoomScale = $derived(zoomLevel / 100);
 	const canvasWidth = $derived(375 * zoomScale);
@@ -45,7 +53,7 @@
 		style="width: {canvasWidth}px; cursor: {canvasInteraction === 'dragging' ? 'grabbing' : canvasInteraction === 'resizing' && activeResizeHandle ? getResizeCursor(activeResizeHandle) : 'default'};"
 	>
 		<div class="aspect-[750/1050] w-full">
-			<CardCanvas {template} data={previewData} />
+			<CardCanvas {template} data={previewData} bind:svgElement />
 		</div>
 
 		<!-- Grid Overlay -->
@@ -71,24 +79,73 @@
 			</div>
 		{/if}
 
+		<!-- Bleed Area Overlay (3mm = 35px at 300 DPI) -->
+		{#if showBleed}
+			<div class="pointer-events-none absolute inset-0">
+				<svg class="h-full w-full" viewBox="0 0 750 1050" preserveAspectRatio="none">
+					<!-- Bleed zone - semi-transparent red overlay on edges -->
+					<!-- Top bleed -->
+					<rect x="0" y="0" width="750" height={BLEED_PX} fill="rgba(239,68,68,0.25)" />
+					<!-- Bottom bleed -->
+					<rect x="0" y={1050 - BLEED_PX} width="750" height={BLEED_PX} fill="rgba(239,68,68,0.25)" />
+					<!-- Left bleed -->
+					<rect x="0" y={BLEED_PX} width={BLEED_PX} height={1050 - BLEED_PX * 2} fill="rgba(239,68,68,0.25)" />
+					<!-- Right bleed -->
+					<rect x={750 - BLEED_PX} y={BLEED_PX} width={BLEED_PX} height={1050 - BLEED_PX * 2} fill="rgba(239,68,68,0.25)" />
+
+					<!-- Bleed line (dashed) - shows where content may be cut -->
+					<rect
+						x={BLEED_PX}
+						y={BLEED_PX}
+						width={750 - BLEED_PX * 2}
+						height={1050 - BLEED_PX * 2}
+						fill="none"
+						stroke="rgba(239,68,68,0.8)"
+						stroke-width="2"
+						stroke-dasharray="8,4"
+						rx="20"
+					/>
+
+					<!-- Corner marks for visual reference -->
+					<!-- Top-left -->
+					<line x1={BLEED_PX} y1="0" x2={BLEED_PX} y2="15" stroke="rgba(239,68,68,0.9)" stroke-width="2" />
+					<line x1="0" y1={BLEED_PX} x2="15" y2={BLEED_PX} stroke="rgba(239,68,68,0.9)" stroke-width="2" />
+					<!-- Top-right -->
+					<line x1={750 - BLEED_PX} y1="0" x2={750 - BLEED_PX} y2="15" stroke="rgba(239,68,68,0.9)" stroke-width="2" />
+					<line x1={750 - 15} y1={BLEED_PX} x2="750" y2={BLEED_PX} stroke="rgba(239,68,68,0.9)" stroke-width="2" />
+					<!-- Bottom-left -->
+					<line x1={BLEED_PX} y1={1050 - 15} x2={BLEED_PX} y2="1050" stroke="rgba(239,68,68,0.9)" stroke-width="2" />
+					<line x1="0" y1={1050 - BLEED_PX} x2="15" y2={1050 - BLEED_PX} stroke="rgba(239,68,68,0.9)" stroke-width="2" />
+					<!-- Bottom-right -->
+					<line x1={750 - BLEED_PX} y1={1050 - 15} x2={750 - BLEED_PX} y2="1050" stroke="rgba(239,68,68,0.9)" stroke-width="2" />
+					<line x1={750 - 15} y1={1050 - BLEED_PX} x2="750" y2={1050 - BLEED_PX} stroke="rgba(239,68,68,0.9)" stroke-width="2" />
+
+					<!-- Label -->
+					<text x="375" y="20" text-anchor="middle" font-size="14" fill="rgba(239,68,68,0.9)" font-weight="500">3mm Bleed Zone</text>
+				</svg>
+			</div>
+		{/if}
+
 		<!-- Selection overlay with drag/resize support -->
 		<div class="pointer-events-none absolute inset-0">
-			{#each containers as container (container.id)}
+			{#each containers as container, index (container.id)}
 				{@const scale = canvasScale}
 				{@const isSelected = selectedContainerId === container.id}
-				{@const isLocked = container.locked}
+				{@const isLocked = container.locked || container.isCardBase}
+				{@const isCardBase = container.isCardBase === true}
 				{@const isDraggingThis = canvasInteraction === 'dragging' && interactionContainerId === container.id}
+				{@const layerZIndex = index + 1}
 				{#if container.visible}
 					<!-- Zone overlay -->
 					<div
-						class="pointer-events-auto absolute {isSelected ? 'ring-1 ring-blue-400/50' : 'hover:ring-1 hover:ring-blue-300/40'} {isDraggingThis ? 'opacity-80' : ''}"
+						class="pointer-events-auto absolute {isSelected ? 'ring-2 ring-blue-500' : 'hover:ring-1 hover:ring-blue-300/40'} {isDraggingThis ? 'opacity-80' : ''}"
 						style="
 							left: {container.x * scale}px;
 							top: {container.y * scale}px;
 							width: {container.width * scale}px;
 							height: {container.height * scale}px;
 							cursor: {isLocked ? 'not-allowed' : isSelected ? 'grab' : 'pointer'};
-							z-index: {isSelected ? 1000 : 'auto'};
+							z-index: {layerZIndex};
 						"
 						role="button"
 						tabindex="0"
@@ -119,6 +176,7 @@
 					{#if isSelected && !isLocked && canvasInteraction === 'idle' && !isTransitioning}
 						{@const handleSize = 12}
 						{@const halfHandle = handleSize / 2}
+						{@const handleZIndex = layerZIndex + 100}
 						<!-- Corner handles -->
 						<div
 							class="pointer-events-auto absolute rounded-full border-2 border-white bg-blue-500 transition-all hover:scale-110 hover:bg-blue-400"
@@ -128,7 +186,7 @@
 								width: {handleSize}px;
 								height: {handleSize}px;
 								cursor: nwse-resize;
-								z-index: 1001;
+								z-index: {handleZIndex};
 							"
 							role="slider"
 							tabindex="0"
@@ -144,7 +202,7 @@
 								width: {handleSize}px;
 								height: {handleSize}px;
 								cursor: nesw-resize;
-								z-index: 1001;
+								z-index: {handleZIndex};
 							"
 							role="slider"
 							tabindex="0"
@@ -160,7 +218,7 @@
 								width: {handleSize}px;
 								height: {handleSize}px;
 								cursor: nesw-resize;
-								z-index: 1001;
+								z-index: {handleZIndex};
 							"
 							role="slider"
 							tabindex="0"
@@ -176,7 +234,7 @@
 								width: {handleSize}px;
 								height: {handleSize}px;
 								cursor: nwse-resize;
-								z-index: 1001;
+								z-index: {handleZIndex};
 							"
 							role="slider"
 							tabindex="0"
@@ -193,7 +251,7 @@
 								width: {handleSize}px;
 								height: {handleSize}px;
 								cursor: ns-resize;
-								z-index: 1001;
+								z-index: {handleZIndex};
 							"
 							role="slider"
 							tabindex="0"
@@ -209,7 +267,7 @@
 								width: {handleSize}px;
 								height: {handleSize}px;
 								cursor: ns-resize;
-								z-index: 1001;
+								z-index: {handleZIndex};
 							"
 							role="slider"
 							tabindex="0"
@@ -225,7 +283,7 @@
 								width: {handleSize}px;
 								height: {handleSize}px;
 								cursor: ew-resize;
-								z-index: 1001;
+								z-index: {handleZIndex};
 							"
 							role="slider"
 							tabindex="0"
@@ -241,7 +299,7 @@
 								width: {handleSize}px;
 								height: {handleSize}px;
 								cursor: ew-resize;
-								z-index: 1001;
+								z-index: {handleZIndex};
 							"
 							role="slider"
 							tabindex="0"

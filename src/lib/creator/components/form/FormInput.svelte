@@ -33,6 +33,6 @@
 </script>
 
 <div class={className}>
-	<Label class="mb-1 text-sm text-muted-foreground">{label}</Label>
-	<Input {type} {value} {min} {max} {step} {placeholder} onchange={handleChange} class="h-8" />
+	<Label class="mb-0.5 text-xs text-muted-foreground">{label}</Label>
+	<Input {type} {value} {min} {max} {step} {placeholder} onchange={handleChange} class="h-8 text-sm" />
 </div>

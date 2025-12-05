@@ -320,6 +320,8 @@ export interface ContainerState {
 	clipContent: boolean;
 	animation?: AnimationConfig;
 	components: ComponentItem[];
+	/** If true, this is the Card Base layer - cannot be deleted/moved and extends to bleed during export */
+	isCardBase?: boolean;
 }
 
 export type ResizeHandle = 'nw' | 'n' | 'ne' | 'e' | 'se' | 's' | 'sw' | 'w';

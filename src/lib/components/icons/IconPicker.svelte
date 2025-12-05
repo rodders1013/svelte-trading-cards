@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { useDebounce } from 'runed';
 	import { Button } from '$lib/components/ui/button';
 	import type { IconData } from './Icon.svelte';
 
@@ -14,6 +15,9 @@
 	let searchResults = $state<string[]>([]);
 	let isLoading = $state(false);
 	let errorMessage = $state('');
+
+	// Debounced search using runed
+	const debouncedSearch = useDebounce(() => searchIcons(), 300);
 
 	// Icon set filter - Only permissive licenses (MIT, Apache 2.0, ISC, CC0 1.0)
 	// All sets below are free for commercial use with NO attribution required
@@ -61,19 +65,6 @@
 		{ value: 'temaki', label: 'Temaki - Maps (543)' }
 	];
 
-	// Debounce timer
-	let debounceTimer: ReturnType<typeof setTimeout> | null = null;
-
-	// Cleanup debounce timer on component unmount
-	$effect(() => {
-		return () => {
-			if (debounceTimer) {
-				clearTimeout(debounceTimer);
-				debounceTimer = null;
-			}
-		};
-	});
-
 	// Search icons via Iconify API
 	async function searchIcons() {
 		if (!searchQuery.trim()) {
@@ -102,12 +93,6 @@
 		} finally {
 			isLoading = false;
 		}
-	}
-
-	// Debounced search
-	function handleSearchInput() {
-		if (debounceTimer) clearTimeout(debounceTimer);
-		debounceTimer = setTimeout(searchIcons, 300);
 	}
 
 	// Fetch icon data and select
@@ -196,7 +181,7 @@
 			<input
 				type="text"
 				bind:value={searchQuery}
-				oninput={handleSearchInput}
+				oninput={debouncedSearch}
 				placeholder="star, heart, user..."
 				class="w-full rounded border border-input bg-background px-2 py-1 text-sm"
 			/>

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { PersistedState, PressedKeys, IsIdle } from 'runed';
 	import { registerComponent, Group } from '$lib';
 	import { GradientBackground, Image, PatternBackground, SolidBackground } from '$lib/components/backgrounds';
 	import { Border } from '$lib/components/borders';
@@ -11,11 +12,15 @@
 	import * as Card from '$lib/components/ui/card';
 
 	import HierarchyPanel from './components/HierarchyPanel.svelte';
+	import TopBar from './components/TopBar.svelte';
 	import CanvasControls from './components/CanvasControls.svelte';
 	import CanvasPreview from './components/CanvasPreview.svelte';
 	import PropertiesPanel from './components/PropertiesPanel.svelte';
 	import HelpModal from './components/HelpModal.svelte';
 	import FieldRemapDialog from './components/FieldRemapDialog.svelte';
+	import RestoreDraftDialog from './components/RestoreDraftDialog.svelte';
+	import ExportDialog from './components/ExportDialog.svelte';
+	import { downloadSVG, downloadPNGClient } from '$lib/export/downloadSVG';
 
 	import type {
 		ContainerState,
@@ -268,6 +273,7 @@
 
 	// Canvas view controls
 	let showGrid = $state(false);
+	let showBleed = $state(false);
 	let zoomLevel = $state(150);
 	const zoomScale = $derived(zoomLevel / 100);
 	const CANVAS_SCALE = $derived((375 * zoomScale) / CARD_WIDTH);
@@ -280,6 +286,109 @@
 
 	// Help modal
 	let showHelp = $state(false);
+
+	// Export dialog
+	let showExportDialog = $state(false);
+	let canvasSvgElement = $state<SVGSVGElement | null>(null);
+
+	// =============================================================================
+	// AUTO-SAVE DRAFT (PersistedState + IsIdle)
+	// =============================================================================
+
+	interface DraftData {
+		containers: ContainerState[];
+		templateName: string;
+		timestamp: number;
+	}
+
+	// Auto-save draft to localStorage
+	const draft = new PersistedState<DraftData | null>('card-creator-draft', null);
+
+	// Track user idle state - save only when user pauses (2 seconds of inactivity)
+	const idle = new IsIdle({ timeout: 2000 });
+
+	// Track if there are unsaved changes
+	let hasUnsavedChanges = $state(false);
+
+	// Show restore dialog state
+	let showRestoreDraftDialog = $state(false);
+
+	// Helper to format time ago
+	function formatTimeAgo(timestamp: number): string {
+		const seconds = Math.floor((Date.now() - timestamp) / 1000);
+		if (seconds < 60) return 'just now';
+		const minutes = Math.floor(seconds / 60);
+		if (minutes < 60) return `${minutes} minute${minutes > 1 ? 's' : ''} ago`;
+		const hours = Math.floor(minutes / 60);
+		if (hours < 24) return `${hours} hour${hours > 1 ? 's' : ''} ago`;
+		const days = Math.floor(hours / 24);
+		return `${days} day${days > 1 ? 's' : ''} ago`;
+	}
+
+	// Check for existing draft on mount (only if no initial template)
+	let hasCheckedDraft = $state(false);
+	$effect(() => {
+		if (hasCheckedDraft) return;
+		hasCheckedDraft = true;
+
+		if (draft.current && !initialTemplate) {
+			const age = Date.now() - draft.current.timestamp;
+			const isRecent = age < 24 * 60 * 60 * 1000; // 24 hours
+			if (isRecent && draft.current.containers.length > 0) {
+				showRestoreDraftDialog = true;
+			}
+		}
+	});
+
+	// Mark as having unsaved changes when containers or templateName change
+	$effect(() => {
+		// Access reactive values to track them
+		containers;
+		templateName;
+		// Mark as having unsaved changes (skip initial render)
+		if (hasCheckedDraft) {
+			hasUnsavedChanges = true;
+		}
+	});
+
+	// Save draft when user becomes idle AND there are unsaved changes
+	$effect(() => {
+		if (idle.current && hasUnsavedChanges && canvasInteraction === 'idle' && !isTransitioning) {
+			try {
+				draft.current = {
+					containers: $state.snapshot(containers) as ContainerState[],
+					templateName,
+					timestamp: Date.now()
+				};
+				hasUnsavedChanges = false;
+			} catch {
+				// Silently fail if localStorage is full or unavailable
+			}
+		}
+	});
+
+	// Restore draft
+	function restoreDraft() {
+		if (draft.current) {
+			containers = draft.current.containers;
+			templateName = draft.current.templateName;
+			selectedContainerId = containers.length > 0 ? containers[0].id : null;
+			// Reset history after restore
+			history = [];
+			historyIndex = -1;
+		}
+		showRestoreDraftDialog = false;
+	}
+
+	// Discard draft and start fresh
+	function discardDraft() {
+		showRestoreDraftDialog = false;
+	}
+
+	// Clear draft (called after explicit save)
+	function clearDraft() {
+		draft.current = null;
+	}
 
 	// Build template and preview data
 	const template = $derived(buildTemplate(templateName, containers));
@@ -339,6 +448,75 @@
 		pushHistory();
 		containers = [...containers, newContainer];
 		selectedContainerId = newContainer.id;
+		propertiesPanelTab = 'layer';
+	}
+
+	function addContainerFromTemplate(templateId: string) {
+		const containerNumber = containers.length + 1;
+		const newContainer = createContainer(containerNumber);
+
+		// Add components based on template
+		switch (templateId) {
+			case 'title':
+				// Title block: background + text
+				newContainer.name = `Title ${containerNumber}`;
+				newContainer.height = 80;
+				newContainer.components = [
+					createBackgroundComponent(),
+					createTextComponent()
+				];
+				break;
+			case 'image-frame':
+				// Image frame: border + image
+				newContainer.name = `Image ${containerNumber}`;
+				newContainer.components = [
+					createBorderComponent(),
+					createImageComponent()
+				];
+				break;
+			case 'stats-block':
+				// Stats block: background + stats
+				newContainer.name = `Stats ${containerNumber}`;
+				newContainer.height = 150;
+				newContainer.components = [
+					createBackgroundComponent(),
+					createStatPanelComponent()
+				];
+				break;
+			case 'card-base':
+				// Card base: full card with background + border
+				newContainer.name = `Card Base`;
+				newContainer.x = 0;
+				newContainer.y = 0;
+				newContainer.width = CARD_WIDTH;
+				newContainer.height = CARD_HEIGHT;
+				newContainer.components = [
+					createBackgroundComponent(),
+					createBorderComponent()
+				];
+				break;
+		}
+
+		pushHistory();
+		containers = [...containers, newContainer];
+		selectedContainerId = newContainer.id;
+		propertiesPanelTab = 'layer';
+	}
+
+	function duplicateContainerById(containerId: string) {
+		const containerToDuplicate = containers.find(c => c.id === containerId);
+		if (!containerToDuplicate) return;
+		pushHistory();
+		const newContainer: ContainerState = {
+			...structuredClone($state.snapshot(containerToDuplicate)),
+			id: generateId(),
+			name: `${containerToDuplicate.name} (copy)`,
+			y: containerToDuplicate.y + 20,
+			x: containerToDuplicate.x + 20
+		};
+		containers = [...containers, newContainer];
+		selectedContainerId = newContainer.id;
+		propertiesPanelTab = 'layer';
 	}
 
 	function deleteContainer() {
@@ -416,6 +594,11 @@
 		containers = containers.map((c) => (c.id === selectedContainerId ? { ...c, [key]: value } : c));
 	}
 
+	function renameContainer(containerId: string, newName: string) {
+		pushHistory();
+		containers = containers.map((c) => (c.id === containerId ? { ...c, name: newName } : c));
+	}
+
 	// =============================================================================
 	// COMPONENT MANAGEMENT
 	// =============================================================================
@@ -437,20 +620,35 @@
 		iconrating: createIconRatingComponent
 	};
 
+	// Active tab in properties panel (for auto-switching after adding component)
+	let propertiesPanelTab = $state<'layer' | 'components'>('layer');
+
+	// Selected component ID for visual feedback
+	let selectedComponentId = $state<string | null>(null);
+
 	/**
 	 * Generic function to add a component to the selected container.
 	 * Prevents duplicate component types per container.
+	 * Adds to the START of the components array and auto-selects it.
 	 */
 	function addComponent(type: ComponentItem['type']) {
 		if (!selectedContainerId) return;
 		const container = containers.find((c) => c.id === selectedContainerId);
 		if (!container || hasComponentType(container, type)) return;
 		pushHistory();
+		const newComponent = componentFactories[type]();
 		containers = containers.map((c) =>
 			c.id === selectedContainerId
-				? { ...c, components: [...c.components, componentFactories[type]()] }
+				? { ...c, components: [newComponent, ...c.components] }
 				: c
 		);
+		// Switch to Components tab, expand the panel, and select the new component
+		propertiesPanelTab = 'components';
+		selectedComponentId = newComponent.id;
+		const panelId = `comp-${type}`;
+		if (!expandedPanels.has(panelId)) {
+			expandedPanels = new Set([...expandedPanels, panelId]);
+		}
 	}
 
 	// Type-safe component adders (thin wrappers for API compatibility)
@@ -809,6 +1007,8 @@
 			a.click();
 			URL.revokeObjectURL(url);
 		}
+		// Clear auto-save draft after explicit save
+		clearDraft();
 	}
 
 	function loadTemplate(event: Event) {
@@ -833,138 +1033,193 @@
 		input.value = '';
 	}
 
+	async function handleExport(options: { format: 'svg' | 'png'; bleedMm: number; scale: number }) {
+		if (canvasSvgElement === null) {
+			alert('Cannot export: Canvas not ready');
+			return;
+		}
+
+		const filename = templateName.toLowerCase().replace(/\s+/g, '-') || 'card';
+
+		if (options.format === 'svg') {
+			downloadSVG(canvasSvgElement, {
+				filename,
+				bleedMm: options.bleedMm
+			});
+		} else {
+			try {
+				await downloadPNGClient(canvasSvgElement, {
+					filename,
+					scale: options.scale,
+					bleedMm: options.bleedMm
+				});
+			} catch (error) {
+				console.error('Export failed:', error);
+				alert('Export failed. Please try again.');
+			}
+		}
+	}
+
 	// =============================================================================
-	// KEYBOARD SHORTCUTS
+	// KEYBOARD SHORTCUTS (Cross-platform: macOS Cmd / Windows Ctrl)
 	// =============================================================================
 
-	// Check if in text input
+	const keys = new PressedKeys();
+
+	// Check if in text input (skip single-key shortcuts when typing)
 	function isInTextInput(): boolean {
 		const tag = document.activeElement?.tagName;
 		return tag === 'INPUT' || tag === 'TEXTAREA';
 	}
 
+	// Cross-platform modifier check (Cmd on macOS, Ctrl on Windows)
+	function hasModifier(e: KeyboardEvent): boolean {
+		return e.metaKey || e.ctrlKey;
+	}
+
+	// Modifier shortcuts: Cmd/Ctrl + Key (work everywhere, need preventDefault)
+	type ModifierShortcut = {
+		key: string | string[];
+		shift?: boolean;
+		action: () => void;
+	};
+
+	const modifierShortcuts: ModifierShortcut[] = [
+		{ key: 'z', shift: false, action: undo },
+		{ key: 'z', shift: true, action: redo },
+		{ key: 'y', action: redo },
+		{ key: 'c', action: copyContainer },
+		{ key: 'v', action: pasteContainer },
+		{ key: ['=', '+'], action: zoomIn },
+		{ key: '-', action: zoomOut },
+		{ key: '0', action: resetZoom },
+		{ key: '/', action: () => { showHelp = !showHelp; } }
+	];
+
+	// Single-key shortcuts (only when not in text input)
+	type SingleKeyShortcut = {
+		key: string | string[];
+		action: (e: KeyboardEvent) => void;
+		requiresSelection?: boolean;
+	};
+
+	const singleKeyShortcuts: SingleKeyShortcut[] = [
+		{ key: 'g', action: () => { showGrid = !showGrid; } },
+		{ key: 'h', action: () => { if (selectedContainerId) toggleVisibility(selectedContainerId); }, requiresSelection: true },
+		{ key: 'l', action: () => { if (selectedContainerId) toggleLock(selectedContainerId); }, requiresSelection: true },
+		{ key: 'Escape', action: () => { selectedContainerId = null; } },
+		{ key: ['Delete', 'Backspace'], action: () => { if (selectedContainer && !selectedContainer.locked) deleteContainer(); }, requiresSelection: true },
+		{ key: '?', action: () => { showHelp = !showHelp; } },
+		{ key: 'ArrowUp', action: (e) => { e.preventDefault(); nudgeContainer(0, e.shiftKey ? -10 : -1); }, requiresSelection: true },
+		{ key: 'ArrowDown', action: (e) => { e.preventDefault(); nudgeContainer(0, e.shiftKey ? 10 : 1); }, requiresSelection: true },
+		{ key: 'ArrowLeft', action: (e) => { e.preventDefault(); nudgeContainer(e.shiftKey ? -10 : -1, 0); }, requiresSelection: true },
+		{ key: 'ArrowRight', action: (e) => { e.preventDefault(); nudgeContainer(e.shiftKey ? 10 : 1, 0); }, requiresSelection: true }
+	];
+
 	function handleKeydown(e: KeyboardEvent) {
-		if (e.metaKey || e.ctrlKey) {
-			if (e.key === 'z' && !e.shiftKey) {
-				e.preventDefault();
-				undo();
-			} else if ((e.key === 'z' && e.shiftKey) || e.key === 'y') {
-				e.preventDefault();
-				redo();
-			} else if (e.key === 'c') {
-				e.preventDefault();
-				copyContainer();
-			} else if (e.key === 'v') {
-				e.preventDefault();
-				pasteContainer();
-			} else if (e.key === '=' || e.key === '+') {
-				e.preventDefault();
-				zoomIn();
-			} else if (e.key === '-') {
-				e.preventDefault();
-				zoomOut();
-			} else if (e.key === '0') {
-				e.preventDefault();
-				resetZoom();
-			} else if (e.key === '/') {
-				e.preventDefault();
-				showHelp = !showHelp;
+		// Handle modifier shortcuts (Cmd/Ctrl + Key)
+		if (hasModifier(e)) {
+			for (const shortcut of modifierShortcuts) {
+				const keyMatches = Array.isArray(shortcut.key)
+					? shortcut.key.includes(e.key)
+					: e.key === shortcut.key;
+
+				if (keyMatches) {
+					// Check shift modifier if specified
+					if (shortcut.shift !== undefined && e.shiftKey !== shortcut.shift) continue;
+
+					e.preventDefault();
+					shortcut.action();
+					return;
+				}
 			}
 			return;
 		}
 
+		// Skip single-key shortcuts when typing in inputs
 		if (isInTextInput()) return;
 
-		switch (e.key) {
-			case 'g':
-				showGrid = !showGrid;
-				break;
-			case 'h':
-				if (selectedContainerId) toggleVisibility(selectedContainerId);
-				break;
-			case 'l':
-				if (selectedContainerId) toggleLock(selectedContainerId);
-				break;
-			case 'Escape':
-				selectedContainerId = null;
-				break;
-			case 'Delete':
-			case 'Backspace':
-				if (selectedContainer && !selectedContainer.locked) deleteContainer();
-				break;
-			case '?':
-				showHelp = !showHelp;
-				break;
-			case 'ArrowUp':
-				e.preventDefault();
-				nudgeContainer(0, e.shiftKey ? -10 : -1);
-				break;
-			case 'ArrowDown':
-				e.preventDefault();
-				nudgeContainer(0, e.shiftKey ? 10 : 1);
-				break;
-			case 'ArrowLeft':
-				e.preventDefault();
-				nudgeContainer(e.shiftKey ? -10 : -1, 0);
-				break;
-			case 'ArrowRight':
-				e.preventDefault();
-				nudgeContainer(e.shiftKey ? 10 : 1, 0);
-				break;
+		// Handle single-key shortcuts
+		for (const shortcut of singleKeyShortcuts) {
+			const keyMatches = Array.isArray(shortcut.key)
+				? shortcut.key.includes(e.key)
+				: e.key === shortcut.key;
+
+			if (keyMatches) {
+				shortcut.action(e);
+				return;
+			}
 		}
 	}
+
+	// Also register common shortcuts with PressedKeys for reactive state
+	// This allows components to check if shortcuts are active
+	const isUndoPressed = $derived(keys.has('Meta', 'z') || keys.has('Control', 'z'));
+	const isRedoPressed = $derived(keys.has('Meta', 'Shift', 'z') || keys.has('Control', 'Shift', 'z'));
 </script>
 
 <svelte:window onkeydown={handleKeydown} onpointermove={handleCanvasPointerMove} onpointerup={handleCanvasPointerUp} />
 
-<div class="flex h-[calc(100vh-100px)] gap-4 {className}">
-	<!-- Left: Hierarchy Panel -->
-	<HierarchyPanel
-		{containers}
-		bind:selectedContainerId
-		{expandedPanels}
+<div class="flex h-screen flex-col {className}">
+	<!-- Top Bar (full width) -->
+	<TopBar
 		bind:templateName
-		{template}
-		onTogglePanel={togglePanel}
-		onToggleVisibility={toggleVisibility}
-		onToggleComponentVisibility={toggleComponentVisibility}
-		onMoveContainerUp={moveContainerUp}
-		onMoveContainerDown={moveContainerDown}
-		onMoveComponentUp={moveComponentUp}
-		onMoveComponentDown={moveComponentDown}
-		onDragStart={handleDragStart}
-		onDragOver={handleDragOver}
-		onDrop={handleDrop}
-		onDragEnd={handleDragEnd}
+		hasDraft={!!draft.current}
+		lastSaved={draft.current?.timestamp ? new Date(draft.current.timestamp) : null}
+		bind:previewMode
+		datasets={datasetOptions}
+		bind:selectedDataset
+		bind:selectedCardIndex
+		cards={cardOptions}
+		onDatasetChange={handleDatasetChange}
 		onSaveTemplate={saveTemplate}
 		onLoadTemplate={loadTemplate}
-		{dragOverContainerId}
+		onExport={() => { showExportDialog = true; }}
+		onShowHelp={showHelpButton ? () => { showHelp = true; } : undefined}
 	/>
 
-	<!-- Center: Canvas -->
-	<div class="flex flex-col gap-4">
-		<CanvasControls
-			bind:zoomLevel
-			bind:showGrid
-			bind:previewMode
-			datasets={datasetOptions}
-			bind:selectedDataset
-			bind:selectedCardIndex
-			cards={cardOptions}
-			onDatasetChange={handleDatasetChange}
-			onZoomIn={zoomIn}
-			onZoomOut={zoomOut}
-			onResetZoom={resetZoom}
-			onShowHelp={showHelpButton ? () => { showHelp = true; } : undefined}
+	<!-- Main Content -->
+	<div class="flex flex-1 gap-3 overflow-hidden p-3">
+		<!-- Left: Hierarchy Panel -->
+		<HierarchyPanel
+			{containers}
+			bind:selectedContainerId
+			{expandedPanels}
+			onTogglePanel={togglePanel}
+			onToggleVisibility={toggleVisibility}
+			onToggleComponentVisibility={toggleComponentVisibility}
+			onMoveContainerUp={moveContainerUp}
+			onMoveContainerDown={moveContainerDown}
+			onMoveComponentUp={moveComponentUp}
+			onMoveComponentDown={moveComponentDown}
+			onRenameContainer={renameContainer}
+			onDragStart={handleDragStart}
+			onDragOver={handleDragOver}
+			onDrop={handleDrop}
+			onDragEnd={handleDragEnd}
+			{dragOverContainerId}
 		/>
 
-		<CanvasPreview
+		<!-- Center: Canvas -->
+		<div class="flex flex-1 flex-col items-center gap-2">
+			<CanvasControls
+				bind:zoomLevel
+				bind:showGrid
+				bind:showBleed
+				onZoomIn={zoomIn}
+				onZoomOut={zoomOut}
+				onResetZoom={resetZoom}
+			/>
+
+			<CanvasPreview
 			{template}
 			{previewData}
 			{containers}
 			bind:selectedContainerId
+			bind:svgElement={canvasSvgElement}
 			{zoomLevel}
 			{showGrid}
+			{showBleed}
 			{canvasInteraction}
 			{interactionContainerId}
 			{activeResizeHandle}
@@ -982,9 +1237,14 @@
 		datasetId={selectedDataset as import('$lib/presets').DatasetId}
 		{previewData}
 		{expandedPanels}
+		bind:activeTab={propertiesPanelTab}
+		{selectedComponentId}
+		{containers}
 		{canUndo}
 		{canRedo}
 		onAddContainer={addContainer}
+		onAddContainerFromTemplate={addContainerFromTemplate}
+		onDuplicateContainerById={duplicateContainerById}
 		onUndo={undo}
 		onRedo={redo}
 		onTogglePanel={togglePanel}
@@ -1024,6 +1284,7 @@
 		onMoveComponentUp={moveComponentUp}
 		onMoveComponentDown={moveComponentDown}
 	/>
+	</div>
 </div>
 
 <HelpModal bind:show={showHelp} />
@@ -1036,4 +1297,16 @@
 	targetDataFields={pendingDataset ? datasets[pendingDataset].dataFields : currentDataFields}
 	onApply={applyRemapping}
 	onSkip={skipRemapping}
+/>
+
+<RestoreDraftDialog
+	bind:show={showRestoreDraftDialog}
+	draftAge={draft.current ? formatTimeAgo(draft.current.timestamp) : ''}
+	onRestore={restoreDraft}
+	onDiscard={discardDraft}
+/>
+
+<ExportDialog
+	bind:show={showExportDialog}
+	onExport={handleExport}
 />

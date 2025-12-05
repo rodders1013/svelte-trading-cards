@@ -21,11 +21,11 @@
 </script>
 
 <div class={className}>
-	<Label class="mb-1 text-sm text-muted-foreground">{label}</Label>
+	<Label class="mb-0.5 text-xs text-muted-foreground">{label}</Label>
 	<input
 		type="color"
 		{value}
 		oninput={handleInput}
-		class="h-8 w-full cursor-pointer rounded border border-input bg-background"
+		class="h-7 w-full cursor-pointer rounded border border-input bg-background"
 	/>
 </div>

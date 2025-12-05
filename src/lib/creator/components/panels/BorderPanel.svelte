@@ -13,21 +13,25 @@
 	let {
 		component,
 		expanded = $bindable(true),
+		isCardBase = false,
 		onUpdate,
 		onUpdateGlow,
 		onUpdateHolographic,
 		onRemove,
 		onMoveUp,
-		onMoveDown
+		onMoveDown,
+		onToggleVisibility
 	}: {
 		component: BorderComponent;
 		expanded: boolean;
+		isCardBase?: boolean;
 		onUpdate: (key: keyof Omit<BorderComponent, 'type' | 'id'>, value: unknown) => void;
 		onUpdateGlow: (key: string, value: unknown) => void;
 		onUpdateHolographic: (key: string, value: unknown) => void;
 		onRemove: () => void;
 		onMoveUp: () => void;
 		onMoveDown: () => void;
+		onToggleVisibility?: () => void;
 	} = $props();
 </script>
 
@@ -35,9 +39,14 @@
 	title="Border"
 	badge={{ text: 'bdr', color: 'bg-amber-600' }}
 	bind:expanded
+	visible={component.visible}
+	showVisibilityToggle={isCardBase}
+	canRemove={!isCardBase}
+	canMove={!isCardBase}
 	{onRemove}
 	{onMoveUp}
 	{onMoveDown}
+	{onToggleVisibility}
 >
 	<FormGrid cols={3}>
 		<FormColorPicker

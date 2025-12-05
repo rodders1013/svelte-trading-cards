@@ -2,7 +2,7 @@
 
 **Package:** `svelte-trading-cards`
 **Version:** 0.1.0
-**Last Updated:** 2025-11-30
+**Last Updated:** 2025-12-05
 **Status:** In Development (~93% complete)
 
 ---
@@ -51,6 +51,20 @@ All cards use standard trading card dimensions:
 | ViewBox | `0 0 750 1050` |
 | Corner Radius | 26px |
 | Physical | 2.5" x 3.5" at 300 DPI |
+
+### Bleed for Print
+
+For professional printing, cards support bleed areas that extend beyond the trim line:
+
+| Property | Value |
+|----------|-------|
+| Max Bleed | 3mm (35px at 300 DPI) |
+| Bleed Width | 820px (750 + 35*2) |
+| Bleed Height | 1120px (1050 + 35*2) |
+| Card Base Position | -35, -35 |
+| Pixels per mm | 11.811 |
+
+The Card Base layer automatically covers the bleed area. When exporting with bleed, the canvas expands and the Card Base fills the extended area.
 
 ---
 
@@ -877,6 +891,42 @@ const data: CardData = {
 
 ---
 
+## Card Base Layer
+
+The Card Base layer is a special protected layer that handles bleed for professional printing.
+
+### Properties
+
+| Property | Value |
+|----------|-------|
+| `isCardBase` | `true` (marks this as the Card Base) |
+| Position | (-35, -35) - extends into bleed area |
+| Size | 820 x 1120 - covers full bleed |
+| Corner Radius | 61px (26 + 35 for bleed) |
+
+### Restrictions
+
+- **Cannot be deleted** - always exists
+- **Cannot be moved or resized** - fixed to bleed dimensions
+- **Cannot be renamed** - always "Card Base"
+- **Cannot be reordered** - always at bottom
+
+### Fixed Components
+
+Card Base has three pre-populated components that cannot be added or removed:
+
+1. **Image** (hidden by default) - for background images
+2. **Background** - solid color, gradient, or pattern fill
+3. **Border** - card edge border (width includes bleed)
+
+Components can only be toggled visible/hidden via the eye icon.
+
+### Border Width
+
+The Card Base border defaults to 43px (8px visible + 35px bleed). This ensures the border extends to the edge when exported with bleed.
+
+---
+
 ## Export System
 
 ### Client-Side
@@ -886,9 +936,44 @@ import {
   downloadSVG,           // Download as .svg file
   downloadPNGClient,     // Download as .png (browser canvas)
   svgToDataURL,          // Get data URL
-  svgToBlob              // Get Blob
+  svgToBlob,             // Get Blob
+  applyBleed             // Apply bleed to SVG element
 } from 'svelte-trading-cards';
 ```
+
+### Export with Bleed
+
+```typescript
+// SVG with bleed
+downloadSVG(svgElement, {
+  filename: 'my-card',
+  bleedMm: 3  // 0, 1, 2, or 3mm
+});
+
+// PNG with bleed and resolution
+downloadPNGClient(svgElement, {
+  filename: 'my-card',
+  bleedMm: 3,
+  scale: 2    // 2x resolution
+});
+```
+
+### applyBleed Function
+
+The `applyBleed()` function handles bleed extension:
+
+```typescript
+const svgWithBleed = applyBleed(svgElement, {
+  bleedMm: 3,
+  cardBaseId: 'card-base'  // ID of the Card Base layer
+});
+```
+
+**What it does:**
+1. Expands canvas by bleed amount on all sides
+2. Updates SVG viewBox and dimensions
+3. Extends Card Base background/border to fill bleed
+4. Offsets all other layers by bleed amount (preserving positions)
 
 ### Server-Side
 

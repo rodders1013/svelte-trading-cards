@@ -13,17 +13,21 @@
 	let {
 		component,
 		expanded = $bindable(true),
+		isCardBase = false,
 		onUpdate,
 		onRemove,
 		onMoveUp,
-		onMoveDown
+		onMoveDown,
+		onToggleVisibility
 	}: {
 		component: BackgroundComponent;
 		expanded: boolean;
+		isCardBase?: boolean;
 		onUpdate: (key: keyof Omit<BackgroundComponent, 'type' | 'id'>, value: unknown) => void;
 		onRemove: () => void;
 		onMoveUp: () => void;
 		onMoveDown: () => void;
+		onToggleVisibility?: () => void;
 	} = $props();
 
 	const fillTypes = [
@@ -95,9 +99,14 @@
 	title="Background"
 	badge={{ text: 'bg', color: 'bg-slate-600' }}
 	bind:expanded
+	visible={component.visible}
+	showVisibilityToggle={isCardBase}
+	canRemove={!isCardBase}
+	canMove={!isCardBase}
 	{onRemove}
 	{onMoveUp}
 	{onMoveDown}
+	{onToggleVisibility}
 >
 	<!-- Fill Section -->
 	<div class="rounded border border-input p-2">

@@ -1,5 +1,4 @@
 <script lang="ts">
-	import * as Card from '$lib/components/ui/card';
 	import { Button } from '$lib/components/ui/button';
 	import * as Collapsible from '$lib/components/ui/collapsible';
 	import * as Select from '$lib/components/ui/select';
@@ -46,152 +45,147 @@
 			onUpdate('animation', localAnimation);
 		}
 	});
+
+	let showAdvanced = $state(false);
 </script>
 
-<Card.Root>
-	<Collapsible.Root open={expanded} onOpenChange={() => onTogglePanel()}>
-		<div class="flex items-center justify-between px-3 py-2 hover:bg-muted/50">
-			<Collapsible.Trigger class="flex items-center gap-2 text-sm font-medium">
-				<ChevronDown
-					class="h-3 w-3 shrink-0 transition-transform duration-200 {expanded ? '' : '-rotate-90'}"
+<div class="space-y-3">
+	{#if container.isCardBase}
+		<!-- Card Base Info -->
+		<div class="rounded border border-blue-500/30 bg-blue-500/10 px-3 py-2 text-xs text-blue-300">
+			<p class="font-medium">Card Base Layer</p>
+			<p class="mt-1 text-blue-300/80">This layer covers the full card and extends to the bleed area when exporting for print.</p>
+		</div>
+	{:else}
+		<!-- Name -->
+		<div>
+			<label class="mb-1 block text-xs text-muted-foreground">Name</label>
+			<input
+				type="text"
+				value={container.name}
+				onchange={(e) => onUpdate('name', (e.target as HTMLInputElement).value)}
+				class="h-8 w-full rounded border border-input bg-background px-2 text-sm"
+			/>
+		</div>
+
+		<!-- Position & Size in compact 2x2 grid -->
+		<div class="grid grid-cols-4 gap-2">
+			<div>
+				<label class="mb-1 block text-xs text-muted-foreground">X</label>
+				<input
+					type="number"
+					value={container.x}
+					onchange={(e) => onUpdate('x', parseInt((e.target as HTMLInputElement).value))}
+					class="h-8 w-full rounded border border-input bg-background px-2 text-sm"
 				/>
-				Layer Properties
-				<HelpTooltip text="Layers group components together. Animation applies to the entire layer and all its components." />
-			</Collapsible.Trigger>
-			<div class="flex gap-2">
-				<Button
-					variant="outline"
-					size="sm"
-					onclick={(e) => {
-						e.stopPropagation();
-						onDuplicate();
-					}}>Duplicate</Button
-				>
-				<Button
-					variant="destructive"
-					size="sm"
-					onclick={(e) => {
-						e.stopPropagation();
-						onDelete();
-					}}>Delete</Button
-				>
+			</div>
+			<div>
+				<label class="mb-1 block text-xs text-muted-foreground">Y</label>
+				<input
+					type="number"
+					value={container.y}
+					onchange={(e) => onUpdate('y', parseInt((e.target as HTMLInputElement).value))}
+					class="h-8 w-full rounded border border-input bg-background px-2 text-sm"
+				/>
+			</div>
+			<div>
+				<label class="mb-1 block text-xs text-muted-foreground">Width</label>
+				<input
+					type="number"
+					value={container.width}
+					onchange={(e) => onUpdate('width', parseInt((e.target as HTMLInputElement).value))}
+					class="h-8 w-full rounded border border-input bg-background px-2 text-sm"
+				/>
+			</div>
+			<div>
+				<label class="mb-1 block text-xs text-muted-foreground">Height</label>
+				<input
+					type="number"
+					value={container.height}
+					onchange={(e) => onUpdate('height', parseInt((e.target as HTMLInputElement).value))}
+					class="h-8 w-full rounded border border-input bg-background px-2 text-sm"
+				/>
 			</div>
 		</div>
 
-		<Collapsible.Content>
-			<Card.Content class="space-y-3 border-t pt-3">
-				<!-- Name -->
+		<!-- Shape & Radius -->
+		<div class="grid grid-cols-2 gap-2">
+			<div>
+				<Label class="mb-1 block text-xs text-muted-foreground">Clip Shape</Label>
+				<Select.Root type="single" value={container.clipShape} onValueChange={(v) => v && onUpdate('clipShape', v as ClipShape)}>
+					<Select.Trigger class="h-8 w-full text-sm">
+						{container.clipShape === 'rect' ? 'Rectangle' :
+						 container.clipShape === 'circle' ? 'Circle' :
+						 container.clipShape === 'ellipse' ? 'Ellipse' :
+						 container.clipShape === 'hexagon' ? 'Hexagon' :
+						 container.clipShape === 'octagon' ? 'Octagon' :
+						 container.clipShape === 'diamond' ? 'Diamond' :
+						 container.clipShape === 'shield' ? 'Shield' :
+						 container.clipShape === 'star' ? 'Star' : container.clipShape}
+					</Select.Trigger>
+					<Select.Content>
+						<Select.Item value="rect" label="Rectangle" />
+						<Select.Item value="circle" label="Circle" />
+						<Select.Item value="ellipse" label="Ellipse" />
+						<Select.Item value="hexagon" label="Hexagon" />
+						<Select.Item value="octagon" label="Octagon" />
+						<Select.Item value="diamond" label="Diamond" />
+						<Select.Item value="shield" label="Shield" />
+						<Select.Item value="star" label="Star" />
+					</Select.Content>
+				</Select.Root>
+			</div>
+			{#if container.clipShape === 'rect'}
 				<div>
-					<label class="text-sm text-muted-foreground">Name</label>
+					<label class="mb-1 block text-xs text-muted-foreground">Corner Radius</label>
 					<input
-						type="text"
-						value={container.name}
-						onchange={(e) => onUpdate('name', (e.target as HTMLInputElement).value)}
-						class="w-full rounded border border-input bg-background px-2 py-1 text-sm"
+						type="number"
+						value={container.radius}
+						onchange={(e) => onUpdate('radius', parseInt((e.target as HTMLInputElement).value))}
+						class="h-8 w-full rounded border border-input bg-background px-2 text-sm"
 					/>
 				</div>
-
-				<!-- Position & Size -->
-				<div class="grid grid-cols-4 gap-2">
-					<div>
-						<label class="text-sm text-muted-foreground">X</label>
-						<input
-							type="number"
-							value={container.x}
-							onchange={(e) => onUpdate('x', parseInt((e.target as HTMLInputElement).value))}
-							class="w-full rounded border border-input bg-background px-2 py-1 text-sm"
+			{:else}
+				<div>
+					<Label class="mb-1 block text-xs text-muted-foreground">Clip Content</Label>
+					<div class="flex h-8 items-center gap-2">
+						<Checkbox
+							id="clip-content"
+							checked={container.clipContent}
+							onCheckedChange={(checked) => onUpdate('clipContent', checked === true)}
 						/>
-					</div>
-					<div>
-						<label class="text-sm text-muted-foreground">Y</label>
-						<input
-							type="number"
-							value={container.y}
-							onchange={(e) => onUpdate('y', parseInt((e.target as HTMLInputElement).value))}
-							class="w-full rounded border border-input bg-background px-2 py-1 text-sm"
-						/>
-					</div>
-					<div>
-						<label class="text-sm text-muted-foreground">Width</label>
-						<input
-							type="number"
-							value={container.width}
-							onchange={(e) => onUpdate('width', parseInt((e.target as HTMLInputElement).value))}
-							class="w-full rounded border border-input bg-background px-2 py-1 text-sm"
-						/>
-					</div>
-					<div>
-						<label class="text-sm text-muted-foreground">Height</label>
-						<input
-							type="number"
-							value={container.height}
-							onchange={(e) => onUpdate('height', parseInt((e.target as HTMLInputElement).value))}
-							class="w-full rounded border border-input bg-background px-2 py-1 text-sm"
-						/>
+						<Label for="clip-content" class="text-sm">Enabled</Label>
 					</div>
 				</div>
+			{/if}
+		</div>
+	{/if}
 
-				<!-- Shape & Radius -->
-				<div class="grid grid-cols-2 gap-2">
-					<div>
-						<Label class="text-sm text-muted-foreground">Clip Shape</Label>
-						<Select.Root type="single" value={container.clipShape} onValueChange={(v) => v && onUpdate('clipShape', v as ClipShape)}>
-							<Select.Trigger class="w-full">
-								{container.clipShape === 'rect' ? 'Rectangle' :
-								 container.clipShape === 'circle' ? 'Circle' :
-								 container.clipShape === 'ellipse' ? 'Ellipse' :
-								 container.clipShape === 'hexagon' ? 'Hexagon' :
-								 container.clipShape === 'octagon' ? 'Octagon' :
-								 container.clipShape === 'diamond' ? 'Diamond' :
-								 container.clipShape === 'shield' ? 'Shield' :
-								 container.clipShape === 'star' ? 'Star' : container.clipShape}
-							</Select.Trigger>
-							<Select.Content>
-								<Select.Item value="rect" label="Rectangle" />
-								<Select.Item value="circle" label="Circle" />
-								<Select.Item value="ellipse" label="Ellipse" />
-								<Select.Item value="hexagon" label="Hexagon" />
-								<Select.Item value="octagon" label="Octagon" />
-								<Select.Item value="diamond" label="Diamond" />
-								<Select.Item value="shield" label="Shield" />
-								<Select.Item value="star" label="Star" />
-							</Select.Content>
-						</Select.Root>
-					</div>
-					{#if container.clipShape === 'rect'}
-						<div>
-							<label class="text-sm text-muted-foreground">Corner Radius</label>
-							<input
-								type="number"
-								value={container.radius}
-								onchange={(e) => onUpdate('radius', parseInt((e.target as HTMLInputElement).value))}
-								class="w-full rounded border border-input bg-background px-2 py-1 text-sm"
-							/>
-						</div>
-					{:else}
-						<div>
-							<Label class="text-sm text-muted-foreground">Clip Content</Label>
-							<div class="mt-1 flex items-center gap-2">
-								<Checkbox
-									id="clip-content"
-									checked={container.clipContent}
-									onCheckedChange={(checked) => onUpdate('clipContent', checked === true)}
-								/>
-								<Label for="clip-content" class="text-sm">Enabled</Label>
-							</div>
-						</div>
-					{/if}
-				</div>
-
-				<!-- Layer Animation -->
-				<div class="rounded border border-blue-500/30 bg-blue-500/5 p-2">
-					<div class="mb-2 flex items-center gap-2">
-						<span class="text-sm font-medium text-blue-400">Layer Animation</span>
-						<HelpTooltip text="Animation applies to this entire layer and all components within it. All components will move together as a unit." />
-					</div>
-					<AnimationControls bind:animation={localAnimation} />
-				</div>
-			</Card.Content>
+	<!-- Advanced Section (Animation) -->
+	<Collapsible.Root bind:open={showAdvanced}>
+		<div class="flex items-center gap-2 rounded border border-blue-500/30 bg-blue-500/5 px-2 py-1.5 text-sm hover:bg-blue-500/10">
+			<Collapsible.Trigger class="flex flex-1 items-center gap-2">
+				<ChevronDown class="h-3 w-3 transition-transform {showAdvanced ? '' : '-rotate-90'}" />
+				<span class="font-medium text-blue-400">Animation</span>
+				{#if localAnimation?.type && localAnimation.type !== 'none'}
+					<span class="ml-auto rounded bg-blue-500/20 px-1.5 py-0.5 text-xs text-blue-400">Active</span>
+				{/if}
+			</Collapsible.Trigger>
+			<HelpTooltip text="Animation applies to this entire layer and all components within it." />
+		</div>
+		<Collapsible.Content>
+			<div class="mt-2 rounded border border-blue-500/20 bg-blue-500/5 p-2">
+				<AnimationControls bind:animation={localAnimation} />
+			</div>
 		</Collapsible.Content>
 	</Collapsible.Root>
-</Card.Root>
+
+	<!-- Delete Layer (hidden for Card Base) -->
+	{#if !container.isCardBase}
+		<div class="border-t border-destructive/20 pt-3">
+			<Button variant="destructive" size="sm" class="w-full" onclick={onDelete}>
+				Delete Layer
+			</Button>
+		</div>
+	{/if}
+</div>

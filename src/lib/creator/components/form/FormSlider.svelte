@@ -35,7 +35,10 @@
 </script>
 
 <div class={className}>
-	<Label class="mb-1 text-sm text-muted-foreground">{label}: {displayValue}</Label>
+	<Label class="mb-0.5 flex items-center justify-between text-xs text-muted-foreground">
+		<span>{label}</span>
+		<span class="font-medium text-foreground">{displayValue}</span>
+	</Label>
 	<Slider
 		type="single"
 		{value}
@@ -43,6 +46,6 @@
 		{min}
 		{max}
 		{step}
-		class="mt-2"
+		class="mt-1"
 	/>
 </div>

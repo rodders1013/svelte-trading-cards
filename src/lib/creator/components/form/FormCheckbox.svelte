@@ -20,7 +20,7 @@
 	}
 </script>
 
-<div class="flex items-center gap-2 {className}">
+<div class="flex items-center gap-1.5 {className}">
 	<Checkbox {checked} onCheckedChange={handleChange} />
-	<Label class="text-sm">{label}</Label>
+	<Label class="text-xs">{label}</Label>
 </div>
