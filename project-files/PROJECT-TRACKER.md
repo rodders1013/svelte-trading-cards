@@ -162,7 +162,6 @@
 ### Bleed System for Print Export - NEW
 - [x] 3mm bleed support (35px at 300 DPI)
 - [x] Card Base layer extends to bleed automatically
-- [x] Bleed preview overlay (toggle in canvas controls)
 - [x] Export dialog with bleed options (0mm, 1mm, 2mm, 3mm)
 - [x] SVG export with bleed support
 - [x] PNG export with bleed support (+ resolution options)
@@ -175,7 +174,15 @@
 - [x] Dataset selector and Preview mode toggle
 - [x] Card selector (when in data mode)
 - [x] Export button opens export dialog
-- [x] Canvas controls moved below TopBar (zoom, grid, bleed)
+- [x] Canvas controls moved below TopBar (zoom, grid)
+- [x] Responsive TopBar - labels collapse on smaller screens
+
+### Responsive Panel System - NEW
+- [x] Dynamic center pane sizing based on card width at current zoom
+- [x] ResizeObserver for accurate container measurements
+- [x] Side panels adjust proportionally when zoom changes
+- [x] PaneForge integration with autoSaveId for persistence
+- [x] Tablet/mobile layouts with top-aligned card (not centered)
 
 ---
 
@@ -464,6 +471,7 @@ The creator uses shadcn-svelte components for consistent UI. Reference: https://
 - `Dialog` - Modals (HelpModal)
 - `Tooltip` - Help text tooltips (HelpTooltip)
 - `Collapsible` - Expandable panels (HierarchyPanel, PropertiesPanel, ComponentPanel)
+- `Accordion` - Collapsible sections (PropertiesPanel)
 - `Select` - Rich dropdowns with animations (replaced all native `<select>`)
 - `Checkbox` - Styled checkboxes (replaced all native checkboxes)
 - `Switch` - Toggle switches
@@ -471,6 +479,8 @@ The creator uses shadcn-svelte components for consistent UI. Reference: https://
 - `Input`, `Label` - Form inputs
 - `ScrollArea` - Custom scrollbars (PropertiesPanel, JSON preview)
 - `Badge` - Count indicators
+- `Drawer` - Mobile/tablet side panels
+- `Resizable` (PaneForge) - Resizable panel layout with dynamic sizing
 
 **Custom form wrapper components** in `src/routes/creator/components/form/`:
 - `FormSlider` - Labeled slider with value display (percent or suffix)

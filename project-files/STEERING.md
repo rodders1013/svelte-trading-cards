@@ -195,6 +195,7 @@ The project uses these shadcn-svelte components:
 | `Dialog` | Modals (HelpModal) |
 | `Tooltip` | Help text (HelpTooltip) |
 | `Collapsible` | Expandable panels |
+| `Accordion` | Collapsible sections |
 | `Select` | Dropdowns (NOT native `<select>`) |
 | `Checkbox` | Boolean toggles |
 | `Switch` | On/off toggles |
@@ -204,6 +205,8 @@ The project uses these shadcn-svelte components:
 | `Separator` | Visual dividers |
 | `ScrollArea` | Custom scrollbars |
 | `Badge` | Count indicators |
+| `Drawer` | Mobile/tablet side panels |
+| `Resizable` | PaneForge-based resizable panels |
 
 ### When Adding UI Elements
 
