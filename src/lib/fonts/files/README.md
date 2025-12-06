@@ -2,83 +2,76 @@
 
 This directory contains TTF font files used by resvg-js for server-side PNG rendering.
 
-## Required Files
+**All 39 Google Fonts are bundled and ready to use.**
 
-For each Google Font in `google-fonts.ts`, you need:
-- `FontName-Regular.ttf` (weight 400)
-- `FontName-Bold.ttf` (weight 700) - if the font supports bold
+## Included Fonts
 
-## How to Download
+### Sans-Serif (11 fonts)
+- Roboto
+- Open Sans
+- Lato
+- Montserrat
+- Poppins
+- Nunito
+- Raleway
+- Quicksand
+- Comfortaa
+- Outfit
+- Lexend
 
-### Option 1: Google Fonts Website
-1. Go to https://fonts.google.com
-2. Search for the font (e.g., "Roboto")
-3. Click "Download family"
-4. Extract the TTF files to this directory
+### Serif (4 fonts)
+- Playfair Display
+- Merriweather
+- Lora
+- Crimson Text
 
-### Option 2: google-webfonts-helper (Recommended)
-1. Go to https://gwfh.mranftl.com/fonts
-2. Search for the font
-3. Select weights 400 and 700
-4. Download as TTF
-5. Extract to this directory
+### Display (17 fonts)
+- Oswald
+- Bebas Neue
+- Anton
+- Righteous
+- Bangers
+- Permanent Marker
+- Russo One
+- Black Ops One
+- Bungee
+- Orbitron
+- Press Start 2P
+- Audiowide
+- Rajdhani
+- Exo 2
+- Michroma
+- Electrolize
+- Teko
+- Kanit
 
-### Option 3: Direct Download Script
-```bash
-# Example for Roboto
-curl -o Roboto-Regular.ttf "https://fonts.gstatic.com/s/roboto/v30/KFOmCnqEu92Fr1Me5Q.ttf"
-curl -o Roboto-Bold.ttf "https://fonts.gstatic.com/s/roboto/v30/KFOlCnqEu92Fr1MmWUlvAw.ttf"
-```
+### Monospace (3 fonts)
+- Source Code Pro
+- Fira Code
+- JetBrains Mono
+
+### Cursive (4 fonts)
+- Pacifico
+- Dancing Script
+- Caveat
+- Satisfy
+
+## Licensing
+
+All fonts are licensed under the SIL Open Font License (OFL), which permits:
+- Free use in personal and commercial projects
+- Redistribution with software
+- Modification (creating derivative works)
+
+See individual font licenses at: https://fonts.google.com
 
 ## File Naming Convention
 
-Use the exact font name with weight suffix:
-- `Roboto-Regular.ttf`
-- `Roboto-Bold.ttf`
-- `OpenSans-Regular.ttf`
-- `OpenSans-Bold.ttf`
-- `PlayfairDisplay-Regular.ttf`
-- `PlayfairDisplay-Bold.ttf`
+Files follow the pattern: `FontName-Regular.ttf`
+- Spaces removed from font names
+- Variable fonts (wght) work for both regular and bold weights
 
-## Fonts to Download
+## Source
 
-Based on `google-fonts.ts`:
-
-### Sans-Serif
-- Roboto (Regular, Bold)
-- Open Sans (Regular, Bold)
-- Lato (Regular, Bold)
-- Montserrat (Regular, Bold)
-- Poppins (Regular, Bold)
-- Nunito (Regular, Bold)
-- Raleway (Regular, Bold)
-
-### Serif
-- Playfair Display (Regular, Bold)
-- Merriweather (Regular, Bold)
-- Lora (Regular, Bold)
-- Crimson Text (Regular, Bold)
-
-### Display
-- Oswald (Regular, Bold)
-- Bebas Neue (Regular only)
-- Anton (Regular only)
-- Righteous (Regular only)
-- Bangers (Regular only)
-- Permanent Marker (Regular only)
-- Russo One (Regular only)
-- Black Ops One (Regular only)
-- Bungee (Regular only)
-- Orbitron (Regular, Bold)
-- Press Start 2P (Regular only)
-
-### Monospace
-- Source Code Pro (Regular, Bold)
-- Fira Code (Regular, Bold)
-- JetBrains Mono (Regular, Bold)
-
-### Cursive
-- Pacifico (Regular only)
-- Dancing Script (Regular, Bold)
-- Caveat (Regular, Bold)
-- Satisfy (Regular only)
+Fonts downloaded from the official Google Fonts GitHub repository:
+https://github.com/google/fonts

@@ -292,7 +292,7 @@
 - [x] Preview URL generation (getGoogleFontsPreviewUrl - minimal character sets)
 - [x] FormFontSelect component (font dropdown with live preview and on-demand loading)
 - [x] FontLoader.svelte component
-- [x] Bundled TTF files for server-side rendering (5 popular fonts)
+- [x] Bundled TTF files for server-side rendering (all 39 fonts)
 
 ### Removed from Scope
 - ~~TitleField~~ - TextField already handles styled text with auto-fit
@@ -368,15 +368,12 @@ src/lib/
 ├── fonts/
 │   ├── index.ts            # Fonts exports & helpers
 │   ├── web-safe.ts         # 37+ web-safe fonts by category
-│   ├── google-fonts.ts     # 40+ Google Fonts (curated, SIL OFL)
+│   ├── google-fonts.ts     # 39 Google Fonts (curated, SIL OFL)
 │   ├── loader.ts           # Font loading utilities
 │   ├── FontLoader.svelte   # Font loader component
-│   ├── files/              # Bundled TTF files for server rendering
-│   │   ├── Roboto-Regular.ttf
-│   │   ├── OpenSans-Regular.ttf
-│   │   ├── Orbitron-Regular.ttf
-│   │   ├── PressStart2P-Regular.ttf
-│   │   └── Bangers-Regular.ttf
+│   ├── files/              # All 39 bundled TTF files for server rendering
+│   │   ├── README.md       # Font list and licensing info
+│   │   └── *.ttf           # All Google Fonts (39 files, ~9MB total)
 │   └── brand-fonts.ts      # Dataset-specific brand fonts
 ├── core/
 │   ├── index.ts            # Core exports
