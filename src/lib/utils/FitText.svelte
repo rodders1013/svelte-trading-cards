@@ -13,6 +13,9 @@
 		maxSize?: number;
 		fontFamily?: string;
 		fontWeight?: string;
+		fontStyle?: 'normal' | 'italic';
+		textDecoration?: 'none' | 'underline' | 'line-through';
+		textTransform?: 'none' | 'uppercase' | 'lowercase' | 'capitalize';
 		horizontalAlign?: 'left' | 'center' | 'right';
 		verticalAlign?: 'top' | 'center' | 'bottom';
 		fill?: string;
@@ -37,6 +40,9 @@
 		maxSize = 72,
 		fontFamily = 'Arial, sans-serif',
 		fontWeight = 'normal',
+		fontStyle = 'normal',
+		textDecoration = 'none',
+		textTransform = 'none',
 		horizontalAlign = 'left',
 		verticalAlign = 'top',
 		fill = '#000000',
@@ -56,15 +62,32 @@
 		}
 	});
 
+	// Apply text transform before measuring
+	const transformedText = $derived.by(() => {
+		if (!text) return '';
+		switch (textTransform) {
+			case 'uppercase':
+				return text.toUpperCase();
+			case 'lowercase':
+				return text.toLowerCase();
+			case 'capitalize':
+				return text.replace(/\b\w/g, (c) => c.toUpperCase());
+			default:
+				return text;
+		}
+	});
+
 	const fitOptions: TextFitOptions = $derived({
 		inset,
 		singleLine,
-		lineHeightRatio
+		lineHeightRatio,
+		fontWeight,
+		fontStyle
 	});
 
 	let fitted = $derived(
-		text && fontsLoaded
-			? fitTextToBox(text, width, height, fontFamily, minSize, maxSize, measureText, fitOptions)
+		transformedText && fontsLoaded
+			? fitTextToBox(transformedText, width, height, fontFamily, minSize, maxSize, measureText, fitOptions)
 			: null
 	);
 
@@ -134,6 +157,8 @@
 		font-family={fontFamily}
 		font-size={fitted.fontSize}
 		font-weight={fontWeight}
+		font-style={fontStyle}
+		text-decoration={textDecoration}
 		text-anchor={textAnchor}
 		{fill}
 		{opacity}

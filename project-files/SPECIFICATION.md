@@ -2,8 +2,8 @@
 
 **Package:** `svelte-trading-cards`
 **Version:** 0.1.0
-**Last Updated:** 2025-12-05
-**Status:** In Development (~93% complete)
+**Last Updated:** 2025-12-06
+**Status:** In Development (~97% complete)
 
 ---
 
@@ -15,11 +15,12 @@
 4. [Components](#components)
 5. [Animation System](#animation-system)
 6. [Effects System](#effects-system)
-7. [Fonts System](#fonts-system)
-8. [Visual Creator](#visual-creator)
-9. [Type System](#type-system)
-10. [Export System](#export-system)
-11. [Extensibility](#extensibility)
+7. [Blend Modes System](#blend-modes-system)
+8. [Fonts System](#fonts-system)
+9. [Visual Creator](#visual-creator)
+10. [Type System](#type-system)
+11. [Export System](#export-system)
+12. [Extensibility](#extensibility)
 
 ---
 
@@ -78,6 +79,8 @@ The Card Base layer automatically covers the bleed area. When exporting with ble
 | Zod | 4.x | Runtime validation |
 | Iconify | - | Icons via CSS classes (`icon-[set--name]`) |
 | shadcn-svelte | - | UI components for creator interface (https://www.shadcn-svelte.com/llms.txt) |
+| sharp | - | Image processing (WebP→PNG conversion for server export) |
+| @resvg/resvg-js | 2.x | Server-side SVG→PNG rendering |
 
 ---
 
@@ -647,9 +650,64 @@ All effects support pulsing animation via the `animated` and `speed` props:
 
 ---
 
+## Blend Modes System
+
+All components support CSS blend modes via the `mix-blend-mode` style property, enabling Photoshop-like layer compositing.
+
+### Available Blend Modes
+
+| Mode | Category | Description |
+|------|----------|-------------|
+| `normal` | Basic | No blending effect (default) |
+| `multiply` | Darken | Darkens layers together - great for textures |
+| `darken` | Darken | Keeps the darker pixels |
+| `color-burn` | Darken | Intense darkening effect |
+| `screen` | Lighten | Lightens layers together - great for glows |
+| `lighten` | Lighten | Keeps the lighter pixels |
+| `color-dodge` | Lighten | Intense brightening effect |
+| `overlay` | Contrast | Boosts contrast - multiply + screen combined |
+| `soft-light` | Contrast | Subtle contrast adjustment |
+| `hard-light` | Contrast | Intense contrast effect |
+| `difference` | Inversion | Creates color inversions |
+| `exclusion` | Inversion | Softer inversion effect |
+
+### Blend Mode Config
+
+```typescript
+import type { BlendMode } from 'svelte-trading-cards';
+
+// On any component
+{
+  type: 'Group',
+  props: {
+    x: 100, y: 100,
+    width: 200, height: 200,
+    blendMode: 'multiply'  // Apply blend mode
+  }
+}
+```
+
+### Components with Blend Mode Support
+
+All Group containers support the optional `blendMode` prop:
+
+- **Group** - Container with blend mode
+- **Card Base** - Base layer blend mode (rarely used)
+
+### Key Files
+
+| File | Purpose |
+|------|---------|
+| `src/lib/blend/types.ts` | Blend mode types, Zod schemas & options |
+| `src/lib/blend/index.ts` | Blend mode exports |
+| `src/lib/creator/components/BlendControls.svelte` | Dropdown with categories |
+| `src/lib/creator/components/form/PanelBlend.svelte` | Collapsible blend panel |
+
+---
+
 ## Fonts System
 
-The library includes 37+ web-safe fonts organized by category, plus dataset-specific brand fonts.
+The library includes 37+ web-safe fonts and 40+ Google Fonts organized by category, plus dataset-specific brand fonts.
 
 ### Architecture
 
@@ -666,6 +724,25 @@ The library includes 37+ web-safe fonts organized by category, plus dataset-spec
 │  │   - Cursive (5): Brush Script, Comic Sans...         │   │
 │  └─────────────────────────────────────────────────────┘   │
 │  ┌─────────────────────────────────────────────────────┐   │
+│  │ google-fonts.ts                                      │   │
+│  │   GOOGLE_FONTS: 40+ fonts (SIL Open Font License)    │   │
+│  │   - Sans-Serif (11): Roboto, Open Sans, Poppins...   │   │
+│  │   - Serif (4): Playfair Display, Merriweather...     │   │
+│  │   - Display (17): Oswald, Bangers, Orbitron...       │   │
+│  │   - Monospace (3): Source Code Pro, Fira Code...     │   │
+│  │   - Cursive (4): Pacifico, Dancing Script...         │   │
+│  └─────────────────────────────────────────────────────┘   │
+│  ┌─────────────────────────────────────────────────────┐   │
+│  │ loader.ts                                            │   │
+│  │   Font loading utilities:                            │   │
+│  │   - extractFontName(fontFamily)                      │   │
+│  │   - isWebSafeFont(fontFamily)                        │   │
+│  │   - isGoogleFont(fontFamily)                         │   │
+│  │   - loadGoogleFont(fontFamily)                       │   │
+│  │   - getGoogleFontsUrl(fontNames)                     │   │
+│  │   - getGoogleFontsPreviewUrl()                       │   │
+│  └─────────────────────────────────────────────────────┘   │
+│  ┌─────────────────────────────────────────────────────┐   │
 │  │ brand-fonts.ts                                       │   │
 │  │   BRAND_FONTS: Dataset-specific fonts                │   │
 │  │   - PlayStation Style (Segoe UI based)               │   │
@@ -673,10 +750,20 @@ The library includes 37+ web-safe fonts organized by category, plus dataset-spec
 │  │   - Steam Style (system sans-serif)                  │   │
 │  └─────────────────────────────────────────────────────┘   │
 │  ┌─────────────────────────────────────────────────────┐   │
+│  │ files/                                               │   │
+│  │   Bundled TTF files for server-side rendering:       │   │
+│  │   - Roboto-Regular.ttf                               │   │
+│  │   - OpenSans-Regular.ttf                             │   │
+│  │   - Orbitron-Regular.ttf                             │   │
+│  │   - PressStart2P-Regular.ttf                         │   │
+│  │   - Bangers-Regular.ttf                              │   │
+│  └─────────────────────────────────────────────────────┘   │
+│  ┌─────────────────────────────────────────────────────┐   │
 │  │ index.ts                                             │   │
 │  │   - getAllFontsForDataset(datasetId)                 │   │
 │  │   - getFontsByGroupForDataset(datasetId)             │   │
 │  │   - getWebSafeFonts()                                │   │
+│  │   - getGoogleFontOptions()                           │   │
 │  │   - fontFamilies (legacy export)                     │   │
 │  └─────────────────────────────────────────────────────┘   │
 └─────────────────────────────────────────────────────────────┘
@@ -743,6 +830,41 @@ getWebSafeFonts(): Array<{ value: string; label: string }>
 
 // Get brand fonts for a specific dataset
 getBrandFontOptions(datasetId: DatasetId): Array<{ value: string; label: string }>
+
+// Get Google Fonts formatted for dropdowns
+getGoogleFontOptions(): Array<{ value: string; label: string; category: FontCategory }>
+```
+
+### Font Loading Utilities
+
+```typescript
+import {
+  extractFontName,      // "Roboto, sans-serif" → "Roboto"
+  isWebSafeFont,        // Check if font is web-safe (no loading needed)
+  isGoogleFont,         // Check if font is a known Google Font
+  loadGoogleFont,       // Load single font on demand
+  loadGoogleFonts,      // Load multiple fonts
+  getGoogleFontsUrl,    // Generate Google Fonts CSS URL
+  getGoogleFontsUrlForCard,  // Extract fonts from card and generate URL
+  getGoogleFontsPreviewUrl,  // Minimal URL for dropdown previews (~20-40KB)
+  waitForFonts,         // Wait for fonts to load via Font Loading API
+  isGoogleFontLoaded    // Check if font has been loaded
+} from 'svelte-trading-cards';
+
+// Example: Load font when user selects it
+async function handleFontChange(fontFamily: string) {
+  await loadGoogleFont(fontFamily);  // Loads from Google Fonts CDN
+  // Font is now ready to use
+}
+
+// Example: Preload fonts for a card
+const url = getGoogleFontsUrlForCard(cardConfig);
+if (url) {
+  const link = document.createElement('link');
+  link.href = url;
+  link.rel = 'stylesheet';
+  document.head.appendChild(link);
+}
 ```
 
 ### Integration with Creator
@@ -761,7 +883,12 @@ Font dropdowns in creator panels automatically use dataset-aware fonts:
 |------|---------|
 | `src/lib/fonts/index.ts` | Main exports & helper functions |
 | `src/lib/fonts/web-safe.ts` | Web-safe fonts with categories |
+| `src/lib/fonts/google-fonts.ts` | 40+ Google Fonts (curated list) |
+| `src/lib/fonts/loader.ts` | Font loading utilities |
 | `src/lib/fonts/brand-fonts.ts` | Dataset-specific brand fonts |
+| `src/lib/fonts/FontLoader.svelte` | Font loader component |
+| `src/lib/fonts/files/` | Bundled TTF files for server rendering |
+| `src/lib/creator/components/form/FormFontSelect.svelte` | Font dropdown with live preview |
 
 ---
 
@@ -941,6 +1068,8 @@ import {
 } from 'svelte-trading-cards';
 ```
 
+**CORS Handling:** Client-side PNG export automatically embeds external images as base64 data URIs before rendering to canvas. This avoids CORS tainting issues with cross-origin images.
+
 ### Export with Bleed
 
 ```typescript
@@ -980,12 +1109,16 @@ const svgWithBleed = applyBleed(svgElement, {
 ```typescript
 import {
   renderToSVGString,     // Template + data → SVG string
-  embedImages,           // Embed external images as base64
+  embedImages,           // Embed external images as base64 (converts WebP→PNG)
   svgToPNG               // SVG → PNG buffer (resvg-js)
 } from 'svelte-trading-cards/server';
 ```
 
-Server-side uses `@resvg/resvg-js` (bundled, no additional install needed).
+**Dependencies:**
+- `@resvg/resvg-js` - SVG to PNG rendering (bundled)
+- `sharp` - Image processing, required for WebP→PNG conversion (resvg-js doesn't support WebP)
+
+**WebP Handling:** The `embedImages()` function automatically detects WebP images and converts them to PNG using `sharp` before embedding as base64.
 
 ---
 

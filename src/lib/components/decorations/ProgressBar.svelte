@@ -2,6 +2,7 @@
 	import { z } from 'zod';
 	import { AnimationConfigSchema } from '$lib/animations/types.js';
 	import { EffectConfigSchema } from '$lib/effects/types.js';
+	import { BlendMode } from '$lib/blend/types.js';
 
 	export const ProgressBarStyleSchema = z.enum(['rounded', 'square', 'pointed']);
 	export type ProgressBarStyle = z.infer<typeof ProgressBarStyleSchema>;
@@ -26,12 +27,10 @@
 		style: ProgressBarStyleSchema.default('rounded'),
 		segments: z.number().default(0),
 		segmentGap: z.number().default(2),
-		glowEnabled: z.boolean().default(false),
-		glowColor: z.string().optional(),
-		glowIntensity: z.number().default(0.5),
 		opacity: z.number().min(0).max(1).default(1),
 		animation: AnimationConfigSchema.optional(),
-		effect: EffectConfigSchema.optional()
+		effect: EffectConfigSchema.optional(),
+		blendMode: BlendMode.optional()
 	});
 
 	export type ProgressBarProps = z.infer<typeof ProgressBarPropsSchema>;
@@ -59,21 +58,16 @@
 		style = 'rounded',
 		segments = 0,
 		segmentGap = 2,
-		glowEnabled = false,
-		glowColor,
-		glowIntensity = 0.5,
 		opacity = 1,
 		animation,
 		effect,
+		blendMode,
 		container,
 		data
 	}: ProgressBarProps & {
 		container: ContainerContext;
 		data?: CardData;
 	} = $props();
-
-	const uid = Math.random().toString(36).substring(2, 9);
-	const glowFilterId = `progress-glow-${uid}`;
 
 	const width = $derived(container.width);
 	const height = $derived(container.height);
@@ -134,16 +128,7 @@
 	const filledSegments = $derived(segmentCount > 0 ? Math.ceil((percentage / 100) * segmentCount) : 0);
 </script>
 
-<defs>
-	{#if glowEnabled}
-		<filter id={glowFilterId} x="-50%" y="-50%" width="200%" height="200%">
-			<feGaussianBlur in="SourceGraphic" stdDeviation="4" result="blur" />
-			<feComposite in="blur" in2="SourceGraphic" operator="over" />
-		</filter>
-	{/if}
-</defs>
-
-<EffectWrapper {effect} transformOrigin="{cx}px {cy}px">
+<EffectWrapper {effect} {blendMode} transformOrigin="{cx}px {cy}px">
 	<AnimationWrapper {animation} transformOrigin="{cx}px {cy}px">
 		<g opacity={opacity}>
 			<!-- Background bar -->
@@ -170,20 +155,6 @@
 						fill={backgroundColor}
 					/>
 				{/each}
-			{/if}
-
-			<!-- Filled bar / Glow layer -->
-			{#if glowEnabled && filledWidth > 0}
-				<rect
-					x={barX}
-					y={barY}
-					width={filledWidth}
-					height={barHeight}
-					rx={borderRadius}
-					fill={glowColor ?? color}
-					opacity={glowIntensity}
-					filter="url(#{glowFilterId})"
-				/>
 			{/if}
 
 			<!-- Filled bar -->

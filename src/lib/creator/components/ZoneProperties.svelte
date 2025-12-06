@@ -6,9 +6,11 @@
 	import { Checkbox } from '$lib/components/ui/checkbox';
 	import ChevronDown from '@lucide/svelte/icons/chevron-down';
 	import AnimationControls from './AnimationControls.svelte';
+	import BlendControls from './BlendControls.svelte';
 	import HelpTooltip from './HelpTooltip.svelte';
 	import type { ContainerState, ClipShape } from '../types';
 	import type { AnimationConfig } from '$lib/animations';
+	import type { BlendMode } from '$lib/blend';
 
 	let {
 		container,
@@ -47,6 +49,7 @@
 	});
 
 	let showAdvanced = $state(false);
+	let showBlend = $state(false);
 </script>
 
 <div class="space-y-3">
@@ -161,14 +164,14 @@
 		</div>
 	{/if}
 
-	<!-- Advanced Section (Animation) -->
+	<!-- Animation Section -->
 	<Collapsible.Root bind:open={showAdvanced}>
 		<div class="flex items-center gap-2 rounded border border-blue-500/30 bg-blue-500/5 px-2 py-1.5 text-sm hover:bg-blue-500/10">
 			<Collapsible.Trigger class="flex flex-1 items-center gap-2">
 				<ChevronDown class="h-3 w-3 transition-transform {showAdvanced ? '' : '-rotate-90'}" />
 				<span class="font-medium text-blue-400">Animation</span>
 				{#if localAnimation?.type && localAnimation.type !== 'none'}
-					<span class="ml-auto rounded bg-blue-500/20 px-1.5 py-0.5 text-xs text-blue-400">Active</span>
+					<span class="ml-auto rounded bg-blue-500/20 px-1.5 py-0.5 text-xs text-blue-400 capitalize">{localAnimation.type}</span>
 				{/if}
 			</Collapsible.Trigger>
 			<HelpTooltip text="Animation applies to this entire layer and all components within it." />
@@ -176,6 +179,28 @@
 		<Collapsible.Content>
 			<div class="mt-2 rounded border border-blue-500/20 bg-blue-500/5 p-2">
 				<AnimationControls bind:animation={localAnimation} />
+			</div>
+		</Collapsible.Content>
+	</Collapsible.Root>
+
+	<!-- Blend Mode Section -->
+	<Collapsible.Root bind:open={showBlend}>
+		<div class="flex items-center gap-2 rounded border border-amber-500/30 bg-amber-500/5 px-2 py-1.5 text-sm hover:bg-amber-500/10">
+			<Collapsible.Trigger class="flex flex-1 items-center gap-2">
+				<ChevronDown class="h-3 w-3 transition-transform {showBlend ? '' : '-rotate-90'}" />
+				<span class="font-medium text-amber-400">Blend Mode</span>
+				{#if container.blendMode && container.blendMode !== 'normal'}
+					<span class="ml-auto rounded bg-amber-500/20 px-1.5 py-0.5 text-xs text-amber-400 capitalize">{container.blendMode}</span>
+				{/if}
+			</Collapsible.Trigger>
+			<HelpTooltip text="Blend mode affects how this layer composites with layers below it." />
+		</div>
+		<Collapsible.Content>
+			<div class="mt-2 rounded border border-amber-500/20 bg-amber-500/5 p-2">
+				<BlendControls
+					blendMode={container.blendMode}
+					onUpdate={(mode) => onUpdate('blendMode', mode)}
+				/>
 			</div>
 		</Collapsible.Content>
 	</Collapsible.Root>

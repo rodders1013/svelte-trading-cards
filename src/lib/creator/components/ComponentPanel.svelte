@@ -4,6 +4,7 @@
 	import ChevronDown from '@lucide/svelte/icons/chevron-down';
 	import Eye from '@lucide/svelte/icons/eye';
 	import EyeOff from '@lucide/svelte/icons/eye-off';
+	import ArrowUpDown from '@lucide/svelte/icons/arrow-up-down';
 	import type { Snippet } from 'svelte';
 
 	interface Props {
@@ -18,6 +19,8 @@
 		canRemove?: boolean;
 		/** Allow reordering this component (default true) */
 		canMove?: boolean;
+		/** Callback to swap layer order (for Card Base image/background) */
+		onSwapLayer?: () => void;
 		onRemove: () => void;
 		onMoveUp: () => void;
 		onMoveDown: () => void;
@@ -33,6 +36,7 @@
 		showVisibilityToggle = false,
 		canRemove = true,
 		canMove = true,
+		onSwapLayer,
 		onRemove,
 		onMoveUp,
 		onMoveDown,
@@ -56,6 +60,17 @@
 			{/if}
 		</Collapsible.Trigger>
 		<div class="flex items-center">
+			{#if onSwapLayer}
+				<Button
+					variant="ghost"
+					size="sm"
+					onclick={(e: MouseEvent) => { e.stopPropagation(); onSwapLayer(); }}
+					class="h-5 w-5 p-0"
+					title="Swap layer order"
+				>
+					<ArrowUpDown class="h-3 w-3" />
+				</Button>
+			{/if}
 			{#if showVisibilityToggle && onToggleVisibility}
 				<Button
 					variant="ghost"

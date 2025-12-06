@@ -3,6 +3,7 @@
 	import ComponentPanel from '../ComponentPanel.svelte';
 	import {
 		FormSelect,
+		FormFontSelect,
 		FormColorPicker,
 		FormSlider,
 		FormCheckbox,
@@ -188,7 +189,7 @@
 		/>
 	</div>
 
-	<FormSelect
+	<FormFontSelect
 		label="Font Family"
 		value={component.fontFamily}
 		onchange={(v) => onUpdate('fontFamily', v)}

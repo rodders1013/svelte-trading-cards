@@ -16,70 +16,45 @@ export interface FontOption {
 }
 
 /**
- * Comprehensive list of web-safe fonts (~35 fonts).
+ * Universal web-safe fonts that work on Windows, macOS, and Linux.
+ * These are primarily Microsoft Core Web Fonts which are widely installed.
  * Organized by category: sans-serif, serif, monospace, display, cursive.
  */
 export const WEB_SAFE_FONTS: FontOption[] = [
 	// ═══════════════════════════════════════════════════════════════════
 	// SANS-SERIF (clean, modern, readable)
+	// Microsoft Core Web Fonts - available on all platforms
 	// ═══════════════════════════════════════════════════════════════════
 	{ value: 'Arial, sans-serif', label: 'Arial', category: 'sans-serif' },
-	{ value: 'Helvetica, Arial, sans-serif', label: 'Helvetica', category: 'sans-serif' },
 	{ value: 'Verdana, sans-serif', label: 'Verdana', category: 'sans-serif' },
 	{ value: 'Tahoma, sans-serif', label: 'Tahoma', category: 'sans-serif' },
 	{ value: 'Trebuchet MS, sans-serif', label: 'Trebuchet MS', category: 'sans-serif' },
-	{ value: 'Segoe UI, sans-serif', label: 'Segoe UI', category: 'sans-serif' },
-	{ value: 'Geneva, sans-serif', label: 'Geneva', category: 'sans-serif' },
-	{ value: 'Optima, sans-serif', label: 'Optima', category: 'sans-serif' },
-	{ value: 'Avenir, sans-serif', label: 'Avenir', category: 'sans-serif' },
-	{ value: 'Century Gothic, sans-serif', label: 'Century Gothic', category: 'sans-serif' },
-	{
-		value: 'Franklin Gothic Medium, sans-serif',
-		label: 'Franklin Gothic',
-		category: 'sans-serif'
-	},
-	{ value: 'Futura, sans-serif', label: 'Futura', category: 'sans-serif' },
-	{ value: 'Gill Sans, sans-serif', label: 'Gill Sans', category: 'sans-serif' },
 
 	// ═══════════════════════════════════════════════════════════════════
 	// SERIF (elegant, traditional, editorial)
+	// Microsoft Core Web Fonts - available on all platforms
 	// ═══════════════════════════════════════════════════════════════════
 	{ value: 'Georgia, serif', label: 'Georgia', category: 'serif' },
 	{ value: 'Times New Roman, serif', label: 'Times New Roman', category: 'serif' },
-	{ value: 'Palatino Linotype, Palatino, serif', label: 'Palatino', category: 'serif' },
-	{ value: 'Book Antiqua, Palatino, serif', label: 'Book Antiqua', category: 'serif' },
-	{ value: 'Garamond, serif', label: 'Garamond', category: 'serif' },
-	{ value: 'Baskerville, serif', label: 'Baskerville', category: 'serif' },
-	{ value: 'Didot, serif', label: 'Didot', category: 'serif' },
-	{ value: 'Bodoni MT, serif', label: 'Bodoni', category: 'serif' },
-	{ value: 'Cambria, serif', label: 'Cambria', category: 'serif' },
-	{ value: 'Rockwell, serif', label: 'Rockwell', category: 'serif' },
 
 	// ═══════════════════════════════════════════════════════════════════
 	// MONOSPACE (technical, code, retro)
+	// Microsoft Core Web Fonts - available on all platforms
 	// ═══════════════════════════════════════════════════════════════════
 	{ value: 'Courier New, monospace', label: 'Courier New', category: 'monospace' },
-	{ value: 'Consolas, monospace', label: 'Consolas', category: 'monospace' },
-	{ value: 'Monaco, monospace', label: 'Monaco', category: 'monospace' },
-	{ value: 'Lucida Console, monospace', label: 'Lucida Console', category: 'monospace' },
-	{ value: 'Andale Mono, monospace', label: 'Andale Mono', category: 'monospace' },
 
 	// ═══════════════════════════════════════════════════════════════════
 	// DISPLAY (bold, impactful, headlines)
+	// Microsoft Core Web Fonts - available on all platforms
 	// ═══════════════════════════════════════════════════════════════════
 	{ value: 'Impact, sans-serif', label: 'Impact', category: 'display' },
 	{ value: 'Arial Black, sans-serif', label: 'Arial Black', category: 'display' },
-	{ value: 'Copperplate, fantasy', label: 'Copperplate', category: 'display' },
-	{ value: 'Haettenschweiler, sans-serif', label: 'Haettenschweiler', category: 'display' },
 
 	// ═══════════════════════════════════════════════════════════════════
 	// CURSIVE/SCRIPT (decorative, handwritten, playful)
+	// Microsoft Core Web Fonts - available on all platforms
 	// ═══════════════════════════════════════════════════════════════════
-	{ value: 'Brush Script MT, cursive', label: 'Brush Script', category: 'cursive' },
-	{ value: 'Lucida Handwriting, cursive', label: 'Lucida Handwriting', category: 'cursive' },
-	{ value: 'Comic Sans MS, cursive', label: 'Comic Sans', category: 'cursive' },
-	{ value: 'Snell Roundhand, cursive', label: 'Snell Roundhand', category: 'cursive' },
-	{ value: 'Zapfino, cursive', label: 'Zapfino', category: 'cursive' }
+	{ value: 'Comic Sans MS, cursive', label: 'Comic Sans', category: 'cursive' }
 ] as const;
 
 /**

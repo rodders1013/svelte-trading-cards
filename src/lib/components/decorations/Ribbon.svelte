@@ -2,6 +2,7 @@
 	import { z } from 'zod';
 	import { AnimationConfigSchema } from '$lib/animations/types.js';
 	import { EffectConfigSchema } from '$lib/effects/types.js';
+	import { BlendMode } from '$lib/blend/types.js';
 
 	export const RibbonPositionSchema = z.enum(['top-left', 'top-right', 'bottom-left', 'bottom-right', 'top', 'bottom']);
 	export type RibbonPosition = z.infer<typeof RibbonPositionSchema>;
@@ -42,7 +43,8 @@
 		ribbonWidth: z.number().optional(),
 		opacity: z.number().min(0).max(1).default(1),
 		animation: AnimationConfigSchema.optional(),
-		effect: EffectConfigSchema.optional()
+		effect: EffectConfigSchema.optional(),
+		blendMode: BlendMode.optional()
 	});
 
 	export type RibbonProps = z.infer<typeof RibbonPropsSchema>;
@@ -70,6 +72,7 @@
 		opacity = 1,
 		animation,
 		effect,
+		blendMode,
 		container,
 		data
 	}: RibbonProps & {
@@ -229,7 +232,7 @@
 	});
 </script>
 
-<EffectWrapper {effect} transformOrigin="{cx}px {cy}px">
+<EffectWrapper {effect} {blendMode} transformOrigin="{cx}px {cy}px">
 	<AnimationWrapper {animation} transformOrigin="{cx}px {cy}px">
 		<g opacity={opacity} transform={transform}>
 			<!-- Shadow/fold for folded style -->

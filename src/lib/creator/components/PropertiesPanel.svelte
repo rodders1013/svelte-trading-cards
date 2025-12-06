@@ -181,6 +181,19 @@
 	// Reset key - increment to force component panels to re-mount with fresh state
 	let componentResetKey = $state(0);
 
+	// Swap image and background layer order (for Card Base only)
+	function handleSwapImageBackground() {
+		if (!container) return;
+		const components = [...container.components];
+		const imageIdx = components.findIndex(c => c.type === 'image');
+		const bgIdx = components.findIndex(c => c.type === 'background');
+
+		if (imageIdx !== -1 && bgIdx !== -1) {
+			[components[imageIdx], components[bgIdx]] = [components[bgIdx], components[imageIdx]];
+			onUpdateContainer('components', components);
+		}
+	}
+
 	// Handle accordion value changes
 	function handleAccordionChange(newValue: string[]) {
 		const wasComponentsClosed = !openSections.includes('components');
@@ -307,6 +320,7 @@
 												onMoveUp={() => onMoveComponentUp(component.id)}
 												onMoveDown={() => onMoveComponentDown(component.id)}
 												onToggleVisibility={() => onUpdateBackgroundComponent('visible', !component.visible)}
+												onSwapLayer={handleSwapImageBackground}
 											/>
 										{:else if component.type === 'border'}
 											<BorderPanel
@@ -341,6 +355,7 @@
 												onMoveUp={() => onMoveComponentUp(component.id)}
 												onMoveDown={() => onMoveComponentDown(component.id)}
 												onToggleVisibility={() => onUpdateImageComponent('visible', !component.visible)}
+												onSwapLayer={handleSwapImageBackground}
 											/>
 										{:else if component.type === 'text'}
 											<TextPanel

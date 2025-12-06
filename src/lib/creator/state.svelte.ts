@@ -188,7 +188,7 @@ const componentBuildConfig: Partial<Record<ComponentItem['type'], ComponentBuild
 	},
 	text: {
 		renderType: 'TextField',
-		props: ['dataField', 'maxFontSize', 'minFontSize', 'fontWeight', 'fontFamily', { from: 'fill', to: 'color' }, 'alignment', 'verticalAlign']
+		props: ['dataField', 'maxFontSize', 'minFontSize', 'fontWeight', 'fontStyle', 'textDecoration', 'textTransform', 'fontFamily', { from: 'fill', to: 'color' }, 'opacity', 'alignment', 'verticalAlign', 'padding']
 	},
 	icon: {
 		renderType: 'Icon',
@@ -248,6 +248,9 @@ function buildPropsFromConfig(
 	if (comp.effect) {
 		props.effect = comp.effect;
 	}
+	if (comp.blendMode && comp.blendMode !== 'normal') {
+		props.blendMode = comp.blendMode;
+	}
 	return props;
 }
 
@@ -263,6 +266,7 @@ function buildBackgroundChildren(comp: BackgroundComponent): ComponentDefinition
 			opacity: comp.fillOpacity
 		};
 		if (comp.effect) props.effect = comp.effect;
+		if (comp.blendMode && comp.blendMode !== 'normal') props.blendMode = comp.blendMode;
 		children.push({ id: `${comp.id}-fill`, type: 'SolidBackground', props });
 	} else if (comp.fillType === 'gradient') {
 		const props: Record<string, unknown> = {
@@ -271,6 +275,7 @@ function buildBackgroundChildren(comp: BackgroundComponent): ComponentDefinition
 			opacity: comp.fillOpacity
 		};
 		if (comp.effect) props.effect = comp.effect;
+		if (comp.blendMode && comp.blendMode !== 'normal') props.blendMode = comp.blendMode;
 		children.push({ id: `${comp.id}-fill`, type: 'GradientBackground', props });
 	}
 
@@ -302,6 +307,7 @@ function buildBackgroundChildren(comp: BackgroundComponent): ComponentDefinition
 		}
 
 		if (comp.effect) props.effect = comp.effect;
+		if (comp.blendMode && comp.blendMode !== 'normal') props.blendMode = comp.blendMode;
 		children.push({ id: `${comp.id}-pattern`, type: 'PatternBackground', props });
 	}
 
@@ -344,6 +350,7 @@ function buildBorderProps(comp: BorderComponent): Record<string, unknown> {
 	}
 
 	if (comp.effect) props.effect = comp.effect;
+	if (comp.blendMode && comp.blendMode !== 'normal') props.blendMode = comp.blendMode;
 	return props;
 }
 
@@ -408,6 +415,11 @@ export function buildTemplate(templateName: string, containers: ContainerState[]
 			groupProps.animation = container.animation;
 		}
 
+		// Blend mode at zone level
+		if (container.blendMode && container.blendMode !== 'normal') {
+			groupProps.blendMode = container.blendMode;
+		}
+
 		components.push({
 			id: container.id,
 			type: 'Group',
@@ -464,10 +476,15 @@ export function createTextComponent(): TextComponent {
 		maxFontSize: 48,
 		minFontSize: 12,
 		fontWeight: 'normal',
+		fontStyle: 'normal',
+		textDecoration: 'none',
+		textTransform: 'none',
 		fontFamily: 'Arial, sans-serif',
 		fill: '#ffffff',
+		opacity: 1,
 		alignment: 'center',
-		verticalAlign: 'center'
+		verticalAlign: 'center',
+		padding: 0
 	};
 }
 
@@ -627,9 +644,6 @@ export function createProgressBarComponent(): ProgressBarComponent {
 		style: 'rounded',
 		segments: 0,
 		segmentGap: 2,
-		glowEnabled: false,
-		glowColor: undefined,
-		glowIntensity: 0.5,
 		opacity: 1
 	};
 }

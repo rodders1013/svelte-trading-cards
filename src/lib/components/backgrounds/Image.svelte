@@ -2,6 +2,7 @@
 	import { z } from 'zod';
 	import { AnimationConfigSchema } from '$lib/animations/types.js';
 	import { EffectConfigSchema } from '$lib/effects/types.js';
+	import { BlendMode } from '$lib/blend/types.js';
 
 	export const ImagePropsSchema = z.object({
 		imageUrl: z.string().optional(),
@@ -9,7 +10,8 @@
 		opacity: z.number().min(0).max(1).default(1),
 		preserveAspectRatio: z.string().default('xMidYMid slice'),
 		animation: AnimationConfigSchema.optional(),
-		effect: EffectConfigSchema.optional()
+		effect: EffectConfigSchema.optional(),
+		blendMode: BlendMode.optional()
 	});
 
 	export type ImageProps = z.infer<typeof ImagePropsSchema>;
@@ -27,6 +29,7 @@
 		preserveAspectRatio = 'xMidYMid slice',
 		animation,
 		effect,
+		blendMode,
 		container,
 		data
 	}: ImageProps & {
@@ -39,9 +42,15 @@
 
 	// Resolve image URL from data binding or direct prop
 	const resolvedImageUrl = $derived.by(() => {
-		if (dataField && data?.images && typeof data.images === 'object') {
-			const images = data.images as Record<string, string>;
-			return images[dataField] ?? imageUrl;
+		if (dataField && data) {
+			// First check nested images object
+			if (data.images && typeof data.images === 'object') {
+				const images = data.images as Record<string, string>;
+				if (images[dataField]) return images[dataField];
+			}
+			// Fallback to top-level data field
+			const value = data[dataField];
+			if (typeof value === 'string') return value;
 		}
 		return imageUrl;
 	});
@@ -70,7 +79,7 @@
 		</defs>
 	{/if}
 
-	<EffectWrapper {effect} transformOrigin="{centerX}px {centerY}px">
+	<EffectWrapper {effect} {blendMode} transformOrigin="{centerX}px {centerY}px">
 		<AnimationWrapper {animation} transformOrigin="{centerX}px {centerY}px">
 			<image
 				href={resolvedImageUrl}

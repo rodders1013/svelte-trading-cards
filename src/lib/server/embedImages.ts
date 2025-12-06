@@ -5,6 +5,8 @@
  * before the SVG can be rasterized to PNG.
  */
 
+import sharp from 'sharp';
+
 export interface EmbedOptions {
 	/** Maximum concurrent image fetches. Defaults to 3 */
 	concurrency?: number;
@@ -35,7 +37,8 @@ async function fetchImageAsDataURI(url: string, timeout: number): Promise<string
 		const response = await fetch(url, {
 			signal: controller.signal,
 			headers: {
-				Accept: 'image/*'
+				'Accept': 'image/*',
+				'User-Agent': 'Mozilla/5.0 (compatible; CardRenderer/1.0)'
 			}
 		});
 
@@ -46,10 +49,16 @@ async function fetchImageAsDataURI(url: string, timeout: number): Promise<string
 			return null;
 		}
 
-		const contentType = response.headers.get('content-type') || 'image/png';
-		const buffer = await response.arrayBuffer();
-		const base64 = Buffer.from(buffer).toString('base64');
+		let contentType = response.headers.get('content-type') || 'image/png';
+		let imageBuffer: Buffer = Buffer.from(await response.arrayBuffer());
 
+		// resvg-js doesn't reliably support webp - convert to png
+		if (contentType.includes('webp')) {
+			imageBuffer = await sharp(imageBuffer).png().toBuffer();
+			contentType = 'image/png';
+		}
+
+		const base64 = imageBuffer.toString('base64');
 		return `data:${contentType};base64,${base64}`;
 	} catch (error) {
 		if (error instanceof Error && error.name === 'AbortError') {

@@ -2,6 +2,7 @@
 	import { z } from 'zod';
 	import { AnimationConfigSchema } from '$lib/animations/types.js';
 	import { EffectConfigSchema } from '$lib/effects/types.js';
+	import { BlendMode } from '$lib/blend/types.js';
 
 	export const TextFieldPropsSchema = z.object({
 		// Text must come from data - no free text input allowed
@@ -10,12 +11,19 @@
 		minFontSize: z.number().default(12),
 		fontFamily: z.string().default('Arial, sans-serif'),
 		fontWeight: z.string().default('normal'),
+		fontStyle: z.enum(['normal', 'italic']).optional(),
+		textDecoration: z.enum(['none', 'underline', 'line-through']).optional(),
+		textTransform: z.enum(['none', 'uppercase', 'lowercase', 'capitalize']).optional(),
 		color: z.string().default('#ffffff'),
+		opacity: z.number().min(0).max(1).optional(),
 		alignment: z.enum(['left', 'center', 'right']).default('left'),
 		verticalAlign: z.enum(['top', 'center', 'bottom']).default('center'),
+		/** Additional padding (e.g., for border width). Added to auto-calculated radius padding. */
+		padding: z.number().optional(),
 		lineHeight: z.number().optional(),
 		animation: AnimationConfigSchema.optional(),
-		effect: EffectConfigSchema.optional()
+		effect: EffectConfigSchema.optional(),
+		blendMode: BlendMode.optional()
 	});
 
 	export type TextFieldProps = z.infer<typeof TextFieldPropsSchema>;
@@ -33,11 +41,17 @@
 		minFontSize = 12,
 		fontFamily = 'Arial, sans-serif',
 		fontWeight = 'normal',
+		fontStyle = 'normal',
+		textDecoration = 'none',
+		textTransform = 'none',
 		color = '#ffffff',
+		opacity = 1,
 		alignment = 'left',
 		verticalAlign = 'center',
+		padding = 0,
 		animation,
 		effect,
+		blendMode,
 		container,
 		data
 	}: TextFieldProps & {
@@ -50,12 +64,17 @@
 		dataField && data ? String(data[dataField] ?? '') : ''
 	);
 
+	// Calculate inset from container radius (to avoid rounded corners) plus user padding
+	// For rounded corners, safe inset ≈ radius * 0.3 keeps text out of corner curves
+	const radiusInset = $derived((container.radius ?? 0) * 0.3);
+	const totalInset = $derived(radiusInset + padding);
+
 	// Calculate center point for animation transform-origin
 	const centerX = $derived(container.width / 2);
 	const centerY = $derived(container.height / 2);
 </script>
 
-<EffectWrapper {effect} transformOrigin="{centerX}px {centerY}px">
+<EffectWrapper {effect} {blendMode} transformOrigin="{centerX}px {centerY}px">
 	<AnimationWrapper {animation} transformOrigin="{centerX}px {centerY}px">
 		<FitText
 			text={resolvedText}
@@ -65,11 +84,16 @@
 			height={container.height}
 			minSize={minFontSize}
 			maxSize={maxFontSize}
+			inset={totalInset}
 			{fontFamily}
 			{fontWeight}
+			{fontStyle}
+			{textDecoration}
+			{textTransform}
 			horizontalAlign={alignment}
 			{verticalAlign}
 			fill={color}
+			{opacity}
 		/>
 	</AnimationWrapper>
 </EffectWrapper>

@@ -2,6 +2,7 @@
 	import { z } from 'zod';
 	import { AnimationConfigSchema } from '$lib/animations/types.js';
 	import { EffectConfigSchema } from '$lib/effects/types.js';
+	import { BlendMode } from '$lib/blend/types.js';
 
 	export const DividerStyleSchema = z.enum(['solid', 'dashed', 'dotted', 'gradient', 'double']);
 	export type DividerStyle = z.infer<typeof DividerStyleSchema>;
@@ -25,7 +26,8 @@
 		gapLength: z.number().default(4),
 		opacity: z.number().min(0).max(1).default(1),
 		animation: AnimationConfigSchema.optional(),
-		effect: EffectConfigSchema.optional()
+		effect: EffectConfigSchema.optional(),
+		blendMode: BlendMode.optional()
 	});
 
 	export type DividerProps = z.infer<typeof DividerPropsSchema>;
@@ -50,6 +52,7 @@
 		opacity = 1,
 		animation,
 		effect,
+		blendMode,
 		container,
 		data
 	}: DividerProps & {
@@ -119,7 +122,7 @@
 	{/if}
 </defs>
 
-<EffectWrapper {effect} transformOrigin="{cx}px {cy}px">
+<EffectWrapper {effect} {blendMode} transformOrigin="{cx}px {cy}px">
 	<AnimationWrapper {animation} transformOrigin="{cx}px {cy}px">
 		<g opacity={opacity} mask={fade !== 'none' ? `url(#fade-mask-${uid})` : undefined}>
 			<!-- Left line (or full line if no ornament) -->

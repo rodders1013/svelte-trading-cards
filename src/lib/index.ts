@@ -61,6 +61,15 @@ export type {
 } from './effects/index.js';
 export { EffectConfigSchema } from './effects/index.js';
 
+// Blend Modes
+export {
+	BlendMode,
+	DEFAULT_BLEND_MODE,
+	BLEND_MODE_OPTIONS,
+	getBlendModesByCategory
+} from './blend/index.js';
+export type { BlendModeOption } from './blend/index.js';
+
 // Types
 export type {
 	CardTemplate,

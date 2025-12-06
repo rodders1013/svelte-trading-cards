@@ -2,6 +2,7 @@
 	import { z } from 'zod';
 	import { AnimationConfigSchema } from '$lib/animations/types.js';
 	import { EffectConfigSchema } from '$lib/effects/types.js';
+	import { BlendMode } from '$lib/blend/types.js';
 	import { IconDataSchema } from '$lib/components/icons/Icon.svelte';
 
 	// Preset icon options
@@ -67,7 +68,8 @@
 		// General
 		opacity: z.number().min(0).max(1).default(1),
 		animation: AnimationConfigSchema.optional(),
-		effect: EffectConfigSchema.optional()
+		effect: EffectConfigSchema.optional(),
+		blendMode: BlendMode.optional()
 	});
 
 	export type IconRatingProps = z.infer<typeof IconRatingPropsSchema>;
@@ -178,6 +180,7 @@
 		opacity = 1,
 		animation,
 		effect,
+		blendMode,
 		container,
 		data
 	}: IconRatingProps & {
@@ -283,7 +286,7 @@
 	const sanitizedBody = $derived(iconData?.body ? sanitizeSvgBody(iconData.body) : '');
 </script>
 
-<EffectWrapper {effect} transformOrigin="{centerX}px {centerY}px">
+<EffectWrapper {effect} {blendMode} transformOrigin="{centerX}px {centerY}px">
 	<AnimationWrapper {animation} transformOrigin="{centerX}px {centerY}px">
 		<g opacity={opacity}>
 			<!-- Value display (left) -->

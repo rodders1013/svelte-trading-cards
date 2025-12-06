@@ -2,7 +2,9 @@
 	import ComponentPanel from '../ComponentPanel.svelte';
 	import {
 		FormSelect,
+		FormFontSelect,
 		FormInput,
+		FormSlider,
 		FormColorPicker,
 		FormGrid,
 		PanelEffects
@@ -39,6 +41,24 @@
 		{ value: 'bold', label: 'Bold' }
 	];
 
+	const fontStyles = [
+		{ value: 'normal', label: 'Normal' },
+		{ value: 'italic', label: 'Italic' }
+	];
+
+	const textDecorations = [
+		{ value: 'none', label: 'None' },
+		{ value: 'underline', label: 'Underline' },
+		{ value: 'line-through', label: 'Strikethrough' }
+	];
+
+	const textTransforms = [
+		{ value: 'none', label: 'None' },
+		{ value: 'uppercase', label: 'Uppercase' },
+		{ value: 'lowercase', label: 'Lowercase' },
+		{ value: 'capitalize', label: 'Capitalize' }
+	];
+
 	const alignments = [
 		{ value: 'left', label: 'Left' },
 		{ value: 'center', label: 'Center' },
@@ -71,7 +91,7 @@
 			onchange={(v) => onUpdate('dataField', v)}
 			options={dataFields}
 		/>
-		<FormSelect
+		<FormFontSelect
 			label="Font Family"
 			value={component.fontFamily}
 			onchange={(v) => onUpdate('fontFamily', v)}
@@ -109,25 +129,65 @@
 			options={fontWeights}
 		/>
 		<FormSelect
-			label="Horizontal"
+			label="Style"
+			value={component.fontStyle}
+			onchange={(v) => onUpdate('fontStyle', v)}
+			options={fontStyles}
+		/>
+	</FormGrid>
+
+	<FormGrid>
+		<FormSelect
+			label="Decoration"
+			value={component.textDecoration}
+			onchange={(v) => onUpdate('textDecoration', v)}
+			options={textDecorations}
+		/>
+		<FormSelect
+			label="Transform"
+			value={component.textTransform}
+			onchange={(v) => onUpdate('textTransform', v)}
+			options={textTransforms}
+		/>
+	</FormGrid>
+
+	<FormGrid>
+		<FormSelect
+			label="Horizontal Align"
 			value={component.alignment}
 			onchange={(v) => onUpdate('alignment', v)}
 			options={alignments}
 		/>
+		<FormSelect
+			label="Vertical Align"
+			value={component.verticalAlign}
+			onchange={(v) => onUpdate('verticalAlign', v)}
+			options={verticalAligns}
+		/>
 	</FormGrid>
 
-	<FormSelect
-		label="Vertical Align"
-		value={component.verticalAlign}
-		onchange={(v) => onUpdate('verticalAlign', v)}
-		options={verticalAligns}
+	<FormSlider
+		label="Padding"
+		value={component.padding}
+		onchange={(v) => onUpdate('padding', v)}
+		min={0}
+		max={50}
+		step={1}
 	/>
 
-	<FormColorPicker
-		label="Color"
-		value={component.fill}
-		onchange={(v) => onUpdate('fill', v)}
-	/>
+	<FormGrid>
+		<FormColorPicker
+			label="Color"
+			value={component.fill}
+			onchange={(v) => onUpdate('fill', v)}
+		/>
+		<FormSlider
+			label="Opacity"
+			value={component.opacity}
+			onchange={(v) => onUpdate('opacity', v)}
+			percent
+		/>
+	</FormGrid>
 
 	<PanelEffects bind:effect={component.effect} />
 </ComponentPanel>

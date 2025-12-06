@@ -124,12 +124,6 @@
 		{/if}
 	</div>
 
-	<FormCheckbox
-		label="Enable Glow"
-		checked={component.glowEnabled}
-		onchange={(v) => onUpdate('glowEnabled', v)}
-	/>
-
 	<FormSlider
 		label="Opacity"
 		value={component.opacity}

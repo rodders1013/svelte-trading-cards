@@ -1,5 +1,7 @@
 // Text fitting algorithm - finds optimal font size via binary search
 
+import type { MeasureTextOptions } from './textMeasure.js';
+
 export interface TextFitResult {
 	fontSize: number;
 	lines: string[];
@@ -20,16 +22,22 @@ export interface TextFitOptions {
 	singleLine?: boolean;
 	/** Line height multiplier (default 1.2) */
 	lineHeightRatio?: number;
+	/** Font weight for accurate measurement */
+	fontWeight?: string;
+	/** Font style for accurate measurement */
+	fontStyle?: string;
 }
 
-type MeasureTextFn = (text: string, fontFamily: string, fontSize: number) => number;
+type MeasureTextFn = (text: string, fontFamily: string, fontSize: number, options?: MeasureTextOptions) => number;
 
 const DEFAULT_OPTIONS: Required<TextFitOptions> = {
 	minSize: 8,
 	maxSize: 72,
 	inset: 0,
 	singleLine: false,
-	lineHeightRatio: 1.2
+	lineHeightRatio: 1.2,
+	fontWeight: 'normal',
+	fontStyle: 'normal'
 };
 
 export function fitTextToBox(
@@ -43,6 +51,7 @@ export function fitTextToBox(
 	options?: Partial<TextFitOptions>
 ): TextFitResult {
 	const opts = { ...DEFAULT_OPTIONS, ...options, minSize, maxSize };
+	const measureOpts: MeasureTextOptions = { fontWeight: opts.fontWeight, fontStyle: opts.fontStyle };
 
 	// Apply inset to available space
 	const availableWidth = Math.max(1, boxWidth - opts.inset * 2);
@@ -62,7 +71,8 @@ export function fitTextToBox(
 			testSize,
 			measureTextFn,
 			opts.singleLine,
-			opts.lineHeightRatio
+			opts.lineHeightRatio,
+			measureOpts
 		);
 
 		if (result.fits) {
@@ -84,7 +94,8 @@ export function fitTextToBox(
 			opts.minSize,
 			measureTextFn,
 			opts.singleLine,
-			opts.lineHeightRatio
+			opts.lineHeightRatio,
+			measureOpts
 		);
 	}
 
@@ -124,11 +135,12 @@ function layoutText(
 	fontSize: number,
 	measureTextFn: MeasureTextFn,
 	singleLine: boolean = false,
-	lineHeightRatio: number = 1.2
+	lineHeightRatio: number = 1.2,
+	measureOpts?: MeasureTextOptions
 ): TextFitResult {
 	const result = singleLine
-		? { lines: [text], lineWidths: [measureTextFn(text, fontFamily, fontSize)] }
-		: breakIntoLines(text, maxWidth, fontFamily, fontSize, measureTextFn);
+		? { lines: [text], lineWidths: [measureTextFn(text, fontFamily, fontSize, measureOpts)] }
+		: breakIntoLines(text, maxWidth, fontFamily, fontSize, measureTextFn, measureOpts);
 
 	const lineHeight = fontSize * lineHeightRatio;
 	const totalHeight = result.lines.length * lineHeight;
@@ -150,7 +162,8 @@ function breakIntoLines(
 	maxWidth: number,
 	fontFamily: string,
 	fontSize: number,
-	measureTextFn: MeasureTextFn
+	measureTextFn: MeasureTextFn,
+	measureOpts?: MeasureTextOptions
 ): { lines: string[]; lineWidths: number[] } {
 	const words = text.split(' ');
 	const lines: string[] = [];
@@ -159,7 +172,7 @@ function breakIntoLines(
 
 	for (const word of words) {
 		const testLine = [...currentLine, word].join(' ');
-		const width = measureTextFn(testLine, fontFamily, fontSize);
+		const width = measureTextFn(testLine, fontFamily, fontSize, measureOpts);
 
 		if (width <= maxWidth) {
 			currentLine.push(word);
@@ -167,7 +180,7 @@ function breakIntoLines(
 			if (currentLine.length > 0) {
 				const lineText = currentLine.join(' ');
 				lines.push(lineText);
-				lineWidths.push(measureTextFn(lineText, fontFamily, fontSize));
+				lineWidths.push(measureTextFn(lineText, fontFamily, fontSize, measureOpts));
 			}
 			currentLine = [word];
 		}
@@ -176,11 +189,11 @@ function breakIntoLines(
 	if (currentLine.length > 0) {
 		const lineText = currentLine.join(' ');
 		lines.push(lineText);
-		lineWidths.push(measureTextFn(lineText, fontFamily, fontSize));
+		lineWidths.push(measureTextFn(lineText, fontFamily, fontSize, measureOpts));
 	}
 
 	return {
 		lines: lines.length > 0 ? lines : [text],
-		lineWidths: lineWidths.length > 0 ? lineWidths : [measureTextFn(text, fontFamily, fontSize)]
+		lineWidths: lineWidths.length > 0 ? lineWidths : [measureTextFn(text, fontFamily, fontSize, measureOpts)]
 	};
 }

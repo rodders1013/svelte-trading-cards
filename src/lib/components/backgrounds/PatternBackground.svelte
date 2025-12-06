@@ -2,6 +2,7 @@
 	import { z } from 'zod';
 	import { AnimationConfigSchema } from '$lib/animations/types.js';
 	import { EffectConfigSchema } from '$lib/effects/types.js';
+	import { BlendMode } from '$lib/blend/types.js';
 	import { IconDataSchema } from '$lib/components/icons/Icon.svelte';
 
 	export const PatternTypeSchema = z.enum([
@@ -63,9 +64,10 @@
 		icons: z.array(PatternIconItemSchema).optional(),
 		rowOffset: z.number().default(0), // Offset alternating rows (stagger/brick effect)
 
-		// Animation and effects
+		// Animation, effects, and blending
 		animation: AnimationConfigSchema.optional(),
-		effect: EffectConfigSchema.optional()
+		effect: EffectConfigSchema.optional(),
+		blendMode: BlendMode.optional()
 	});
 
 	export type PatternBackgroundProps = z.infer<typeof PatternBackgroundPropsSchema>;
@@ -139,6 +141,7 @@
 		rowOffset = 0,
 		animation,
 		effect,
+		blendMode,
 		container,
 		data
 	}: PatternBackgroundProps & {
@@ -482,7 +485,7 @@
 	{/if}
 </defs>
 
-<EffectWrapper {effect} transformOrigin="{centerX}px {centerY}px">
+<EffectWrapper {effect} {blendMode} transformOrigin="{centerX}px {centerY}px">
 	<AnimationWrapper {animation} transformOrigin="{centerX}px {centerY}px">
 		<rect
 			x="0"

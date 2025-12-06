@@ -2,13 +2,15 @@
 	import { z } from 'zod';
 	import { AnimationConfigSchema } from '$lib/animations/types.js';
 	import { EffectConfigSchema } from '$lib/effects/types.js';
+	import { BlendMode } from '$lib/blend/types.js';
 
 	export const GradientBackgroundPropsSchema = z.object({
 		colors: z.array(z.string()).min(2).max(4),
 		opacity: z.number().min(0).max(1).default(1),
 		direction: z.enum(['vertical', 'horizontal', 'diagonal']).default('vertical'),
 		animation: AnimationConfigSchema.optional(),
-		effect: EffectConfigSchema.optional()
+		effect: EffectConfigSchema.optional(),
+		blendMode: BlendMode.optional()
 	});
 
 	export type GradientBackgroundProps = z.infer<typeof GradientBackgroundPropsSchema>;
@@ -25,6 +27,7 @@
 		direction = 'vertical',
 		animation,
 		effect,
+		blendMode,
 		container,
 		data
 	}: GradientBackgroundProps & {
@@ -60,7 +63,7 @@
 	</linearGradient>
 </defs>
 
-<EffectWrapper {effect} transformOrigin="{centerX}px {centerY}px">
+<EffectWrapper {effect} {blendMode} transformOrigin="{centerX}px {centerY}px">
 	<AnimationWrapper {animation} transformOrigin="{centerX}px {centerY}px">
 		<rect
 			x="0"

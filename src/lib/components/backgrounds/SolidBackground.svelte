@@ -2,12 +2,14 @@
 	import { z } from 'zod';
 	import { AnimationConfigSchema } from '$lib/animations/types.js';
 	import { EffectConfigSchema } from '$lib/effects/types.js';
+	import { BlendMode } from '$lib/blend/types.js';
 
 	export const SolidBackgroundPropsSchema = z.object({
 		color: z.string().default('#000000'),
 		opacity: z.number().min(0).max(1).default(1),
 		animation: AnimationConfigSchema.optional(),
-		effect: EffectConfigSchema.optional()
+		effect: EffectConfigSchema.optional(),
+		blendMode: BlendMode.optional()
 	});
 
 	export type SolidBackgroundProps = z.infer<typeof SolidBackgroundPropsSchema>;
@@ -23,6 +25,7 @@
 		opacity = 1,
 		animation,
 		effect,
+		blendMode,
 		container,
 		data
 	}: SolidBackgroundProps & {
@@ -35,7 +38,7 @@
 	const centerY = $derived(container.height / 2);
 </script>
 
-<EffectWrapper {effect} transformOrigin="{centerX}px {centerY}px">
+<EffectWrapper {effect} {blendMode} transformOrigin="{centerX}px {centerY}px">
 	<AnimationWrapper {animation} transformOrigin="{centerX}px {centerY}px">
 		<rect
 			x="0"

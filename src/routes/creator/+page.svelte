@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { CardCreator } from '$lib/creator';
+	import { FontLoader } from '$lib/fonts';
 	import { datasets } from '$lib/demo';
 
 	// Convert datasets to the format expected by CardCreator
@@ -34,6 +35,9 @@
 		URL.revokeObjectURL(url);
 	}
 </script>
+
+<!-- Load Google Fonts previews for dropdown display -->
+<FontLoader />
 
 <CardCreator
 	datasets={creatorDatasets}

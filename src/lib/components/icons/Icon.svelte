@@ -2,6 +2,7 @@
 	import { z } from 'zod';
 	import { AnimationConfigSchema } from '$lib/animations/types.js';
 	import { EffectConfigSchema } from '$lib/effects/types.js';
+	import { BlendMode } from '$lib/blend/types.js';
 
 	// IconifyIcon data format
 	export const IconDataSchema = z.object({
@@ -22,7 +23,8 @@
 		flipHorizontal: z.boolean().default(false),
 		flipVertical: z.boolean().default(false),
 		animation: AnimationConfigSchema.optional(),
-		effect: EffectConfigSchema.optional()
+		effect: EffectConfigSchema.optional(),
+		blendMode: BlendMode.optional()
 	});
 
 	export type IconData = z.infer<typeof IconDataSchema>;
@@ -71,6 +73,7 @@
 		flipVertical = false,
 		animation,
 		effect,
+		blendMode,
 		container,
 		data
 	}: IconProps & {
@@ -123,7 +126,7 @@
 </script>
 
 {#if iconData?.body}
-	<EffectWrapper {effect} transformOrigin="{centerX}px {centerY}px">
+	<EffectWrapper {effect} {blendMode} transformOrigin="{centerX}px {centerY}px">
 		<AnimationWrapper {animation} transformOrigin="{centerX}px {centerY}px">
 			<g transform={transform} opacity={opacity}>
 				<svg

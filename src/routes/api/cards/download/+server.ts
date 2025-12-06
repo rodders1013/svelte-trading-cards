@@ -18,7 +18,7 @@ export const POST: RequestHandler = async ({ request }) => {
 		// Embed external images if present
 		let processedSvg = svg;
 		if (hasExternalImages(svg)) {
-			processedSvg = await embedImages(svg);
+			processedSvg = await embedImages(svg, { timeout: 15000 });
 		}
 
 		// Convert to PNG

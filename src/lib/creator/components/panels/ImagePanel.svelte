@@ -1,6 +1,6 @@
 <script lang="ts">
 	import ComponentPanel from '../ComponentPanel.svelte';
-	import { FormSelect, FormSlider, FormGrid, PanelEffects } from '../form';
+	import { FormSelect, FormSlider, FormGrid, PanelEffects, PanelBlend } from '../form';
 	import type { ImageComponent, DataFieldOption } from '../../types';
 
 	let {
@@ -12,7 +12,8 @@
 		onRemove,
 		onMoveUp,
 		onMoveDown,
-		onToggleVisibility
+		onToggleVisibility,
+		onSwapLayer
 	}: {
 		component: ImageComponent;
 		dataFields: DataFieldOption[];
@@ -23,6 +24,7 @@
 		onMoveUp: () => void;
 		onMoveDown: () => void;
 		onToggleVisibility?: () => void;
+		onSwapLayer?: () => void;
 	} = $props();
 
 	// Filter to image fields based on type or naming convention
@@ -45,6 +47,7 @@
 	showVisibilityToggle={isCardBase}
 	canRemove={!isCardBase}
 	canMove={!isCardBase}
+	onSwapLayer={isCardBase ? onSwapLayer : undefined}
 	{onRemove}
 	{onMoveUp}
 	{onMoveDown}
@@ -76,4 +79,5 @@
 	</FormGrid>
 
 	<PanelEffects bind:effect={component.effect} />
+	<PanelBlend bind:blendMode={component.blendMode} />
 </ComponentPanel>

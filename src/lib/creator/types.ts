@@ -1,5 +1,6 @@
 import type { AnimationConfig } from '$lib/animations';
 import type { EffectConfig } from '$lib/effects';
+import type { BlendMode } from '$lib/blend';
 import type { IconData } from '$lib/components/icons';
 import type { StatRow, ListStyle } from '$lib/components/fields';
 import type { BadgeShape, BadgePreset, BadgeSize, BadgeTextPreset } from '$lib/components/decorations';
@@ -7,7 +8,6 @@ import type { DividerStyle, DividerFade, DividerOrnament } from '$lib/components
 import type { ProgressBarStyle, LabelPosition } from '$lib/components/decorations';
 import type { RibbonPosition, RibbonStyle, RibbonTextPreset } from '$lib/components/decorations';
 import type { FrameStyle, FrameSize } from '$lib/components/decorations';
-import type { RatingIconPreset, ValueFormat } from '$lib/components/decorations';
 
 // Component type definitions for the visual creator
 
@@ -19,11 +19,17 @@ export interface TextComponent {
 	maxFontSize: number;
 	minFontSize: number;
 	fontWeight: string;
+	fontStyle: 'normal' | 'italic';
+	textDecoration: 'none' | 'underline' | 'line-through';
+	textTransform: 'none' | 'uppercase' | 'lowercase' | 'capitalize';
 	fontFamily: string;
 	fill: string;
+	opacity: number;
 	alignment: 'left' | 'center' | 'right';
 	verticalAlign: 'top' | 'center' | 'bottom';
+	padding: number;
 	effect?: EffectConfig;
+	blendMode?: BlendMode;
 }
 
 export interface ImageComponent {
@@ -34,6 +40,7 @@ export interface ImageComponent {
 	opacity: number;
 	preserveAspectRatio: string;
 	effect?: EffectConfig;
+	blendMode?: BlendMode;
 }
 
 export interface BackgroundComponent {
@@ -61,6 +68,7 @@ export interface BackgroundComponent {
 	patternIcons?: Array<{ iconData: IconData; iconName?: string; rotation?: number }>;
 	patternRowOffset?: number;
 	effect?: EffectConfig;
+	blendMode?: BlendMode;
 }
 
 export interface BorderComponent {
@@ -87,6 +95,7 @@ export interface BorderComponent {
 	layerColors?: string[];
 	layerSpacing?: number;
 	effect?: EffectConfig;
+	blendMode?: BlendMode;
 }
 
 export interface IconComponent {
@@ -102,6 +111,7 @@ export interface IconComponent {
 	flipHorizontal: boolean;
 	flipVertical: boolean;
 	effect?: EffectConfig;
+	blendMode?: BlendMode;
 }
 
 export interface BadgeComponent {
@@ -123,6 +133,7 @@ export interface BadgeComponent {
 	iconColor?: string;
 	opacity: number;
 	effect?: EffectConfig;
+	blendMode?: BlendMode;
 }
 
 export interface StatPanelComponent {
@@ -143,6 +154,7 @@ export interface StatPanelComponent {
 	barBorderRadius: number;
 	opacity: number;
 	effect?: EffectConfig;
+	blendMode?: BlendMode;
 }
 
 export interface DividerComponent {
@@ -161,6 +173,7 @@ export interface DividerComponent {
 	gapLength: number;
 	opacity: number;
 	effect?: EffectConfig;
+	blendMode?: BlendMode;
 }
 
 export interface ProgressBarComponent {
@@ -183,11 +196,9 @@ export interface ProgressBarComponent {
 	style: ProgressBarStyle;
 	segments: number;
 	segmentGap: number;
-	glowEnabled: boolean;
-	glowColor?: string;
-	glowIntensity: number;
 	opacity: number;
 	effect?: EffectConfig;
+	blendMode?: BlendMode;
 }
 
 export interface RibbonComponent {
@@ -208,6 +219,7 @@ export interface RibbonComponent {
 	ribbonWidth?: number;
 	opacity: number;
 	effect?: EffectConfig;
+	blendMode?: BlendMode;
 }
 
 export interface FrameComponent {
@@ -223,6 +235,7 @@ export interface FrameComponent {
 	strokeWidth: number;
 	opacity: number;
 	effect?: EffectConfig;
+	blendMode?: BlendMode;
 }
 
 export interface ListComponent {
@@ -249,6 +262,7 @@ export interface ListComponent {
 	overflowColor?: string;
 	opacity: number;
 	effect?: EffectConfig;
+	blendMode?: BlendMode;
 }
 
 export interface IconRatingComponent {
@@ -279,6 +293,7 @@ export interface IconRatingComponent {
 	valueGap: number;
 	opacity: number;
 	effect?: EffectConfig;
+	blendMode?: BlendMode;
 }
 
 export type ComponentItem =
@@ -319,6 +334,7 @@ export interface ContainerState {
 	radius: number;
 	clipContent: boolean;
 	animation?: AnimationConfig;
+	blendMode?: BlendMode;
 	components: ComponentItem[];
 	/** If true, this is the Card Base layer - cannot be deleted/moved and extends to bleed during export */
 	isCardBase?: boolean;

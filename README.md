@@ -26,6 +26,8 @@ Build professional trading cards by composing pre-built SVG components. Think of
 | Tailwind CSS | 4.x | Styling |
 | Zod | 4.x | Runtime validation |
 | shadcn-svelte | - | Creator UI components |
+| sharp | - | Image processing (WebP→PNG for server export) |
+| @resvg/resvg-js | 2.x | Server-side SVG→PNG rendering |
 
 ## Quick Start
 
@@ -133,6 +135,8 @@ The `CardCreator` component is a full-featured template designer you can embed i
 <button onclick={() => downloadPNGClient(svgElement)}>Download PNG</button>
 ```
 
+**Note:** Client-side PNG export automatically embeds external images as base64 before rendering to canvas, avoiding CORS issues.
+
 ### 4. Export with Bleed (for Print)
 
 ```typescript
@@ -150,9 +154,11 @@ The visual creator includes an **Export** button that opens a dialog with:
 
 ## Fonts System
 
-The library includes 37+ web-safe fonts organized by category, plus dataset-specific brand fonts.
+The library includes 37+ web-safe fonts and 40+ Google Fonts organized by category, plus dataset-specific brand fonts.
 
 ### Font Categories
+
+**Web-Safe Fonts (no loading required):**
 
 | Category | Fonts | Examples |
 |----------|-------|----------|
@@ -161,6 +167,43 @@ The library includes 37+ web-safe fonts organized by category, plus dataset-spec
 | Monospace | 5 | Courier New, Consolas, Monaco |
 | Display | 4 | Impact, Arial Black, Copperplate |
 | Cursive | 5 | Brush Script, Lucida Handwriting, Comic Sans |
+
+**Google Fonts (loaded on demand):**
+
+| Category | Fonts | Examples |
+|----------|-------|----------|
+| Sans-Serif | 11 | Roboto, Open Sans, Montserrat, Poppins, Nunito |
+| Serif | 4 | Playfair Display, Merriweather, Lora, Crimson Text |
+| Display | 17 | Oswald, Bangers, Orbitron, Press Start 2P, Bebas Neue |
+| Monospace | 3 | Source Code Pro, Fira Code, JetBrains Mono |
+| Cursive | 4 | Pacifico, Dancing Script, Caveat, Satisfy |
+
+### Font Loading
+
+Google Fonts are loaded on demand when selected in the creator:
+
+```typescript
+import {
+  loadGoogleFont,           // Load single font on demand
+  getGoogleFontsUrlForCard, // Generate URL for all fonts in a card
+  isWebSafeFont,            // Check if font needs loading
+  isGoogleFont,             // Check if it's a known Google Font
+  waitForFonts              // Wait for fonts to be ready
+} from 'svelte-trading-cards';
+
+// Load font when user selects it
+await loadGoogleFont('Roboto, sans-serif');
+
+// Preload all fonts for a card configuration
+const url = getGoogleFontsUrlForCard(cardConfig);
+if (url) {
+  const link = document.createElement('link');
+  link.href = url;
+  link.rel = 'stylesheet';
+  document.head.appendChild(link);
+  await waitForFonts(['Roboto', 'Oswald']);
+}
+```
 
 ### Dataset Brand Fonts
 
@@ -183,7 +226,9 @@ import {
   getAllFontsForDataset,      // Brand + web-safe fonts for a dataset
   getFontsByGroupForDataset,  // Fonts organized by category
   getWebSafeFonts,            // Just web-safe fonts
+  getGoogleFontOptions,       // Google Fonts for dropdowns
   WEB_SAFE_FONTS,             // Full font list with metadata
+  GOOGLE_FONTS,               // Full Google Fonts list
   FONT_GROUP_LABELS           // Display names for categories
 } from 'svelte-trading-cards';
 ```
@@ -404,6 +449,41 @@ All visual components support both `animation` and `effect` props:
 - GradientBackground
 - PatternBackground
 
+## Blend Modes
+
+Layer blend modes enable Photoshop-like compositing effects. Applied via CSS `mix-blend-mode` on Groups.
+
+### Available Blend Modes
+
+| Mode | Category | Description |
+|------|----------|-------------|
+| `normal` | Basic | No blending effect (default) |
+| `multiply` | Darken | Darkens layers together - great for textures |
+| `screen` | Lighten | Lightens layers together - great for glows |
+| `overlay` | Contrast | Boosts contrast - multiply + screen combined |
+| `darken` | Darken | Keeps the darker pixels |
+| `lighten` | Lighten | Keeps the lighter pixels |
+| `color-dodge` | Lighten | Intense brightening effect |
+| `color-burn` | Darken | Intense darkening effect |
+| `soft-light` | Contrast | Subtle contrast adjustment |
+| `hard-light` | Contrast | Intense contrast effect |
+| `difference` | Inversion | Creates color inversions |
+| `exclusion` | Inversion | Softer inversion effect |
+
+### Usage
+
+```typescript
+{
+  type: 'Group',
+  props: {
+    x: 100, y: 100,
+    width: 200, height: 200,
+    blendMode: 'multiply'  // Apply blend mode to this layer
+  },
+  children: [...]
+}
+```
+
 ### Group (Container)
 
 ```typescript
@@ -461,9 +541,11 @@ npm run build        # Build library
 import { renderToSVGString, embedImages, svgToPNG } from 'svelte-trading-cards/server';
 
 const svg = renderToSVGString(template, data);
-const svgWithImages = await embedImages(svg);
+const svgWithImages = await embedImages(svg);  // Embeds external images as base64, converts webp→png
 const { buffer } = await svgToPNG(svgWithImages);
 ```
+
+**Note:** Server-side export uses `sharp` to convert WebP images to PNG (resvg-js doesn't support WebP). This is handled automatically by `embedImages()`.
 
 ### SVG Validation
 

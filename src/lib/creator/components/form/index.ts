@@ -1,8 +1,10 @@
 export { default as FormSlider } from './FormSlider.svelte';
 export { default as FormSelect } from './FormSelect.svelte';
+export { default as FormFontSelect } from './FormFontSelect.svelte';
 export { default as FormCheckbox } from './FormCheckbox.svelte';
 export { default as FormSwitch } from './FormSwitch.svelte';
 export { default as FormInput } from './FormInput.svelte';
 export { default as FormColorPicker } from './FormColorPicker.svelte';
 export { default as PanelEffects } from './PanelEffects.svelte';
+export { default as PanelBlend } from './PanelBlend.svelte';
 export { default as FormGrid } from './FormGrid.svelte';

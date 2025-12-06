@@ -3,9 +3,11 @@
  * Centralized font management for trading card components
  *
  * Provides:
- * - 35+ web-safe fonts organized by category
+ * - Universal web-safe fonts (Microsoft Core Web Fonts)
+ * - Google Fonts with dynamic loading support
  * - Dataset-specific brand fonts
  * - Helper functions for font selection UI
+ * - Utilities for dynamic font loading in consuming projects
  */
 
 import {
@@ -24,11 +26,20 @@ import {
 	type BrandFont
 } from './brand-fonts.js';
 
+import {
+	GOOGLE_FONTS,
+	getGoogleFontOptions,
+	type GoogleFont
+} from './google-fonts.js';
+
 import type { DatasetId } from '$lib/presets';
 
 // Re-export everything
 export * from './web-safe.js';
 export * from './brand-fonts.js';
+export * from './google-fonts.js';
+export * from './loader.js';
+export { default as FontLoader } from './FontLoader.svelte';
 
 /**
  * Font option for UI dropdowns, with optional grouping.
@@ -40,7 +51,7 @@ export interface FontDropdownOption {
 }
 
 /**
- * Get all fonts for a dataset (brand fonts first, then web-safe fonts).
+ * Get all fonts for a dataset (brand fonts first, then web-safe, then Google Fonts).
  * Returns options suitable for a dropdown UI.
  */
 export function getAllFontsForDataset(datasetId: DatasetId): FontDropdownOption[] {
@@ -55,7 +66,13 @@ export function getAllFontsForDataset(datasetId: DatasetId): FontDropdownOption[
 		category: f.category
 	}));
 
-	return [...brandFonts, ...webSafeFonts];
+	const googleFonts = GOOGLE_FONTS.map((f) => ({
+		value: f.value,
+		label: f.label,
+		category: f.category
+	}));
+
+	return [...brandFonts, ...webSafeFonts, ...googleFonts];
 }
 
 /**

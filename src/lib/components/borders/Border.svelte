@@ -2,6 +2,7 @@
 	import { z } from 'zod';
 	import { AnimationConfigSchema } from '$lib/animations/types.js';
 	import { EffectConfigSchema } from '$lib/effects/types.js';
+	import { BlendMode } from '$lib/blend/types.js';
 
 	const GlowEffectSchema = z.object({
 		color: z.string().optional(),
@@ -26,7 +27,8 @@
 		layerColors: z.array(z.string()).optional(),
 		layerSpacing: z.number().default(4),
 		animation: AnimationConfigSchema.optional(),
-		effect: EffectConfigSchema.optional()
+		effect: EffectConfigSchema.optional(),
+		blendMode: BlendMode.optional()
 	});
 
 	export type BorderProps = z.infer<typeof BorderPropsSchema>;
@@ -50,6 +52,7 @@
 		layerSpacing = 4,
 		animation,
 		effect,
+		blendMode,
 		container,
 		data
 	}: BorderProps & {
@@ -294,7 +297,7 @@
 	{/if}
 {/snippet}
 
-<EffectWrapper {effect} transformOrigin="{centerX}px {centerY}px">
+<EffectWrapper {effect} {blendMode} transformOrigin="{centerX}px {centerY}px">
 	<AnimationWrapper {animation} transformOrigin="{centerX}px {centerY}px">
 		<!-- Glow layer (rendered behind main border) -->
 		{#if glow}

@@ -27,10 +27,12 @@
 	import RestoreDraftDialog from './components/RestoreDraftDialog.svelte';
 	import ExportDialog from './components/ExportDialog.svelte';
 	import { downloadSVG, downloadPNGClient } from '$lib/export/downloadSVG';
+import { extractFontsFromCard, loadGoogleFonts } from '$lib/fonts';
 
 	import type {
 		ContainerState,
 		ComponentItem,
+		BorderComponent,
 		ResizeHandle,
 		DataFieldOption
 	} from './types.js';
@@ -451,6 +453,14 @@
 		onChange?.({ template, editorState: containers });
 	});
 
+	// Auto-load Google Fonts when containers change (e.g., template loaded)
+	$effect(() => {
+		const fonts = extractFontsFromCard(containers);
+		if (fonts.length > 0) {
+			loadGoogleFonts(fonts);
+		}
+	});
+
 	// Track pane group width for dynamic center sizing
 	$effect(() => {
 		if (!paneGroupElement) return;
@@ -727,7 +737,31 @@
 	const addTextComponent = () => addComponent('text');
 	const addImageComponent = () => addComponent('image');
 	const addBackgroundComponent = () => addComponent('background');
-	const addBorderComponent = () => addComponent('border');
+
+	// Border adder - also syncs text padding with new border's default width
+	function addBorderComponent() {
+		if (!selectedContainerId) return;
+		const container = containers.find((c) => c.id === selectedContainerId);
+		if (!container || hasComponentType(container, 'border')) return;
+		pushHistory();
+		const newBorder = componentFactories['border']() as BorderComponent;
+		const borderWidth = newBorder.width;
+
+		containers = containers.map((c) => {
+			if (c.id !== selectedContainerId) return c;
+			// Add border and sync text padding
+			const updatedComponents = c.components.map((comp) =>
+				comp.type === 'text' ? { ...comp, padding: borderWidth } : comp
+			);
+			return { ...c, components: [newBorder, ...updatedComponents] };
+		});
+
+		propertiesPanelTab = 'components';
+		selectedComponentId = newBorder.id;
+		if (!expandedPanels.has('comp-border')) {
+			expandedPanels = new Set([...expandedPanels, 'comp-border']);
+		}
+	}
 	const addIconComponent = () => addComponent('icon');
 	const addBadgeComponent = () => addComponent('badge');
 	const addStatPanelComponent = () => addComponent('statpanel');
@@ -764,7 +798,28 @@
 	const updateTextComponent = (key: string, value: unknown) => updateComponent('text', key, value);
 	const updateImageComponent = (key: string, value: unknown) => updateComponent('image', key, value);
 	const updateBackgroundComponent = (key: string, value: unknown) => updateComponent('background', key, value);
-	const updateBorderComponent = (key: string, value: unknown) => updateComponent('border', key, value);
+
+	// Border component updater - also syncs text padding with border width
+	function updateBorderComponent(key: string, value: unknown) {
+		if (!selectedContainerId) return;
+		pushHistory();
+		containers = containers.map((c) => {
+			if (c.id !== selectedContainerId) return c;
+
+			const updatedComponents = c.components.map((comp) => {
+				if (comp.type === 'border') {
+					return { ...comp, [key]: value };
+				}
+				// Auto-sync text padding with border width
+				if (comp.type === 'text' && key === 'width' && typeof value === 'number') {
+					return { ...comp, padding: value };
+				}
+				return comp;
+			});
+
+			return { ...c, components: updatedComponents };
+		});
+	}
 	const updateIconComponent = (key: string, value: unknown) => updateComponent('icon', key, value);
 	const updateBadgeComponent = (key: string, value: unknown) => updateComponent('badge', key, value);
 	const updateStatPanelComponent = (key: string, value: unknown) => updateComponent('statpanel', key, value);

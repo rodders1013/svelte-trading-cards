@@ -4,10 +4,25 @@
 let canvas: HTMLCanvasElement | null = null;
 let ctx: CanvasRenderingContext2D | null = null;
 
-export function measureText(text: string, fontFamily: string, fontSize: number): number {
+export interface MeasureTextOptions {
+	fontWeight?: string;
+	fontStyle?: string;
+}
+
+export function measureText(
+	text: string,
+	fontFamily: string,
+	fontSize: number,
+	options?: MeasureTextOptions
+): number {
+	const fontWeight = options?.fontWeight || 'normal';
+	const fontStyle = options?.fontStyle || 'normal';
+
 	if (typeof document === 'undefined') {
 		// Server fallback: estimate based on average character width
-		return text.length * fontSize * 0.6;
+		// Bold text is roughly 10% wider
+		const boldMultiplier = fontWeight === 'bold' ? 1.1 : 1;
+		return text.length * fontSize * 0.6 * boldMultiplier;
 	}
 
 	if (!canvas) {
@@ -16,7 +31,8 @@ export function measureText(text: string, fontFamily: string, fontSize: number):
 	}
 
 	if (ctx) {
-		ctx.font = `${fontSize}px ${fontFamily}`;
+		// CSS font shorthand: font-style font-weight font-size font-family
+		ctx.font = `${fontStyle} ${fontWeight} ${fontSize}px ${fontFamily}`;
 		return ctx.measureText(text).width;
 	}
 

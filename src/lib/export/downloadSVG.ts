@@ -7,6 +7,61 @@
 
 import { CARD_WIDTH, CARD_HEIGHT } from '../types/CardTemplate.js';
 
+/**
+ * Fetches an image and converts it to a base64 data URI (client-side).
+ */
+async function fetchImageAsDataURIClient(url: string): Promise<string | null> {
+	try {
+		const response = await fetch(url);
+		if (!response.ok) return null;
+
+		const blob = await response.blob();
+		return new Promise((resolve) => {
+			const reader = new FileReader();
+			reader.onloadend = () => resolve(reader.result as string);
+			reader.onerror = () => resolve(null);
+			reader.readAsDataURL(blob);
+		});
+	} catch {
+		return null;
+	}
+}
+
+/**
+ * Embeds external images in an SVG string as base64 data URIs (client-side).
+ * This is required before rendering to canvas to avoid CORS tainting.
+ */
+async function embedImagesClient(svgString: string): Promise<string> {
+	// Find all <image> elements with external URLs
+	const imageRegex = /<image[^>]*(?:href|xlink:href)=["'](https?:\/\/[^"']+)["'][^>]*>/gi;
+	const matches = [...svgString.matchAll(imageRegex)];
+
+	if (matches.length === 0) return svgString;
+
+	// Deduplicate URLs
+	const uniqueUrls = [...new Set(matches.map((m) => m[1]))];
+
+	// Fetch all images in parallel
+	const urlToDataUri = new Map<string, string>();
+	await Promise.all(
+		uniqueUrls.map(async (url) => {
+			const dataUri = await fetchImageAsDataURIClient(url);
+			if (dataUri) {
+				urlToDataUri.set(url, dataUri);
+			}
+		})
+	);
+
+	// Replace URLs with data URIs
+	let result = svgString;
+	for (const [url, dataUri] of urlToDataUri) {
+		const escapedUrl = url.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+		result = result.replace(new RegExp(escapedUrl, 'g'), dataUri);
+	}
+
+	return result;
+}
+
 /** Pixels per millimeter at 300 DPI (750px / 63.5mm = 11.811) */
 const PX_PER_MM = 11.811;
 
@@ -293,7 +348,10 @@ export async function svgToPNGClient(svgElement: SVGSVGElement, scale = 1, bleed
 		throw new Error('Could not get canvas context');
 	}
 
-	const svgString = serializeSVG(svgToRender, true);
+	// Serialize and embed external images as base64 to avoid CORS tainting
+	let svgString = serializeSVG(svgToRender, true);
+	svgString = await embedImagesClient(svgString);
+
 	const svgBlob = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' });
 	const url = URL.createObjectURL(svgBlob);
 

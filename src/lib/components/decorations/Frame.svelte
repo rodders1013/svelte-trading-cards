@@ -2,6 +2,7 @@
 	import { z } from 'zod';
 	import { AnimationConfigSchema } from '$lib/animations/types.js';
 	import { EffectConfigSchema } from '$lib/effects/types.js';
+	import { BlendMode } from '$lib/blend/types.js';
 
 	export const FrameStyleSchema = z.enum(['simple', 'ornate', 'art-deco', 'celtic', 'tribal', 'elegant']);
 	export type FrameStyle = z.infer<typeof FrameStyleSchema>;
@@ -19,7 +20,8 @@
 		strokeWidth: z.number().default(2),
 		opacity: z.number().min(0).max(1).default(1),
 		animation: AnimationConfigSchema.optional(),
-		effect: EffectConfigSchema.optional()
+		effect: EffectConfigSchema.optional(),
+		blendMode: BlendMode.optional()
 	});
 
 	export type FrameProps = z.infer<typeof FramePropsSchema>;
@@ -41,6 +43,7 @@
 		opacity = 1,
 		animation,
 		effect,
+		blendMode,
 		container,
 		data
 	}: FrameProps & {
@@ -155,23 +158,23 @@
 	}
 
 	// Corner positions and rotations
-	const cornerConfigs = [
-		{ id: 'tl', x: padding, y: padding, rotate: 0 },
-		{ id: 'tr', x: width - padding, y: padding, rotate: 90 },
-		{ id: 'br', x: width - padding, y: height - padding, rotate: 180 },
-		{ id: 'bl', x: padding, y: height - padding, rotate: 270 }
-	] as const;
+	const cornerConfigs = $derived([
+		{ id: 'tl' as const, x: padding, y: padding, rotate: 0 },
+		{ id: 'tr' as const, x: width - padding, y: padding, rotate: 90 },
+		{ id: 'br' as const, x: width - padding, y: height - padding, rotate: 180 },
+		{ id: 'bl' as const, x: padding, y: height - padding, rotate: 270 }
+	]);
 
 	// Edge positions and rotations
-	const edgeConfigs = [
-		{ id: 'top', x: cx, y: padding + cornerSize * 0.2, rotate: 0 },
-		{ id: 'right', x: width - padding - cornerSize * 0.2, y: cy, rotate: 90 },
-		{ id: 'bottom', x: cx, y: height - padding - cornerSize * 0.2, rotate: 180 },
-		{ id: 'left', x: padding + cornerSize * 0.2, y: cy, rotate: 270 }
-	] as const;
+	const edgeConfigs = $derived([
+		{ id: 'top' as const, x: cx, y: padding + cornerSize * 0.2, rotate: 0 },
+		{ id: 'right' as const, x: width - padding - cornerSize * 0.2, y: cy, rotate: 90 },
+		{ id: 'bottom' as const, x: cx, y: height - padding - cornerSize * 0.2, rotate: 180 },
+		{ id: 'left' as const, x: padding + cornerSize * 0.2, y: cy, rotate: 270 }
+	]);
 </script>
 
-<EffectWrapper {effect} transformOrigin="{cx}px {cy}px">
+<EffectWrapper {effect} {blendMode} transformOrigin="{cx}px {cy}px">
 	<AnimationWrapper {animation} transformOrigin="{cx}px {cy}px">
 		<g opacity={opacity}>
 			<!-- Corner decorations -->

@@ -14,6 +14,8 @@
 | Tailwind CSS | v4+ | CSS-first configuration |
 | Zod | v4+ | z.record requires 2 args |
 | SvelteKit | 2.x | Library mode with @sveltejs/package |
+| sharp | - | Image processing (WebP→PNG for server export) |
+| @resvg/resvg-js | 2.x | Server-side SVG→PNG rendering |
 
 ---
 
@@ -131,8 +133,8 @@ The creator at `/creator` uses zones (Groups) as the organizing unit.
 ### File Structure
 
 ```
-src/routes/creator/
-├── +page.svelte        # Main orchestrator (~800 lines)
+src/lib/creator/
+├── CardCreator.svelte  # Main orchestrator (~1300 lines)
 ├── types.ts            # Type definitions
 ├── state.svelte.ts     # Factory functions & helpers
 └── components/         # Modular UI components
@@ -141,6 +143,8 @@ src/routes/creator/
     ├── PropertiesPanel.svelte
     ├── AnimationControls.svelte  # Reusable (shared by all panels)
     ├── EffectsControls.svelte    # Reusable (shared by all panels)
+    ├── BlendControls.svelte      # Blend mode dropdown (shared)
+    ├── form/*.svelte             # Reusable form components
     └── panels/*.svelte           # Component property panels
 ```
 
@@ -223,7 +227,7 @@ The project uses these shadcn-svelte components:
 
 ### Form Wrapper Components
 
-Located in `src/routes/creator/components/form/`:
+Located in `src/lib/creator/components/form/`:
 
 | Component | Purpose |
 |-----------|---------|
@@ -233,7 +237,10 @@ Located in `src/routes/creator/components/form/`:
 | `FormSwitch` | Labeled toggle switch |
 | `FormInput` | Labeled text/number input |
 | `FormColorPicker` | Labeled color picker |
+| `FormFontSelect` | Font dropdown with live preview and on-demand loading |
 | `FormGrid` | 2/3/4 column grid layout |
+| `PanelEffects` | Shared effects section footer |
+| `PanelBlend` | Shared blend mode section |
 
 ---
 

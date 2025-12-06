@@ -1,7 +1,7 @@
 # svelte-trading-cards Project Tracker
 
-**Last Updated:** 2025-12-05
-**Current Progress:** ~93% (Beta ready)
+**Last Updated:** 2025-12-06
+**Current Progress:** ~97% (Beta ready)
 
 ---
 
@@ -49,13 +49,15 @@
 ### Export System
 - [x] Client-side SVG download (downloadSVG)
 - [x] Client-side PNG download (downloadPNGClient)
+- [x] Client-side image embedding for PNG (embedImagesClient - handles CORS)
 - [x] SVG utilities (svgToDataURL, svgToBlob, serializeSVG)
 - [x] Server-side SVG rendering (renderToSVGString)
 - [x] Server-side image embedding (embedImages)
 - [x] Server-side PNG conversion (svgToPNG)
+- [x] WebP to PNG conversion via sharp (resvg-js doesn't support webp)
 - [x] Memory cleanup for high-volume rendering
 - [x] Separate /server entry point (tree-shaking friendly)
-- [x] Bundled resvg-js for server-side PNG (no peer deps needed)
+- [x] Bundled resvg-js for server-side PNG
 
 ### Field Components
 - [x] TextField (container-aware, auto-fit with min/max range, vertical align)
@@ -158,6 +160,7 @@
 - [x] Card Base locked on canvas (no drag/resize)
 - [x] Special UI in hierarchy panel (lock icon, no reorder)
 - [x] Info panel in properties (explains Card Base purpose)
+- [x] Swap button (↕️) on Image/Background panels to swap z-order
 
 ### Bleed System for Print Export - NEW
 - [x] 3mm bleed support (35px at 300 DPI)
@@ -263,8 +266,33 @@
 - [x] Pattern controls (size, spacing, rotation, stroke width)
 - [x] Row offset for brick/staggered effect on multi-icon patterns
 
-### Layer Features
-- [ ] Blend modes support (multiply, screen, overlay)
+### Blend Modes System - COMPLETE
+- [x] Blend modes support (12 CSS mix-blend-mode values)
+  - Basic: normal
+  - Darken: multiply, darken, color-burn
+  - Lighten: screen, lighten, color-dodge
+  - Contrast: overlay, soft-light, hard-light
+  - Inversion: difference, exclusion
+- [x] BlendControls component (dropdown with categories)
+- [x] PanelBlend collapsible panel (used in component panels)
+- [x] Blend mode types and Zod schema
+- [x] BLEND_MODE_OPTIONS constant with descriptions
+
+### Google Fonts System - COMPLETE
+- [x] 40+ curated Google Fonts (SIL Open Font License)
+  - Sans-Serif (11): Roboto, Open Sans, Lato, Montserrat, Poppins, Nunito, Raleway, Quicksand, Comfortaa, Outfit, Lexend
+  - Serif (4): Playfair Display, Merriweather, Lora, Crimson Text
+  - Display (17): Oswald, Bebas Neue, Anton, Righteous, Bangers, Permanent Marker, Russo One, Black Ops One, Bungee, Orbitron, Press Start 2P, Audiowide, Rajdhani, Exo 2, Michroma, Electrolize, Teko, Kanit
+  - Monospace (3): Source Code Pro, Fira Code, JetBrains Mono
+  - Cursive (4): Pacifico, Dancing Script, Caveat, Satisfy
+- [x] Font loading utilities (extractFontName, isWebSafeFont, isGoogleFont, loadGoogleFont)
+- [x] Font extraction from card config (extractFontsFromCard)
+- [x] Google Fonts URL generation (getGoogleFontsUrl, getGoogleFontsUrlForCard)
+- [x] On-demand font loading (loadGoogleFont, loadGoogleFonts)
+- [x] Preview URL generation (getGoogleFontsPreviewUrl - minimal character sets)
+- [x] FormFontSelect component (font dropdown with live preview and on-demand loading)
+- [x] FontLoader.svelte component
+- [x] Bundled TTF files for server-side rendering (5 popular fonts)
 
 ### Removed from Scope
 - ~~TitleField~~ - TextField already handles styled text with auto-fit
@@ -275,15 +303,7 @@
 
 ---
 
-## PHASE 4: THEMING & STYLES
-
-- [ ] Style preset system (pixel-art, modern, metallic, gothic, sports)
-- [ ] applyStylePreset() function
-- [ ] registerStylePreset() for custom themes
-
----
-
-## PHASE 5: TESTING & DOCS
+## PHASE 4: TESTING & DOCS
 
 - [ ] Unit tests for components
 - [ ] Integration tests for CardCanvas
@@ -292,7 +312,7 @@
 
 ---
 
-## PHASE 6: PUBLISH
+## PHASE 5: PUBLISH
 
 - [ ] Package build verification (npm run package)
 - [x] README.md with usage examples
@@ -306,11 +326,10 @@
 |-------|--------|----------|
 | Phase 1: Core Package | Complete | 28/28 |
 | Phase 2: Visual Creator | Complete | 68/68 |
-| Phase 3: Additional Components | In Progress | 38/39 |
-| Phase 4: Theming | Not Started | 0/3 |
-| Phase 5: Testing & Docs | Not Started | 0/4 |
-| Phase 6: Publish | In Progress | 1/3 |
-| **Total** | | **135/145 (~93%)** |
+| Phase 3: Additional Components | Complete | 57/57 |
+| Phase 4: Testing & Docs | Not Started | 0/4 |
+| Phase 5: Publish | In Progress | 1/3 |
+| **Total** | | **154/160 (~97%)** |
 
 ### Phase 3 Component Priority
 
@@ -322,7 +341,8 @@
 | 4 | ProgressBar | Visual stat bars, meters | Medium | ✓ |
 | 5 | Ribbon | Banner/ribbon text overlays | Medium | ✓ |
 | 6 | Frame | Corner/edge decorations | Medium | ✓ |
-| 7 | Blend modes | multiply, screen, overlay support | Low | Pending |
+| 7 | Blend modes | multiply, screen, overlay support | Low | ✓ |
+| 8 | Google Fonts | 40+ curated fonts with loading | Medium | ✓ |
 
 ---
 
@@ -337,6 +357,9 @@ src/lib/
 │   ├── presets.ts          # Animation presets (spin, pulse, bounce, etc.)
 │   ├── styles.ts           # CSS keyframes & classes for SVG injection
 │   └── AnimationWrapper.svelte # Wrapper component for animated SVG elements
+├── blend/
+│   ├── index.ts            # Blend mode exports
+│   └── types.ts            # Blend mode types, schemas & options
 ├── effects/
 │   ├── index.ts            # Effect exports
 │   ├── types.ts            # Effect types & schemas (glow, shadow, neon, etc.)
@@ -345,6 +368,15 @@ src/lib/
 ├── fonts/
 │   ├── index.ts            # Fonts exports & helpers
 │   ├── web-safe.ts         # 37+ web-safe fonts by category
+│   ├── google-fonts.ts     # 40+ Google Fonts (curated, SIL OFL)
+│   ├── loader.ts           # Font loading utilities
+│   ├── FontLoader.svelte   # Font loader component
+│   ├── files/              # Bundled TTF files for server rendering
+│   │   ├── Roboto-Regular.ttf
+│   │   ├── OpenSans-Regular.ttf
+│   │   ├── Orbitron-Regular.ttf
+│   │   ├── PressStart2P-Regular.ttf
+│   │   └── Bangers-Regular.ttf
 │   └── brand-fonts.ts      # Dataset-specific brand fonts
 ├── core/
 │   ├── index.ts            # Core exports
@@ -413,6 +445,7 @@ src/lib/creator/               # Embeddable CardCreator component
     ├── AddComponentPopover.svelte  # Add component popover
     ├── AnimationControls.svelte    # Reusable animation panel
     ├── EffectsControls.svelte      # Reusable effects panel
+    ├── BlendControls.svelte        # Blend mode dropdown with categories
     ├── HelpModal.svelte            # Keyboard shortcuts modal
     ├── HelpTooltip.svelte          # Help text tooltips
     ├── FieldRemapDialog.svelte     # Dataset field remapping
@@ -426,8 +459,10 @@ src/lib/creator/               # Embeddable CardCreator component
     │   ├── FormSwitch.svelte      # Label + Switch
     │   ├── FormInput.svelte       # Label + Input (text/number)
     │   ├── FormColorPicker.svelte # Label + color input
+    │   ├── FormFontSelect.svelte  # Font dropdown with live preview
     │   ├── FormGrid.svelte        # Grid layout (2/3/4 columns)
-    │   └── PanelEffects.svelte    # Shared effects section footer
+    │   ├── PanelEffects.svelte    # Shared effects section footer
+    │   └── PanelBlend.svelte      # Shared blend mode section
     └── panels/
         ├── TextPanel.svelte        # Text component properties
         ├── ImagePanel.svelte       # Image component properties

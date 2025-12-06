@@ -1,6 +1,6 @@
 <script lang="ts">
 	import ComponentPanel from '../ComponentPanel.svelte';
-	import { FormSelect, FormSlider, FormColorPicker, FormInput, FormGrid, PanelEffects } from '../form';
+	import { FormSelect, FormSlider, FormColorPicker, FormInput, FormGrid, PanelEffects, PanelBlend } from '../form';
 	import { IconPicker } from '$lib/components/icons';
 	import type { IconData } from '$lib/components/icons';
 	import { PATTERN_LABELS, PATTERN_PRESETS } from '$lib/components/backgrounds/PatternBackground.svelte';
@@ -18,7 +18,8 @@
 		onRemove,
 		onMoveUp,
 		onMoveDown,
-		onToggleVisibility
+		onToggleVisibility,
+		onSwapLayer
 	}: {
 		component: BackgroundComponent;
 		expanded: boolean;
@@ -28,6 +29,7 @@
 		onMoveUp: () => void;
 		onMoveDown: () => void;
 		onToggleVisibility?: () => void;
+		onSwapLayer?: () => void;
 	} = $props();
 
 	const fillTypes = [
@@ -103,6 +105,7 @@
 	showVisibilityToggle={isCardBase}
 	canRemove={!isCardBase}
 	canMove={!isCardBase}
+	onSwapLayer={isCardBase ? onSwapLayer : undefined}
 	{onRemove}
 	{onMoveUp}
 	{onMoveDown}
@@ -335,4 +338,5 @@
 	</div>
 
 	<PanelEffects bind:effect={component.effect} />
+	<PanelBlend bind:blendMode={component.blendMode} />
 </ComponentPanel>

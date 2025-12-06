@@ -64,6 +64,13 @@ const productCard: CardData = {
 };
 ```
 
+**Image Data Binding:** The Image component resolves `dataField` by checking:
+1. `data.images[dataField]` (nested images object)
+2. `data[dataField]` (top-level field)
+3. Falls back to `imageUrl` prop
+
+This allows flexible data structures - images can be at the top level or nested.
+
 #### 2. Card Template (`CardTemplate`)
 
 Templates define the visual layout. They're created via the `CardCreator` UI or programmatically:
@@ -323,6 +330,7 @@ import {
   type TypedCardData,
   type CommonCardFields,
   type ContainerContext,
+  type BlendMode,
 
   // Creator types
   type ContainerState,
@@ -336,6 +344,22 @@ import {
   svgToDataURL,
   svgToBlob,
   type DownloadOptions,
+
+  // Font utilities
+  extractFontName,
+  isWebSafeFont,
+  isGoogleFont,
+  loadGoogleFont,
+  loadGoogleFonts,
+  getGoogleFontsUrl,
+  getGoogleFontsUrlForCard,
+  getGoogleFontsPreviewUrl,
+  waitForFonts,
+  isGoogleFontLoaded,
+  GOOGLE_FONTS,
+
+  // Blend modes
+  BLEND_MODE_OPTIONS,
 
   // Constants
   CARD_WIDTH,   // 750
@@ -681,3 +705,4 @@ interface DownloadOptions {
 - [ ] Use `CardCanvas` for rendering with loaded templates
 - [ ] Implement export endpoints (client or server)
 - [ ] Add bleed settings for print workflows
+- [ ] Load Google Fonts before rendering (use `getGoogleFontsUrlForCard`)

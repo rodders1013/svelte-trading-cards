@@ -1,6 +1,7 @@
 <script lang="ts" module>
 	import { z } from 'zod';
 	import { AnimationConfigSchema } from '$lib/animations';
+	import { BlendMode } from '$lib/blend/types.js';
 
 	// Predefined clip shapes
 	export const ClipShapeEnum = z.enum([
@@ -26,7 +27,8 @@
 		clipContent: z.boolean().default(true),
 		clipShape: ClipShapeEnum.default('rect'),
 		clipPoints: z.array(z.object({ x: z.number(), y: z.number() })).optional(),
-		animation: AnimationConfigSchema.optional()
+		animation: AnimationConfigSchema.optional(),
+		blendMode: BlendMode.optional()
 	});
 
 	export type GroupProps = z.infer<typeof GroupPropsSchema>;
@@ -48,6 +50,7 @@
 		clipShape = 'rect',
 		clipPoints,
 		animation,
+		blendMode,
 		children,
 		data,
 		container: _container
@@ -59,6 +62,10 @@
 
 	// Check if animation should be applied
 	const hasAnimation = $derived(animation && animation.type !== 'none');
+
+	// Check if blend mode should be applied
+	const hasBlend = $derived(blendMode !== undefined && blendMode !== 'normal');
+	const blendStyle = $derived(hasBlend ? `mix-blend-mode: ${blendMode}` : '');
 
 	const uid = Math.random().toString(36).substring(2, 9);
 	const clipId = `group-clip-${uid}`;
@@ -191,14 +198,25 @@
 	</g>
 {/snippet}
 
-{#if hasAnimation && animation}
-	<AnimationWrapper {animation} transformOrigin="{width / 2}px {height / 2}px">
+{#snippet positionedContent()}
+	{#if hasAnimation && animation}
+		<AnimationWrapper {animation} transformOrigin="{width / 2}px {height / 2}px">
+			<g transform="translate({x}, {y})">
+				{@render groupContent()}
+			</g>
+		</AnimationWrapper>
+	{:else}
 		<g transform="translate({x}, {y})">
 			{@render groupContent()}
 		</g>
-	</AnimationWrapper>
-{:else}
-	<g transform="translate({x}, {y})">
-		{@render groupContent()}
+	{/if}
+{/snippet}
+
+<!-- Outer wrapper for blend mode (wraps everything including animations) -->
+{#if hasBlend}
+	<g style={blendStyle}>
+		{@render positionedContent()}
 	</g>
+{:else}
+	{@render positionedContent()}
 {/if}
