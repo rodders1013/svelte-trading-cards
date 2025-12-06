@@ -131,16 +131,24 @@
 		return baseX;
 	});
 
+	// Calculate vertical position
+	// Note: We use dominant-baseline="central" on the text element,
+	// so y positions the visual center of each line, not the baseline.
+	// This gives better centering especially for fonts with descenders.
 	let verticalOffset = $derived.by(() => {
 		if (!fitted) return inset;
 		const totalTextHeight = fitted.lines.length * fitted.lineHeight;
 
 		if (verticalAlign === 'center') {
-			return (height - totalTextHeight) / 2;
+			// Center the text block, accounting for line height
+			// Add half a line height to position first line's center correctly
+			return (height - totalTextHeight) / 2 + fitted.lineHeight / 2;
 		} else if (verticalAlign === 'bottom') {
-			return height - totalTextHeight - inset;
+			// Position from bottom, with half line height offset for central baseline
+			return height - totalTextHeight - inset + fitted.lineHeight / 2;
 		}
-		return inset;
+		// Top alignment: start at inset + half line height for central baseline
+		return inset + fitted.lineHeight / 2;
 	});
 </script>
 
@@ -176,18 +184,19 @@
 {#if fitted}
 	<text
 		x={textX}
-		y={y + verticalOffset + fitted.fontSize}
+		y={y + verticalOffset}
 		font-family={fontFamily}
 		font-size={fitted.fontSize}
 		font-weight={fontWeight}
 		font-style={fontStyle}
 		text-decoration={textDecoration}
 		text-anchor={textAnchor}
+		dominant-baseline="central"
 		{fill}
 		{opacity}
 	>
 		{#each fitted.lines as line, i}
-			<tspan x={textX} dy={i === 0 ? 0 : fitted.lineHeight}>
+			<tspan x={textX} dy={i === 0 ? 0 : fitted.lineHeight} dominant-baseline="central">
 				{line}
 			</tspan>
 		{/each}
