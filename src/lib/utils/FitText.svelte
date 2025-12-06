@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { fitTextToBox, type TextFitOptions } from './textFitting.js';
 	import { measureText } from './textMeasure.js';
+	import { loadFont } from '$lib/fonts';
 	import { onMount } from 'svelte';
 
 	interface Props {
@@ -54,11 +55,33 @@
 	}: Props = $props();
 
 	let fontsLoaded = $state(typeof document === 'undefined');
+	let currentFontFamily = $state(fontFamily);
 
-	onMount(async () => {
+	// Load the specific font and wait for it before measuring
+	async function ensureFontLoaded(font: string) {
+		if (typeof document === 'undefined') return;
+
+		// Load the font (handles Google, brand, and web-safe fonts)
+		await loadFont(font);
+
+		// Also wait for document.fonts.ready for any other pending fonts
 		if (document.fonts) {
 			await document.fonts.ready;
-			fontsLoaded = true;
+		}
+
+		fontsLoaded = true;
+		currentFontFamily = font;
+	}
+
+	onMount(() => {
+		ensureFontLoaded(fontFamily);
+	});
+
+	// Re-load font when fontFamily changes
+	$effect(() => {
+		if (fontFamily !== currentFontFamily) {
+			fontsLoaded = false;
+			ensureFontLoaded(fontFamily);
 		}
 	});
 
