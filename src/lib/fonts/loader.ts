@@ -2,12 +2,15 @@
  * Font Loading Utilities
  *
  * Provides helpers for dynamic font loading in consuming projects.
- * The library provides these utilities but doesn't handle the actual loading -
- * that's the responsibility of the consuming project.
+ * Supports:
+ * - Google Fonts (loaded from CDN)
+ * - Brand fonts like SST (loaded from bundled base64 data)
+ * - Web-safe fonts (no loading needed)
  */
 
 import { WEB_SAFE_FONTS } from './web-safe.js';
 import { GOOGLE_FONTS } from './google-fonts.js';
+import { SST_FONTS } from './sst-fonts-data.js';
 
 // Cache of web-safe font family values for quick lookup
 const webSafeFontValues = new Set(WEB_SAFE_FONTS.map(f => f.value));
@@ -241,4 +244,148 @@ export async function loadGoogleFonts(fontFamilies: string[]): Promise<void> {
 export function isGoogleFontLoaded(fontFamily: string): boolean {
 	const fontName = extractFontName(fontFamily);
 	return loadedFonts.has(fontName);
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// BRAND FONT LOADING (SST, etc.)
+// ═══════════════════════════════════════════════════════════════════════════
+
+// Known brand fonts that are bundled with the library
+const BRAND_FONT_NAMES = new Set(['SST']);
+
+/**
+ * Check if a font is a bundled brand font.
+ */
+export function isBrandFont(fontFamily: string): boolean {
+	const fontName = extractFontName(fontFamily);
+	return BRAND_FONT_NAMES.has(fontName);
+}
+
+/**
+ * Check if a brand font has been loaded.
+ */
+export function isBrandFontLoaded(fontFamily: string): boolean {
+	const fontName = extractFontName(fontFamily);
+	return loadedFonts.has(fontName);
+}
+
+/**
+ * Load SST font by injecting @font-face rules with base64 data.
+ */
+async function loadSSTFont(): Promise<void> {
+	if (typeof document === 'undefined') return;
+	if (loadedFonts.has('SST')) return;
+
+	const styleId = 'brand-font-sst';
+	if (document.getElementById(styleId)) return;
+
+	// Create @font-face CSS with base64 data URLs
+	const css = `
+		@font-face {
+			font-family: 'SST';
+			src: url('${SST_FONTS.regular}') format('truetype');
+			font-weight: 400;
+			font-style: normal;
+			font-display: swap;
+		}
+		@font-face {
+			font-family: 'SST';
+			src: url('${SST_FONTS.bold}') format('truetype');
+			font-weight: 700;
+			font-style: normal;
+			font-display: swap;
+		}
+		@font-face {
+			font-family: 'SST';
+			src: url('${SST_FONTS.italic}') format('truetype');
+			font-weight: 400;
+			font-style: italic;
+			font-display: swap;
+		}
+		@font-face {
+			font-family: 'SST';
+			src: url('${SST_FONTS.boldItalic}') format('truetype');
+			font-weight: 700;
+			font-style: italic;
+			font-display: swap;
+		}
+	`;
+
+	const style = document.createElement('style');
+	style.id = styleId;
+	style.textContent = css;
+	document.head.appendChild(style);
+
+	// Wait for font to be ready
+	await waitForFonts(['SST']);
+	loadedFonts.add('SST');
+}
+
+/**
+ * Load a brand font on demand.
+ * Currently supports: SST (PlayStation)
+ *
+ * @param fontFamily The font-family value (e.g., "SST, Segoe UI, sans-serif")
+ * @returns Promise that resolves when font is loaded
+ */
+export async function loadBrandFont(fontFamily: string): Promise<void> {
+	if (typeof document === 'undefined') return;
+	if (isWebSafeFont(fontFamily)) return;
+
+	const fontName = extractFontName(fontFamily);
+
+	if (fontName === 'SST') {
+		await loadSSTFont();
+	}
+}
+
+/**
+ * Load any font (Google, brand, or web-safe) on demand.
+ * This is the unified function that handles all font types.
+ *
+ * @param fontFamily The font-family value
+ * @returns Promise that resolves when font is loaded
+ */
+export async function loadFont(fontFamily: string): Promise<void> {
+	if (typeof document === 'undefined') return;
+	if (isWebSafeFont(fontFamily)) return;
+
+	const fontName = extractFontName(fontFamily);
+
+	// Check if already loaded
+	if (loadedFonts.has(fontName)) return;
+
+	// Try brand font first
+	if (isBrandFont(fontFamily)) {
+		await loadBrandFont(fontFamily);
+		return;
+	}
+
+	// Try Google Font
+	if (isGoogleFont(fontFamily)) {
+		await loadGoogleFont(fontFamily);
+		return;
+	}
+}
+
+/**
+ * Load multiple fonts of any type on demand.
+ *
+ * @param fontFamilies Array of font-family values
+ * @returns Promise that resolves when all fonts are loaded
+ */
+export async function loadFonts(fontFamilies: string[]): Promise<void> {
+	await Promise.all(fontFamilies.map(loadFont));
+}
+
+/**
+ * Load all fonts used in a card configuration.
+ * Automatically detects and loads Google Fonts and brand fonts.
+ *
+ * @param cardConfig The card configuration object
+ * @returns Promise that resolves when all fonts are loaded
+ */
+export async function loadFontsForCard(cardConfig: unknown): Promise<void> {
+	const fonts = extractFontsFromCard(cardConfig);
+	await loadFonts(fonts);
 }

@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { Label } from '$lib/components/ui/label';
 	import * as Select from '$lib/components/ui/select';
-	import { loadGoogleFont } from '$lib/fonts';
+	import { loadFont } from '$lib/fonts';
 
 	type FontOption = { value: string; label: string };
 
@@ -22,8 +22,8 @@
 	function handleValueChange(newValue: string | undefined) {
 		if (newValue !== undefined) {
 			value = newValue;
-			// Load the full font on demand (for card preview)
-			loadGoogleFont(newValue);
+			// Load the font on demand (works for Google Fonts and brand fonts like SST)
+			loadFont(newValue);
 			onchange?.(newValue);
 		}
 	}
