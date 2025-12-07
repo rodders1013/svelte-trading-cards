@@ -7,16 +7,16 @@
 		downloadPNGClient,
 		serializeSVG
 	} from '$lib';
-	import { GradientBackground, Image, PatternBackground, SolidBackground } from '$lib/components/backgrounds';
-	import { Border } from '$lib/components/borders';
-	import { TextField } from '$lib/components/fields';
+	import { GradientBackground, Image, PatternBackground, SolidBackground } from '$lib/card/backgrounds';
+	import { Border } from '$lib/card/borders';
+	import { TextField } from '$lib/card/fields';
 	import type { CardTemplate } from '$lib/types';
 	import { datasets, type AnyCard } from '$lib/demo';
-	import * as Card from '$lib/components/ui/card';
-	import { Button } from '$lib/components/ui/button';
-	import * as Select from '$lib/components/ui/select';
-	import * as Tabs from '$lib/components/ui/tabs';
-	import { Separator } from '$lib/components/ui/separator';
+	import * as Card from '$lib/creator/ui/card';
+	import { Button } from '$lib/creator/ui/button';
+	import * as Select from '$lib/creator/ui/select';
+	import * as Tabs from '$lib/creator/ui/tabs';
+	import { Separator } from '$lib/creator/ui/separator';
 
 	// Register all components
 	registerComponent('Group', Group);

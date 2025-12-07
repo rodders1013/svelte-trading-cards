@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { Label } from '$lib/components/ui/label';
-	import * as Select from '$lib/components/ui/select';
+	import { Label } from '$lib/creator/ui/label';
+	import * as Select from '$lib/creator/ui/select';
 	import { loadFont } from '$lib/fonts';
 
 	type FontOption = { value: string; label: string };

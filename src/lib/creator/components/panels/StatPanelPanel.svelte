@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Button } from '$lib/components/ui/button';
+	import { Button } from '$lib/creator/ui/button';
 	import ComponentPanel from '../ComponentPanel.svelte';
 	import {
 		FormSelect,
@@ -7,11 +7,11 @@
 		FormColorPicker,
 		FormSlider,
 		FormCheckbox,
-		FormGrid,
-		PanelEffects
+		FormGrid
 	} from '../form';
+	import PanelEffects from './PanelEffects.svelte';
 	import type { StatPanelComponent, DataFieldOption } from '../../types';
-	import type { StatRow } from '$lib/components/fields';
+	import type { StatRow } from '$lib/card/fields';
 	import { getAllFontsForDataset } from '$lib/fonts';
 	import {
 		getLabelsByCategory,

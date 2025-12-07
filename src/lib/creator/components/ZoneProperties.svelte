@@ -1,16 +1,16 @@
 <script lang="ts">
-	import { Button } from '$lib/components/ui/button';
-	import * as Collapsible from '$lib/components/ui/collapsible';
-	import { Label } from '$lib/components/ui/label';
-	import { Checkbox } from '$lib/components/ui/checkbox';
+	import { Button } from '$lib/creator/ui/button';
+	import * as Collapsible from '$lib/creator/ui/collapsible';
+	import { Label } from '$lib/creator/ui/label';
+	import { Checkbox } from '$lib/creator/ui/checkbox';
 	import ChevronDown from '@lucide/svelte/icons/chevron-down';
-	import AnimationControls from './AnimationControls.svelte';
-	import BlendControls from './BlendControls.svelte';
+	import AnimationControls from './controls/AnimationControls.svelte';
+	import BlendControls from './controls/BlendControls.svelte';
 	import HelpTooltip from './HelpTooltip.svelte';
-	import ShapePicker from '$lib/shapes/ShapePicker.svelte';
-	import type { ShapeSource } from '$lib/shapes';
+	import ShapePicker from '$lib/styling/shapes/ShapePicker.svelte';
+	import type { ShapeSource } from '$lib/styling/shapes';
 	import type { ContainerState } from '../types';
-	import type { AnimationConfig } from '$lib/animations';
+	import type { AnimationConfig } from '$lib/styling/animations';
 
 	let {
 		container,

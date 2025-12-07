@@ -1,5 +1,5 @@
 <script lang="ts">
-	import * as Tooltip from '$lib/components/ui/tooltip';
+	import * as Tooltip from '$lib/creator/ui/tooltip';
 
 	let { text }: { text: string } = $props();
 </script>

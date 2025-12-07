@@ -1,15 +1,15 @@
-import type { AnimationConfig } from '$lib/animations';
-import type { EffectConfig } from '$lib/effects';
-import type { BlendMode } from '$lib/blend';
-import type { IconData } from '$lib/components/icons';
-import type { StatRow, ListStyle, TextPreset } from '$lib/components/fields';
-import type { DividerStyle, DividerFade, DividerOrnament } from '$lib/components/decorations';
-import type { ProgressBarStyle, LabelPosition } from '$lib/components/decorations';
-import type { RibbonPosition, RibbonStyle, RibbonTextPreset } from '$lib/components/decorations';
-import type { FrameStyle, FrameSize } from '$lib/components/decorations';
-import type { RatingIconPreset, ValueFormat } from '$lib/components/decorations';
-import type { ShapeSource } from '$lib/shapes';
-import type { FilterConfig, ImageTransformConfig } from '$lib/filters';
+import type { AnimationConfig } from '$lib/styling/animations';
+import type { EffectConfig } from '$lib/styling/effects';
+import type { BlendMode } from '$lib/styling/blend';
+import type { IconData } from '$lib/card/icons';
+import type { StatRow, ListStyle, TextPreset } from '$lib/card/fields';
+import type { DividerStyle, DividerFade, DividerOrnament } from '$lib/card/decorations';
+import type { ProgressBarStyle, LabelPosition } from '$lib/card/decorations';
+import type { RibbonPosition, RibbonStyle, RibbonTextPreset } from '$lib/card/decorations';
+import type { FrameStyle, FrameSize } from '$lib/card/decorations';
+import type { RatingIconPreset, ValueFormat } from '$lib/card/decorations';
+import type { ShapeSource } from '$lib/styling/shapes';
+import type { FilterConfig, ImageTransformConfig } from '$lib/styling/filters';
 
 // Component type definitions for the visual creator
 

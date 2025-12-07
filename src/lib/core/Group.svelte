@@ -1,8 +1,8 @@
 <script lang="ts" module>
 	import { z } from 'zod';
-	import { AnimationConfigSchema } from '$lib/animations';
-	import { BlendMode } from '$lib/blend/types.js';
-	import { BuiltInShapeSchema } from '$lib/shapes';
+	import { AnimationConfigSchema } from '$lib/styling/animations';
+	import { BlendMode } from '$lib/styling/blend/types.js';
+	import { BuiltInShapeSchema } from '$lib/styling/shapes';
 
 	// Shape source schema for Group clipping
 	const ShapeSourceSchema = z.discriminatedUnion('type', [
@@ -37,10 +37,10 @@
 
 <script lang="ts">
 	import type { ComponentDefinition, ContainerContext, CardData } from '$lib/types';
-	import type { ShapeSource } from '$lib/shapes';
+	import type { ShapeSource } from '$lib/styling/shapes';
 	import ComponentRenderer from './ComponentRenderer.svelte';
-	import AnimationWrapper from '$lib/animations/AnimationWrapper.svelte';
-	import { getShapeRenderData } from '$lib/shapes';
+	import AnimationWrapper from '$lib/styling/animations/AnimationWrapper.svelte';
+	import { getShapeRenderData } from '$lib/styling/shapes';
 
 	let {
 		x = 0,

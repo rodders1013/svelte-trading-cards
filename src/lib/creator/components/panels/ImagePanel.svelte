@@ -1,13 +1,15 @@
 <script lang="ts">
 	import ComponentPanel from '../ComponentPanel.svelte';
-	import { FormSelect, FormSlider, FormGrid, PanelEffects, PanelBlend } from '../form';
+	import { FormSelect, FormSlider, FormGrid } from '../form';
+	import PanelEffects from './PanelEffects.svelte';
+	import PanelBlend from './PanelBlend.svelte';
 	import type { ImageComponent, DataFieldOption } from '../../types';
-	import ShapePicker from '$lib/shapes/ShapePicker.svelte';
-	import type { ShapeSource } from '$lib/shapes';
-	import type { FilterConfig, ImageTransformConfig } from '$lib/filters';
-	import { DEFAULT_FILTER_CONFIG, DEFAULT_IMAGE_TRANSFORM, hasActiveFilters, hasActiveTransform } from '$lib/filters';
-	import * as Collapsible from '$lib/components/ui/collapsible';
-	import * as Tooltip from '$lib/components/ui/tooltip';
+	import ShapePicker from '$lib/styling/shapes/ShapePicker.svelte';
+	import type { ShapeSource } from '$lib/styling/shapes';
+	import type { FilterConfig, ImageTransformConfig } from '$lib/styling/filters';
+	import { DEFAULT_FILTER_CONFIG, DEFAULT_IMAGE_TRANSFORM, hasActiveFilters, hasActiveTransform } from '$lib/styling/filters';
+	import * as Collapsible from '$lib/creator/ui/collapsible';
+	import * as Tooltip from '$lib/creator/ui/tooltip';
 	import ChevronDown from '@lucide/svelte/icons/chevron-down';
 	import RotateCw from '@lucide/svelte/icons/rotate-cw';
 	import X from '@lucide/svelte/icons/x';

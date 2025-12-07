@@ -5,9 +5,9 @@
 		FormInput,
 		FormSlider,
 		FormCheckbox,
-		FormGrid,
-		PanelEffects
+		FormGrid
 	} from '../form';
+	import PanelEffects from './PanelEffects.svelte';
 	import type { BorderComponent } from '../../types';
 
 	let {

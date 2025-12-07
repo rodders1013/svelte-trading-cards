@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { Label } from '$lib/components/ui/label';
-	import { Switch } from '$lib/components/ui/switch';
+	import { Label } from '$lib/creator/ui/label';
+	import { Switch } from '$lib/creator/ui/switch';
 
 	let {
 		label,

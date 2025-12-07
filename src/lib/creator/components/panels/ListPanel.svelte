@@ -6,9 +6,9 @@
 		FormColorPicker,
 		FormInput,
 		FormSlider,
-		FormGrid,
-		PanelEffects
+		FormGrid
 	} from '../form';
+	import PanelEffects from './PanelEffects.svelte';
 	import type { ListComponent, DataFieldOption } from '../../types';
 	import { getAllFontsForDataset } from '$lib/fonts';
 	import { DEFAULT_DATASET, type DatasetId } from '$lib/presets';

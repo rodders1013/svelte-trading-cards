@@ -6,9 +6,9 @@
 		FormSlider,
 		FormInput,
 		FormCheckbox,
-		FormGrid,
-		PanelEffects
+		FormGrid
 	} from '../form';
+	import PanelEffects from './PanelEffects.svelte';
 	import type { ProgressBarComponent, DataFieldOption } from '../../types';
 
 	let {

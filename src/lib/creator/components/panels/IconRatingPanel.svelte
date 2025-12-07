@@ -1,8 +1,8 @@
 <script lang="ts">
-	import { IconPicker } from '$lib/components/icons';
-	import type { IconData } from '$lib/components/icons';
-	import { RATING_ICON_PRESETS, RATING_ICON_LABELS } from '$lib/components/decorations/IconRating.svelte';
-	import type { RatingIconPreset } from '$lib/components/decorations';
+	import { IconPicker } from '$lib/card/icons';
+	import type { IconData } from '$lib/card/icons';
+	import { RATING_ICON_PRESETS, RATING_ICON_LABELS } from '$lib/card/decorations/IconRating.svelte';
+	import type { RatingIconPreset } from '$lib/card/decorations';
 	import ComponentPanel from '../ComponentPanel.svelte';
 	import {
 		FormSelect,
@@ -11,9 +11,9 @@
 		FormSlider,
 		FormInput,
 		FormCheckbox,
-		FormGrid,
-		PanelEffects
+		FormGrid
 	} from '../form';
+	import PanelEffects from './PanelEffects.svelte';
 	import type { IconRatingComponent, DataFieldOption } from '../../types';
 	import type { FontDropdownOption } from '$lib/fonts';
 	import Link from '@lucide/svelte/icons/link';

@@ -13,7 +13,7 @@
 
 <script lang="ts">
 	import { CARD_WIDTH, CARD_HEIGHT, CARD_RADIUS } from '$lib/types';
-	import { getAnimationCSS } from '$lib/animations';
+	import { getAnimationCSS } from '$lib/styling/animations';
 	import ComponentRenderer from './ComponentRenderer.svelte';
 
 	let {

@@ -1,15 +1,15 @@
 <script lang="ts">
-	import { IconPicker } from '$lib/components/icons';
-	import type { IconData } from '$lib/components/icons';
+	import { IconPicker } from '$lib/card/icons';
+	import type { IconData } from '$lib/card/icons';
 	import ComponentPanel from '../ComponentPanel.svelte';
 	import {
 		FormColorPicker,
 		FormInput,
 		FormSlider,
 		FormCheckbox,
-		FormGrid,
-		PanelEffects
+		FormGrid
 	} from '../form';
+	import PanelEffects from './PanelEffects.svelte';
 	import type { IconComponent } from '../../types';
 
 	let {

@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { Label } from '$lib/components/ui/label';
-	import { Input } from '$lib/components/ui/input';
+	import { Label } from '$lib/creator/ui/label';
+	import { Input } from '$lib/creator/ui/input';
 
 	let {
 		label,

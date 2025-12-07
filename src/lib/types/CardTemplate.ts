@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import type { ShapeSource } from '$lib/shapes';
+import type { ShapeSource } from '$lib/styling/shapes';
 
 // Standard card dimensions (2.5" x 3.5" at 300 DPI)
 export const CARD_WIDTH = 750;

@@ -1,12 +1,14 @@
 <script lang="ts">
 	import ComponentPanel from '../ComponentPanel.svelte';
-	import { FormSelect, FormSlider, FormColorPicker, FormInput, FormGrid, PanelEffects, PanelBlend } from '../form';
-	import { IconPicker } from '$lib/components/icons';
-	import type { IconData } from '$lib/components/icons';
-	import { PATTERN_LABELS, PATTERN_PRESETS } from '$lib/components/backgrounds/PatternBackground.svelte';
-	import type { PatternType } from '$lib/components/backgrounds';
+	import { FormSelect, FormSlider, FormColorPicker, FormInput, FormGrid } from '../form';
+	import PanelEffects from './PanelEffects.svelte';
+	import PanelBlend from './PanelBlend.svelte';
+	import { IconPicker } from '$lib/card/icons';
+	import type { IconData } from '$lib/card/icons';
+	import { PATTERN_LABELS, PATTERN_PRESETS } from '$lib/card/backgrounds/PatternBackground.svelte';
+	import type { PatternType } from '$lib/card/backgrounds';
 	import type { BackgroundComponent } from '../../types';
-	import { Button } from '$lib/components/ui/button';
+	import { Button } from '$lib/creator/ui/button';
 	import Trash2 from '@lucide/svelte/icons/trash-2';
 	import Plus from '@lucide/svelte/icons/plus';
 

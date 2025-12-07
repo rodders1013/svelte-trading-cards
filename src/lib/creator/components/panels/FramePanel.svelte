@@ -5,9 +5,9 @@
 		FormColorPicker,
 		FormSlider,
 		FormCheckbox,
-		FormGrid,
-		PanelEffects
+		FormGrid
 	} from '../form';
+	import PanelEffects from './PanelEffects.svelte';
 	import type { FrameComponent } from '../../types';
 
 	let {

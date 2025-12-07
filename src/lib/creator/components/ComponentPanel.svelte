@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { Button } from '$lib/components/ui/button';
-	import * as Collapsible from '$lib/components/ui/collapsible';
+	import { Button } from '$lib/creator/ui/button';
+	import * as Collapsible from '$lib/creator/ui/collapsible';
 	import ChevronDown from '@lucide/svelte/icons/chevron-down';
 	import Eye from '@lucide/svelte/icons/eye';
 	import EyeOff from '@lucide/svelte/icons/eye-off';

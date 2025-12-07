@@ -9,7 +9,7 @@ export const MAX_BLEED_PX = Math.round(MAX_BLEED_MM * PX_PER_MM); // ~35px
 export const CARD_BASE_WIDTH = CARD_WIDTH + MAX_BLEED_PX * 2;   // 820
 export const CARD_BASE_HEIGHT = CARD_HEIGHT + MAX_BLEED_PX * 2; // 1120
 import type { CardTemplate, ComponentDefinition } from '$lib/types';
-import type { IconData } from '$lib/components/icons';
+import type { IconData } from '$lib/card/icons';
 import type {
 	ContainerState,
 	ComponentItem,

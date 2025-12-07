@@ -1,16 +1,16 @@
 // Core
 export { CardCanvas, ComponentRenderer, Group, registerComponent, getComponentByName } from './core/index.js';
 
-// Components
-export { GradientBackground, Image, PatternBackground, SolidBackground } from './components/backgrounds/index.js';
-export { Border } from './components/borders/index.js';
-export { TextField, StatPanel, List } from './components/fields/index.js';
-export { Icon, IconPicker } from './components/icons/index.js';
-export type { IconData, IconProps } from './components/icons/index.js';
-export type { StatPanelProps, StatRow, ListProps, ListStyle } from './components/fields/index.js';
+// Card Components
+export { GradientBackground, Image, PatternBackground, SolidBackground } from './card/backgrounds/index.js';
+export { Border } from './card/borders/index.js';
+export { TextField, StatPanel, List } from './card/fields/index.js';
+export { Icon, IconPicker } from './card/icons/index.js';
+export type { IconData, IconProps } from './card/icons/index.js';
+export type { StatPanelProps, StatRow, ListProps, ListStyle } from './card/fields/index.js';
 
 // Decorations
-export { Badge, Divider, ProgressBar, Ribbon, Frame, IconRating } from './components/decorations/index.js';
+export { Badge, Divider, ProgressBar, Ribbon, Frame, IconRating } from './card/decorations/index.js';
 export type {
 	BadgeProps,
 	DividerProps, DividerStyle, DividerFade, DividerOrnament,
@@ -18,12 +18,12 @@ export type {
 	RibbonProps, RibbonPosition, RibbonStyle,
 	FrameProps, FrameStyle, FrameSize,
 	IconRatingProps, RatingIconPreset, ValueFormat
-} from './components/decorations/index.js';
-export { RATING_ICON_PRESETS, RATING_ICON_LABELS } from './components/decorations/index.js';
+} from './card/decorations/index.js';
+export { RATING_ICON_PRESETS, RATING_ICON_LABELS } from './card/decorations/index.js';
 
 // Shapes
-export { ShapePicker, BUNDLED_SHAPES, SHAPE_CATEGORIES, BUILT_IN_SHAPES } from './shapes/index.js';
-export type { BuiltInShape, ShapeSource, ShapeData, ShapeConfig, ShapeRenderOptions } from './shapes/index.js';
+export { ShapePicker, BUNDLED_SHAPES, SHAPE_CATEGORIES, BUILT_IN_SHAPES } from './styling/shapes/index.js';
+export type { BuiltInShape, ShapeSource, ShapeData, ShapeConfig, ShapeRenderOptions } from './styling/shapes/index.js';
 
 // Animations
 export {
@@ -32,7 +32,7 @@ export {
 	getAnimationCSS,
 	ANIMATION_PRESETS,
 	SPEED_DURATIONS
-} from './animations/index.js';
+} from './styling/animations/index.js';
 export type {
 	AnimationType,
 	AnimationSpeed,
@@ -40,8 +40,8 @@ export type {
 	AnimationEasing,
 	AnimationConfig,
 	AnimationPreset
-} from './animations/index.js';
-export { AnimationConfigSchema } from './animations/index.js';
+} from './styling/animations/index.js';
+export { AnimationConfigSchema } from './styling/animations/index.js';
 
 // Effects
 export {
@@ -51,7 +51,7 @@ export {
 	EFFECT_PRESETS,
 	EFFECT_COLOR_PRESETS,
 	LIFT_ELEVATIONS
-} from './effects/index.js';
+} from './styling/effects/index.js';
 export type {
 	EffectType,
 	EffectConfig,
@@ -62,8 +62,8 @@ export type {
 	LiftEffect,
 	OutlineEffect,
 	EffectPreset
-} from './effects/index.js';
-export { EffectConfigSchema } from './effects/index.js';
+} from './styling/effects/index.js';
+export { EffectConfigSchema } from './styling/effects/index.js';
 
 // Blend Modes
 export {
@@ -71,8 +71,8 @@ export {
 	DEFAULT_BLEND_MODE,
 	BLEND_MODE_OPTIONS,
 	getBlendModesByCategory
-} from './blend/index.js';
-export type { BlendModeOption } from './blend/index.js';
+} from './styling/blend/index.js';
+export type { BlendModeOption } from './styling/blend/index.js';
 
 // Types
 export type {

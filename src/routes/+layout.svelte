@@ -1,8 +1,8 @@
 <script lang="ts">
 	import './layout.css';
 	import { page } from '$app/state';
-	import { Button } from '$lib/components/ui/button';
-	import { Separator } from '$lib/components/ui/separator';
+	import { Button } from '$lib/creator/ui/button';
+	import { Separator } from '$lib/creator/ui/separator';
 
 	let { children } = $props();
 

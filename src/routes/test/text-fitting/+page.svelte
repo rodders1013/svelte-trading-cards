@@ -1,10 +1,10 @@
 <script lang="ts">
 	import FitText from '$lib/utils/FitText.svelte';
-	import StatPanel from '$lib/components/fields/StatPanel.svelte';
-	import List from '$lib/components/fields/List.svelte';
-	import Badge from '$lib/components/decorations/Badge.svelte';
-	import Ribbon from '$lib/components/decorations/Ribbon.svelte';
-	import TextField from '$lib/components/fields/TextField.svelte';
+	import StatPanel from '$lib/card/fields/StatPanel.svelte';
+	import List from '$lib/card/fields/List.svelte';
+	import Badge from '$lib/card/decorations/Badge.svelte';
+	import Ribbon from '$lib/card/decorations/Ribbon.svelte';
+	import TextField from '$lib/card/fields/TextField.svelte';
 	import type { ContainerContext } from '$lib/types';
 
 	// Test data with various text lengths

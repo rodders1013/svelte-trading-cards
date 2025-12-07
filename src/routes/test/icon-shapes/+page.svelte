@@ -1,7 +1,7 @@
 <script lang="ts">
-	import IconPicker from '$lib/components/icons/IconPicker.svelte';
-	import type { IconData } from '$lib/components/icons/Icon.svelte';
-	import { sanitizeSvgBody } from '$lib/components/icons/Icon.svelte';
+	import IconPicker from '$lib/card/icons/IconPicker.svelte';
+	import type { IconData } from '$lib/card/icons/Icon.svelte';
+	import { sanitizeSvgBody } from '$lib/card/icons/Icon.svelte';
 
 	// Selected icon state
 	let selectedIcon = $state<{ iconData?: IconData; iconName?: string }>({});

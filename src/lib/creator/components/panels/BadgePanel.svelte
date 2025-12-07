@@ -4,13 +4,13 @@
 		FormColorPicker,
 		FormInput,
 		FormSlider,
-		FormGrid,
-		PanelEffects
+		FormGrid
 	} from '../form';
+	import PanelEffects from './PanelEffects.svelte';
 	import type { BadgeComponent, DataFieldOption } from '../../types';
 	import { DEFAULT_DATASET, type DatasetId } from '$lib/presets';
-	import ShapePicker from '$lib/shapes/ShapePicker.svelte';
-	import type { ShapeSource } from '$lib/shapes';
+	import ShapePicker from '$lib/styling/shapes/ShapePicker.svelte';
+	import type { ShapeSource } from '$lib/styling/shapes';
 
 	let {
 		component,

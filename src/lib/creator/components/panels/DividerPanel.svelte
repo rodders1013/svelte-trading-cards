@@ -5,9 +5,9 @@
 		FormColorPicker,
 		FormSlider,
 		FormInput,
-		FormGrid,
-		PanelEffects
+		FormGrid
 	} from '../form';
+	import PanelEffects from './PanelEffects.svelte';
 	import type { DividerComponent } from '../../types';
 
 	let {
