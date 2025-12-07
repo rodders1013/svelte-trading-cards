@@ -6,7 +6,7 @@ export { default as Frame } from './Frame.svelte';
 export { default as IconRating } from './IconRating.svelte';
 
 // Re-export types
-export type { BadgeProps, BadgeShape, BadgePreset, BadgeSize, BadgeTextPreset } from './Badge.svelte';
+export type { BadgeProps } from './Badge.svelte';
 export type { DividerProps, DividerStyle, DividerFade, DividerOrnament } from './Divider.svelte';
 export type { ProgressBarProps, ProgressBarStyle, LabelPosition } from './ProgressBar.svelte';
 export type { RibbonProps, RibbonPosition, RibbonStyle, RibbonTextPreset } from './Ribbon.svelte';
@@ -14,7 +14,7 @@ export type { FrameProps, FrameStyle, FrameSize } from './Frame.svelte';
 export type { IconRatingProps, RatingIconPreset, ValueFormat } from './IconRating.svelte';
 
 // Re-export schemas for validation
-export { BadgePropsSchema, BadgeShapeSchema, BadgePresetSchema, BadgeSizeSchema, BadgeTextPresetSchema, BADGE_PRESETS } from './Badge.svelte';
+export { BadgePropsSchema, BadgeShapeSourceSchema } from './Badge.svelte';
 export { DividerPropsSchema, DividerStyleSchema, DividerFadeSchema, DividerOrnamentSchema } from './Divider.svelte';
 export { ProgressBarPropsSchema, ProgressBarStyleSchema, LabelPositionSchema } from './ProgressBar.svelte';
 export { RibbonPropsSchema, RibbonPositionSchema, RibbonStyleSchema, RibbonTextPresetSchema } from './Ribbon.svelte';

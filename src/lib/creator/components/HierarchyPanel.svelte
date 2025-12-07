@@ -109,11 +109,14 @@
 		editingName = '';
 	}
 
-	// Get shape icon component
-	function getShapeIcon(shape: string) {
-		switch (shape) {
-			case 'rect': return Square;
-			case 'circle': return Circle;
+	// Get shape icon component based on shapeSource
+	function getShapeIcon(shapeSource: ContainerState['shapeSource']) {
+		if (!shapeSource) return Square; // Default rect
+		if (shapeSource.type === 'custom') return Layers; // Custom icon shape
+		switch (shapeSource.shape) {
+			case 'rectangle':
+			case 'square': return Square;
+			case 'circle':
 			case 'ellipse': return Circle;
 			case 'hexagon': return Hexagon;
 			case 'octagon': return Octagon;
@@ -168,7 +171,7 @@
 							{@const isExpanded = expandedLayers.has(container.id)}
 							{@const isSelected = selectedContainerId === container.id}
 							{@const isCardBase = container.isCardBase === true}
-							{@const ShapeIcon = isCardBase ? CreditCard : getShapeIcon(container.clipShape)}
+							{@const ShapeIcon = isCardBase ? CreditCard : getShapeIcon(container.shapeSource)}
 
 							<!-- Layer Row -->
 							<div

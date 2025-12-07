@@ -86,8 +86,8 @@ const template: CardTemplate = {
       type: "Group",
       props: {
         x: -35, y: -35,
-        width: 820, height: 1120,
-        clipShape: "rect"
+        width: 820, height: 1120
+        // shapeSource undefined = rect
       },
       children: [
         {
@@ -433,13 +433,25 @@ interface ContainerState {
   y: number;
   width: number;
   height: number;
-  clipShape: ClipShape;
+  shapeSource?: ShapeSource;  // Icon-based shape system (undefined = rect)
   radius: number;
   clipContent: boolean;
   animation?: AnimationConfig;
   components: ComponentItem[];
   isCardBase?: boolean;
 }
+
+// Shape source type
+type ShapeSource =
+  | { type: 'builtin'; shape: BuiltInShape }
+  | { type: 'custom'; iconData: IconData; iconName?: string };
+
+// Built-in shapes (22 total)
+type BuiltInShape =
+  | 'circle' | 'square' | 'rectangle' | 'triangle' | 'diamond'
+  | 'hexagon' | 'octagon' | 'pentagon' | 'ellipse'
+  | 'star' | 'heart' | 'shield' | 'bookmark' | 'label' | 'cloud' | 'message'
+  | 'crown' | 'trophy' | 'medal' | 'seal' | 'certificate' | 'card';
 ```
 
 ---

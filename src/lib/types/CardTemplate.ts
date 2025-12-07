@@ -1,25 +1,18 @@
 import { z } from 'zod';
+import type { ShapeSource } from '$lib/shapes';
 
 // Standard card dimensions (2.5" x 3.5" at 300 DPI)
 export const CARD_WIDTH = 750;
 export const CARD_HEIGHT = 1050;
 export const CARD_RADIUS = 26;
 
-// Clip shape types
-export type ClipShape = 'rect' | 'circle' | 'ellipse' | 'hexagon' | 'octagon' | 'diamond' | 'shield' | 'star' | 'polygon';
-
-export interface ClipPoint {
-	x: number;
-	y: number;
-}
-
 // Container context passed to all components
 export interface ContainerContext {
 	width: number;
 	height: number;
 	radius: number;
-	clipShape?: ClipShape;
-	clipPoints?: ClipPoint[];
+	/** Shape for clipping/borders - uses icon-based shape system */
+	shapeSource?: ShapeSource;
 }
 
 // Base component definition schema (recursive for children)

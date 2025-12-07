@@ -89,6 +89,15 @@ The Card Base layer is a special protected layer:
 - Cannot be deleted, moved, resized, or renamed
 - Has 3 fixed components: Image, Background, Border
 
+### Shape System
+
+All shapes use the icon-based `shapeSource` prop:
+- `shapeSource?: ShapeSource` (undefined = rect)
+- 22 built-in shapes (geometric, decorative, awards, containers)
+- Custom shapes via any Iconify icon
+- Uses SVG `<mask>` for rendering (works with `{@html}`)
+- ShapePicker component for visual selection
+
 ---
 
 ## Component Development

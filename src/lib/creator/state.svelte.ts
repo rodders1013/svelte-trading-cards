@@ -26,7 +26,6 @@ import type {
 	FrameComponent,
 	ListComponent,
 	IconRatingComponent,
-	ClipShape,
 	ResizeHandle
 } from './types';
 
@@ -56,7 +55,7 @@ export function createInitialCardBackground(): ContainerState {
 		// Size includes bleed on all sides
 		width: CARD_BASE_WIDTH,
 		height: CARD_BASE_HEIGHT,
-		clipShape: 'rect',
+		// shapeSource undefined = rect
 		radius: 26 + MAX_BLEED_PX, // Extend radius to account for bleed
 		clipContent: false,
 		isCardBase: true,
@@ -184,11 +183,11 @@ interface ComponentBuildConfig {
 const componentBuildConfig: Partial<Record<ComponentItem['type'], ComponentBuildConfig>> = {
 	image: {
 		renderType: 'Image',
-		props: ['dataField', 'opacity', 'preserveAspectRatio']
+		props: ['dataField', 'opacity', 'preserveAspectRatio', 'shapeSource', 'filter', 'transform']
 	},
 	text: {
 		renderType: 'TextField',
-		props: ['dataField', 'maxFontSize', 'minFontSize', 'fontWeight', 'fontStyle', 'textDecoration', 'textTransform', 'fontFamily', { from: 'fill', to: 'color' }, 'opacity', 'alignment', 'verticalAlign', 'padding']
+		props: ['textPreset', 'dataField', 'maxFontSize', 'minFontSize', 'fontWeight', 'fontStyle', 'textDecoration', 'textTransform', 'fontFamily', { from: 'fill', to: 'color' }, 'opacity', 'alignment', 'verticalAlign', 'padding']
 	},
 	icon: {
 		renderType: 'Icon',
@@ -197,7 +196,7 @@ const componentBuildConfig: Partial<Record<ComponentItem['type'], ComponentBuild
 	},
 	badge: {
 		renderType: 'Badge',
-		props: ['textPreset', 'dataField', 'shape', 'preset', 'backgroundColor', 'textColor', 'borderColor', 'borderWidth', 'size', 'fontFamily', 'fontWeight', 'icon', 'iconColor', 'opacity']
+		props: ['shapeSource', 'backgroundColor', 'borderColor', 'borderWidth', 'icon', 'iconColor', 'opacity']
 	},
 	statpanel: {
 		renderType: 'StatPanel',
@@ -405,8 +404,8 @@ export function buildTemplate(templateName: string, containers: ContainerState[]
 			y: container.y,
 			width: container.width,
 			height: container.height,
-			radius: container.clipShape === 'rect' ? container.radius : 0,
-			clipShape: container.clipShape,
+			radius: !container.shapeSource ? container.radius : 0,
+			shapeSource: container.shapeSource,
 			clipContent: container.clipContent
 		};
 
@@ -472,7 +471,8 @@ export function createTextComponent(): TextComponent {
 		type: 'text',
 		id: generateComponentId('text'),
 		visible: true,
-		dataField: '',
+		textPreset: 'none',
+		dataField: undefined,
 		maxFontSize: 48,
 		minFontSize: 12,
 		fontWeight: 'normal',
@@ -562,17 +562,10 @@ export function createBadgeComponent(): BadgeComponent {
 		type: 'badge',
 		id: generateComponentId('badge'),
 		visible: true,
-		textPreset: 'RARE',
-		dataField: undefined,
-		shape: 'pill',
-		preset: 'custom',
+		shapeSource: { type: 'builtin', shape: 'circle' },
 		backgroundColor: '#3b82f6',
-		textColor: '#ffffff',
 		borderColor: undefined,
 		borderWidth: 0,
-		size: 'md',
-		fontFamily: 'Arial, sans-serif',
-		fontWeight: 'bold',
 		icon: undefined,
 		iconColor: undefined,
 		opacity: 1
@@ -753,7 +746,7 @@ export function createContainer(containerNumber: number): ContainerState {
 		y: 50 + (containerNumber - 1) * 120,
 		width: 300,
 		height: 100,
-		clipShape: 'rect',
+		// shapeSource undefined = rect
 		radius: 8,
 		clipContent: true,
 		components: []

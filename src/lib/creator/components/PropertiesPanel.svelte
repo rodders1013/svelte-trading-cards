@@ -193,19 +193,6 @@
 			onUpdateContainer('components', components);
 		}
 	}
-
-	// Handle accordion value changes
-	function handleAccordionChange(newValue: string[]) {
-		const wasComponentsClosed = !openSections.includes('components');
-		const isComponentsNowOpen = newValue.includes('components');
-
-		// Force reset all component panels when Components section is OPENED
-		if (wasComponentsClosed && isComponentsNowOpen) {
-			componentResetKey++;
-		}
-
-		openSections = newValue;
-	}
 </script>
 
 <div class="flex h-full w-full flex-col overflow-hidden">
@@ -261,7 +248,7 @@
 	{#if container}
 		<!-- Accordion Panels (both can be open at once) -->
 		<div class="min-h-0 flex-1 overflow-auto">
-			<Accordion.Root type="multiple" value={openSections} onValueChange={handleAccordionChange} class="w-full">
+			<Accordion.Root type="multiple" bind:value={openSections} class="w-full">
 				<!-- Layer Section -->
 				<Accordion.Item value="layer" class="border-b">
 					<Accordion.Trigger class="px-3 py-2 text-sm font-medium hover:bg-muted/50">

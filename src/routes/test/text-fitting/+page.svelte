@@ -387,17 +387,22 @@
 							viewBox="0 0 {test.width} {test.height}"
 						>
 							<Badge
-								textPreset="none"
-								dataField="badgeText"
-								shape="pill"
-								preset="legendary"
+								shapeSource={{ type: 'builtin', shape: 'ellipse' }}
 								backgroundColor="#f59e0b"
-								textColor="#000000"
 								borderWidth={0}
-								size="md"
+								opacity={1}
+								container={{ width: test.width, height: test.height, radius: 0 }}
+								data={{ badgeText: test.text }}
+							/>
+							<TextField
+								dataField="badgeText"
+								maxFontSize={18}
+								minFontSize={6}
 								fontFamily="Arial, sans-serif"
 								fontWeight="bold"
-								opacity={1}
+								color="#000000"
+								alignment="center"
+								verticalAlign="center"
 								container={{ width: test.width, height: test.height, radius: 0 }}
 								data={{ badgeText: test.text }}
 							/>

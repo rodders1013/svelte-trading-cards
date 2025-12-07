@@ -1,0 +1,35 @@
+// Types
+export type {
+	BuiltInShape,
+	ShapeData,
+	ShapeSource,
+	ShapeConfig,
+	ShapeRenderOptions
+} from './types';
+
+export {
+	BuiltInShapeSchema,
+	BUILT_IN_SHAPES,
+	SHAPE_CATEGORIES
+} from './types';
+
+// Bundled shapes
+export {
+	BUNDLED_SHAPES,
+	getShapeData,
+	isBuiltInShape
+} from './bundledShapes';
+
+// Utilities
+export {
+	resolveShapeData,
+	getShapeDataFromAny,
+	sanitizeShapeBody,
+	stripFillAttributes,
+	getShapeTransform,
+	prepareShapeBody,
+	getShapeRenderData
+} from './shapeUtils';
+
+// Components
+export { default as ShapePicker } from './ShapePicker.svelte';

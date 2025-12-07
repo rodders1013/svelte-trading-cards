@@ -18,7 +18,6 @@ export type {
 	FrameComponent,
 	ListComponent,
 	IconRatingComponent,
-	ClipShape,
 	ResizeHandle,
 	DataFieldOption
 } from './types.js';

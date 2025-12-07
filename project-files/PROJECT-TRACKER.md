@@ -21,10 +21,10 @@
 - [x] Group component (container for nested components)
 - [x] Container-aware component pattern
 - [x] Recursive child rendering via ComponentRenderer
-- [x] ContainerContext type (width, height, radius, clipShape, clipPoints)
+- [x] ContainerContext type (width, height, radius, shapeSource)
 - [x] CARD_WIDTH, CARD_HEIGHT, CARD_RADIUS constants
-- [x] clipShape prop with predefined shapes (rect, circle, ellipse, hexagon, octagon, diamond, shield, star)
-- [x] clipPoints support for custom polygons
+- [x] **Shape system** with 22 bundled icon shapes + custom Iconify icons
+- [x] shapeSource prop (builtin shapes or custom icons via mask)
 - [x] clipContent toggle for enabling/disabling clipping
 
 ### Background Components
@@ -35,7 +35,7 @@
 ### Border Component
 - [x] Border (unified, container-aware, shape-aware)
   - Base: color, width, opacity
-  - Shape-aware: renders correct shape based on container.clipShape
+  - Shape-aware: uses container.shapeSource for shape (icon-based system)
   - Glow effect: color, intensity, blur, animated pulse
   - Holographic effect: dual-color animation with speed control
   - Multi-layer (mythic) effect: up to 5 layers with custom colors and spacing
@@ -365,6 +365,12 @@ src/lib/
 │   ├── types.ts            # Effect types & schemas (glow, shadow, neon, etc.)
 │   ├── presets.ts          # Effect presets & color options
 │   └── EffectWrapper.svelte # Wrapper component for SVG filter effects
+├── shapes/
+│   ├── index.ts            # Shape exports
+│   ├── types.ts            # BuiltInShape, ShapeSource, ShapeData types
+│   ├── bundledShapes.ts    # 22 pre-bundled icon shapes (~3KB)
+│   ├── shapeUtils.ts       # Transform, strip fill, render utilities
+│   └── ShapePicker.svelte  # Visual shape grid + custom icon search
 ├── fonts/
 │   ├── index.ts            # Fonts exports & helpers
 │   ├── web-safe.ts         # 37+ web-safe fonts by category

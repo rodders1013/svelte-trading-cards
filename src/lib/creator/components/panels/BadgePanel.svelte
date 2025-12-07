@@ -1,8 +1,6 @@
 <script lang="ts">
 	import ComponentPanel from '../ComponentPanel.svelte';
 	import {
-		FormSelect,
-		FormFontSelect,
 		FormColorPicker,
 		FormInput,
 		FormSlider,
@@ -10,13 +8,9 @@
 		PanelEffects
 	} from '../form';
 	import type { BadgeComponent, DataFieldOption } from '../../types';
-	import { getAllFontsForDataset } from '$lib/fonts';
-	import {
-		getLabelsByCategory,
-		getCategoryDisplayName,
-		DEFAULT_DATASET,
-		type DatasetId
-	} from '$lib/presets';
+	import { DEFAULT_DATASET, type DatasetId } from '$lib/presets';
+	import ShapePicker from '$lib/shapes/ShapePicker.svelte';
+	import type { ShapeSource } from '$lib/shapes';
 
 	let {
 		component,
@@ -38,76 +32,10 @@
 		onMoveDown: () => void;
 	} = $props();
 
-	const shapes = ['pill', 'square', 'diamond', 'hexagon', 'shield', 'star', 'circle'];
-	const presets = ['custom', 'common', 'uncommon', 'rare', 'epic', 'legendary', 'mythic', 'verified', 'new', 'sold', 'limited', 'promo', 'exclusive'];
-	const sizes = [
-		{ value: 'sm', label: 'SM' },
-		{ value: 'md', label: 'MD' },
-		{ value: 'lg', label: 'LG' }
-	];
-
-	// Get categorized labels based on current dataset
-	const labelCategories = $derived(getLabelsByCategory(datasetId));
-	const datasetDisplayName = $derived(getCategoryDisplayName(datasetId));
-
-	// Build grouped text presets for the dropdown
-	const textPresets = $derived.by(() => {
-		const options: Array<{ value: string; label: string } | { group: string; options: string[] }> = [
-			{ value: 'none', label: '(No text / Icon only)' }
-		];
-
-		// Add dataset-specific labels
-		if (labelCategories.specific.length > 0) {
-			options.push({ group: datasetDisplayName, options: [...labelCategories.specific] });
-		}
-
-		// Add shared categories
-		options.push({ group: 'Rarity', options: [...labelCategories.rarity] });
-		options.push({ group: 'Status', options: [...labelCategories.status] });
-		options.push({ group: 'Editions', options: [...labelCategories.editions] });
-		options.push({ group: 'General', options: [...labelCategories.general] });
-
-		return options;
-	});
-
-	// Flatten for simple dropdown (until grouped select is implemented)
-	// Deduplicate labels to avoid duplicate key errors
-	const flatTextPresets = $derived.by(() => {
-		const seen = new Set<string>();
-		const flat: Array<{ value: string; label: string } | string> = [
-			{ value: 'none', label: '(No text / Icon only)' }
-		];
-
-		const addUnique = (labels: readonly string[]) => {
-			for (const label of labels) {
-				if (!seen.has(label)) {
-					seen.add(label);
-					flat.push(label);
-				}
-			}
-		};
-
-		// Add dataset-specific labels first (priority)
-		if (labelCategories.specific.length > 0) {
-			addUnique(labelCategories.specific);
-		}
-
-		// Add shared categories (skip duplicates)
-		addUnique(labelCategories.rarity);
-		addUnique(labelCategories.status);
-		addUnique(labelCategories.editions);
-		addUnique(labelCategories.general);
-
-		return flat;
-	});
-
-	const dataFieldOptions = [
-		{ value: '', label: 'None (use preset text)' },
-		...dataFields
-	];
-
-	// Get fonts for current dataset (brand fonts first, then web-safe by category)
-	const fontOptions = $derived(getAllFontsForDataset(datasetId));
+	// Handle shape source updates
+	function handleShapeChange(source: ShapeSource) {
+		onUpdate('shapeSource', source);
+	}
 </script>
 
 <ComponentPanel
@@ -118,56 +46,24 @@
 	{onMoveUp}
 	{onMoveDown}
 >
-	<FormSelect
-		label="Text Label"
-		value={component.textPreset}
-		onchange={(v) => onUpdate('textPreset', v)}
-		options={flatTextPresets}
-	/>
+	<div class="rounded bg-muted/50 px-2 py-1.5 text-sm text-muted-foreground">
+		Shape only - add a TextField in same zone for text
+	</div>
 
-	<FormSelect
-		label="Data Field (overrides preset)"
-		value={component.dataField ?? ''}
-		onchange={(v) => onUpdate('dataField', v || undefined)}
-		options={dataFieldOptions}
-	/>
-
-	<FormGrid>
-		<FormSelect
-			label="Shape"
-			value={component.shape}
-			onchange={(v) => onUpdate('shape', v)}
-			options={shapes}
+	<!-- Shape Picker -->
+	<div class="space-y-1.5">
+		<label class="text-xs font-medium text-muted-foreground">Shape</label>
+		<ShapePicker
+			value={component.shapeSource}
+			onchange={handleShapeChange}
 		/>
-		<FormSelect
-			label="Size"
-			value={component.size}
-			onchange={(v) => onUpdate('size', v)}
-			options={sizes}
-		/>
-	</FormGrid>
+	</div>
 
-	<FormSelect
-		label="Preset"
-		value={component.preset}
-		onchange={(v) => onUpdate('preset', v)}
-		options={presets}
+	<FormColorPicker
+		label="Background"
+		value={component.backgroundColor}
+		onchange={(v) => onUpdate('backgroundColor', v)}
 	/>
-
-	{#if component.preset === 'custom'}
-		<FormGrid>
-			<FormColorPicker
-				label="Background"
-				value={component.backgroundColor}
-				onchange={(v) => onUpdate('backgroundColor', v)}
-			/>
-			<FormColorPicker
-				label="Text Color"
-				value={component.textColor}
-				onchange={(v) => onUpdate('textColor', v)}
-			/>
-		</FormGrid>
-	{/if}
 
 	<FormGrid>
 		<FormColorPicker
@@ -184,13 +80,6 @@
 			max={10}
 		/>
 	</FormGrid>
-
-	<FormFontSelect
-		label="Font Family"
-		value={component.fontFamily}
-		onchange={(v) => onUpdate('fontFamily', v)}
-		options={fontOptions}
-	/>
 
 	<FormSlider
 		label="Opacity"

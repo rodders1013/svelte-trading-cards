@@ -1,16 +1,16 @@
 <script lang="ts">
 	import { Button } from '$lib/components/ui/button';
 	import * as Collapsible from '$lib/components/ui/collapsible';
-	import * as Select from '$lib/components/ui/select';
 	import { Label } from '$lib/components/ui/label';
 	import { Checkbox } from '$lib/components/ui/checkbox';
 	import ChevronDown from '@lucide/svelte/icons/chevron-down';
 	import AnimationControls from './AnimationControls.svelte';
 	import BlendControls from './BlendControls.svelte';
 	import HelpTooltip from './HelpTooltip.svelte';
-	import type { ContainerState, ClipShape } from '../types';
+	import ShapePicker from '$lib/shapes/ShapePicker.svelte';
+	import type { ShapeSource } from '$lib/shapes';
+	import type { ContainerState } from '../types';
 	import type { AnimationConfig } from '$lib/animations';
-	import type { BlendMode } from '$lib/blend';
 
 	let {
 		container,
@@ -50,6 +50,25 @@
 
 	let showAdvanced = $state(false);
 	let showBlend = $state(false);
+	let showShape = $state(false);
+
+	// Check if current shape is a simple rect (no shapeSource)
+	const isSimpleRect = $derived(!container.shapeSource);
+
+	// Handle shape source change
+	function handleShapeChange(source: ShapeSource) {
+		// If selecting rectangle, clear shapeSource to use default rect behavior
+		if (source.type === 'builtin' && source.shape === 'rectangle') {
+			onUpdate('shapeSource', undefined);
+		} else {
+			onUpdate('shapeSource', source);
+		}
+	}
+
+	// Get current shape for display
+	const currentShapeValue = $derived<ShapeSource>(
+		container.shapeSource ?? { type: 'builtin', shape: 'rectangle' }
+	);
 </script>
 
 <div class="space-y-3">
@@ -111,34 +130,9 @@
 			</div>
 		</div>
 
-		<!-- Shape & Radius -->
-		<div class="grid grid-cols-2 gap-2">
-			<div>
-				<Label class="mb-1 block text-xs text-muted-foreground">Clip Shape</Label>
-				<Select.Root type="single" value={container.clipShape} onValueChange={(v) => v && onUpdate('clipShape', v as ClipShape)}>
-					<Select.Trigger class="h-8 w-full text-sm">
-						{container.clipShape === 'rect' ? 'Rectangle' :
-						 container.clipShape === 'circle' ? 'Circle' :
-						 container.clipShape === 'ellipse' ? 'Ellipse' :
-						 container.clipShape === 'hexagon' ? 'Hexagon' :
-						 container.clipShape === 'octagon' ? 'Octagon' :
-						 container.clipShape === 'diamond' ? 'Diamond' :
-						 container.clipShape === 'shield' ? 'Shield' :
-						 container.clipShape === 'star' ? 'Star' : container.clipShape}
-					</Select.Trigger>
-					<Select.Content>
-						<Select.Item value="rect" label="Rectangle" />
-						<Select.Item value="circle" label="Circle" />
-						<Select.Item value="ellipse" label="Ellipse" />
-						<Select.Item value="hexagon" label="Hexagon" />
-						<Select.Item value="octagon" label="Octagon" />
-						<Select.Item value="diamond" label="Diamond" />
-						<Select.Item value="shield" label="Shield" />
-						<Select.Item value="star" label="Star" />
-					</Select.Content>
-				</Select.Root>
-			</div>
-			{#if container.clipShape === 'rect'}
+		<!-- Corner Radius (only for rect) -->
+		{#if isSimpleRect}
+			<div class="grid grid-cols-2 gap-2">
 				<div>
 					<label class="mb-1 block text-xs text-muted-foreground">Corner Radius</label>
 					<input
@@ -148,7 +142,6 @@
 						class="h-8 w-full rounded border border-input bg-background px-2 text-sm"
 					/>
 				</div>
-			{:else}
 				<div>
 					<Label class="mb-1 block text-xs text-muted-foreground">Clip Content</Label>
 					<div class="flex h-8 items-center gap-2">
@@ -160,8 +153,44 @@
 						<Label for="clip-content" class="text-sm">Enabled</Label>
 					</div>
 				</div>
-			{/if}
-		</div>
+			</div>
+		{:else}
+			<div>
+				<Label class="mb-1 block text-xs text-muted-foreground">Clip Content</Label>
+				<div class="flex h-8 items-center gap-2">
+					<Checkbox
+						id="clip-content"
+						checked={container.clipContent}
+						onCheckedChange={(checked) => onUpdate('clipContent', checked === true)}
+					/>
+					<Label for="clip-content" class="text-sm">Enabled</Label>
+				</div>
+			</div>
+		{/if}
+
+		<!-- Shape Section -->
+		<Collapsible.Root bind:open={showShape}>
+			<div class="flex items-center gap-2 rounded border border-purple-500/30 bg-purple-500/5 px-2 py-1.5 text-sm hover:bg-purple-500/10">
+				<Collapsible.Trigger class="flex flex-1 items-center gap-2">
+					<ChevronDown class="h-3 w-3 transition-transform {showShape ? '' : '-rotate-90'}" />
+					<span class="font-medium text-purple-400">Clip Shape</span>
+					{#if !isSimpleRect && container.shapeSource}
+						<span class="ml-auto rounded bg-purple-500/20 px-1.5 py-0.5 text-xs text-purple-400 capitalize">
+							{container.shapeSource.type === 'builtin' ? container.shapeSource.shape : 'custom'}
+						</span>
+					{/if}
+				</Collapsible.Trigger>
+				<HelpTooltip text="Shape used to clip/mask this layer's content." />
+			</div>
+			<Collapsible.Content>
+				<div class="mt-2 rounded border border-purple-500/20 bg-purple-500/5 p-2">
+					<ShapePicker
+						value={currentShapeValue}
+						onchange={handleShapeChange}
+					/>
+				</div>
+			</Collapsible.Content>
+		</Collapsible.Root>
 	{/if}
 
 	<!-- Animation Section -->

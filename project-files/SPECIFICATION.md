@@ -266,34 +266,47 @@ Groups position and contain child components:
     y: 100,
     width: 200,
     height: 200,
-    radius: 20,                // Corner radius (rect only)
-    clipShape: 'circle',       // rect, circle, ellipse, hexagon, octagon, diamond, shield, star, polygon
-    clipContent: true,         // Enable/disable clipping
-    clipPoints: [...]          // For custom polygon shapes
+    radius: 20,                // Corner radius (rect only, when no shapeSource)
+    shapeSource: {             // Icon-based shape system
+      type: 'builtin',
+      shape: 'circle'          // 22 built-in shapes
+    },
+    // Or custom icon shape:
+    // shapeSource: { type: 'custom', iconData: {...}, iconName: 'mdi:heart' }
+    clipContent: true          // Enable/disable clipping
   },
   children: [...]
 }
 ```
 
-**Available clipShapes:** rect, circle, ellipse, hexagon, octagon, diamond, shield, star, polygon
+**Built-in shapes (22):**
+- Geometric: circle, square, rectangle, triangle, diamond, hexagon, octagon, pentagon, ellipse
+- Decorative: star, heart, shield, bookmark, label, cloud, message
+- Awards: crown, trophy, medal, seal, certificate
+- Containers: card
 
-### Badge (Planned)
+### Badge
 
-Universal badge component with shapes and style presets:
+Shape-based badge component using the icon-based shape system:
 
 ```typescript
 {
   type: 'Badge',
   props: {
-    text: 'LEGENDARY',
-    shape: 'pill',             // pill, square, diamond, hexagon, shield, star
-    preset: 'legendary',       // Rarity: common, rare, epic, legendary, mythic
-                               // Status: verified, new, sold, limited, promo
+    shapeSource: {             // Icon-based shape system
+      type: 'builtin',
+      shape: 'circle'          // Any of 22 built-in shapes
+    },
+    // Or custom icon shape:
+    // shapeSource: { type: 'custom', iconData: {...}, iconName: 'mdi:heart' }
     backgroundColor: '#fbbf24',
-    textColor: '#000000',
     borderColor: '#ffffff',
-    icon: { ... },             // Optional icon
-    size: 'md'                 // sm, md, lg
+    borderWidth: 2,
+    icon: { ... },             // Optional content icon (centered inside)
+    iconColor: '#ffffff',
+    opacity: 1,
+    effect: { ... },           // Optional effect
+    blendMode: 'normal'
   }
 }
 ```
@@ -996,9 +1009,13 @@ interface ContainerContext {
   width: number;
   height: number;
   radius: number;
-  clipShape?: ClipShape;
-  clipPoints?: ClipPoint[];
+  shapeSource?: ShapeSource;  // Icon-based shape system
 }
+
+// Shape source type
+type ShapeSource =
+  | { type: 'builtin'; shape: BuiltInShape }
+  | { type: 'custom'; iconData: IconData; iconName?: string };
 ```
 
 ### CardData

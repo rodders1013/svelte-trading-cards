@@ -9,7 +9,7 @@ Build professional trading cards by composing pre-built SVG components. Think of
 **Key capabilities:**
 - Visual template creator with zone hierarchy and property panels
 - Group-based architecture for composable, nestable components
-- Shape clipping via `clipShape` (circle, hexagon, shield, star, custom polygons)
+- **Shape system** with 22 built-in shapes + custom Iconify icons via `shapeSource`
 - Auto-fit text that scales between min/max sizes to fit containers
 - Container-aware components that fill their parent by default
 - CSS animations that auto-strip for static PNG export
@@ -492,7 +492,8 @@ Layer blend modes enable Photoshop-like compositing effects. Applied via CSS `mi
   props: {
     x: 100, y: 100,
     width: 200, height: 200,
-    clipShape: 'circle',  // rect, circle, hexagon, shield, star, etc.
+    shapeSource: { type: 'builtin', shape: 'circle' },  // 22 built-in shapes
+    // Or custom: { type: 'custom', iconData: {...}, iconName: 'mdi:heart' }
     clipContent: true
   },
   children: [...]

@@ -4,9 +4,23 @@
 	import { EffectConfigSchema } from '$lib/effects/types.js';
 	import { BlendMode } from '$lib/blend/types.js';
 
+	// Text preset options - predefined labels (moved from Badge)
+	export const TextPresetSchema = z.enum([
+		// Rarity labels
+		'COMMON', 'UNCOMMON', 'RARE', 'EPIC', 'LEGENDARY', 'MYTHIC',
+		// Status labels
+		'NEW', 'HOT', 'SOLD', 'LIMITED', 'PROMO', 'EXCLUSIVE', 'VERIFIED',
+		// Edition labels
+		'1ST EDITION', 'SPECIAL', 'COLLECTOR', 'PREMIUM', 'ULTRA',
+		// Empty (use data field instead)
+		'none'
+	]);
+	export type TextPreset = z.infer<typeof TextPresetSchema>;
+
 	export const TextFieldPropsSchema = z.object({
-		// Text must come from data - no free text input allowed
-		dataField: z.string(),
+		// Text from preset OR data field (dataField takes priority)
+		textPreset: TextPresetSchema.optional(),
+		dataField: z.string().optional(),
 		maxFontSize: z.number().default(48),
 		minFontSize: z.number().default(12),
 		fontFamily: z.string().default('Arial, sans-serif'),
@@ -36,6 +50,7 @@
 	import { EffectWrapper } from '$lib/effects/index.js';
 
 	let {
+		textPreset = 'none',
 		dataField,
 		maxFontSize = 48,
 		minFontSize = 12,
@@ -59,10 +74,15 @@
 		data?: CardData;
 	} = $props();
 
-	// Text must come from data field - no free text allowed
-	const resolvedText = $derived(
-		dataField && data ? String(data[dataField] ?? '') : ''
-	);
+	// Text from data field (priority) or preset - no free text allowed
+	const resolvedText = $derived.by(() => {
+		// Data field takes priority (trusted source)
+		if (dataField && data && data[dataField] !== undefined) {
+			return String(data[dataField]);
+		}
+		// Otherwise use preset text
+		return textPreset === 'none' ? '' : textPreset;
+	});
 
 	// Calculate inset from container radius (to avoid rounded corners) plus user padding
 	// For rounded corners, safe inset ≈ radius * 0.3 keeps text out of corner curves

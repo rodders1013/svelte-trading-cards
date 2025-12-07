@@ -12,14 +12,18 @@ export type { StatPanelProps, StatRow, ListProps, ListStyle } from './components
 // Decorations
 export { Badge, Divider, ProgressBar, Ribbon, Frame, IconRating } from './components/decorations/index.js';
 export type {
-	BadgeProps, BadgeShape, BadgePreset, BadgeSize,
+	BadgeProps,
 	DividerProps, DividerStyle, DividerFade, DividerOrnament,
 	ProgressBarProps, ProgressBarStyle, LabelPosition,
 	RibbonProps, RibbonPosition, RibbonStyle,
 	FrameProps, FrameStyle, FrameSize,
 	IconRatingProps, RatingIconPreset, ValueFormat
 } from './components/decorations/index.js';
-export { BADGE_PRESETS, RATING_ICON_PRESETS, RATING_ICON_LABELS } from './components/decorations/index.js';
+export { RATING_ICON_PRESETS, RATING_ICON_LABELS } from './components/decorations/index.js';
+
+// Shapes
+export { ShapePicker, BUNDLED_SHAPES, SHAPE_CATEGORIES, BUILT_IN_SHAPES } from './shapes/index.js';
+export type { BuiltInShape, ShapeSource, ShapeData, ShapeConfig, ShapeRenderOptions } from './shapes/index.js';
 
 // Animations
 export {
@@ -77,9 +81,7 @@ export type {
 	CardData,
 	TypedCardData,
 	CommonCardFields,
-	ContainerContext,
-	ClipShape,
-	ClipPoint
+	ContainerContext
 } from './types/index.js';
 export { CardTemplateSchema, ComponentDefinitionSchema, CARD_WIDTH, CARD_HEIGHT, CARD_RADIUS } from './types/index.js';
 

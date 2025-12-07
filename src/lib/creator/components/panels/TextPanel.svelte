@@ -11,7 +11,11 @@
 	} from '../form';
 	import type { TextComponent, DataFieldOption } from '../../types';
 	import { getAllFontsForDataset } from '$lib/fonts';
-	import { DEFAULT_DATASET, type DatasetId } from '$lib/presets';
+	import {
+		getLabelsByCategory,
+		DEFAULT_DATASET,
+		type DatasetId
+	} from '$lib/presets';
 
 	let {
 		component,
@@ -35,6 +39,44 @@
 
 	// Get fonts for current dataset (brand fonts first, then web-safe by category)
 	const fontOptions = $derived(getAllFontsForDataset(datasetId));
+
+	// Get categorized labels based on current dataset
+	const labelCategories = $derived(getLabelsByCategory(datasetId));
+
+	// Flatten for simple dropdown - deduplicate labels
+	const flatTextPresets = $derived.by(() => {
+		const seen = new Set<string>();
+		const flat: Array<{ value: string; label: string } | string> = [
+			{ value: 'none', label: '(Use data field)' }
+		];
+
+		const addUnique = (labels: readonly string[]) => {
+			for (const label of labels) {
+				if (!seen.has(label)) {
+					seen.add(label);
+					flat.push(label);
+				}
+			}
+		};
+
+		// Add dataset-specific labels first (priority)
+		if (labelCategories.specific.length > 0) {
+			addUnique(labelCategories.specific);
+		}
+
+		// Add shared categories (skip duplicates)
+		addUnique(labelCategories.rarity);
+		addUnique(labelCategories.status);
+		addUnique(labelCategories.editions);
+		addUnique(labelCategories.general);
+
+		return flat;
+	});
+
+	const dataFieldOptions = $derived([
+		{ value: '', label: 'None (use preset text)' },
+		...dataFields
+	]);
 
 	const fontWeights = [
 		{ value: 'normal', label: 'Normal' },
@@ -84,20 +126,26 @@
 		Text automatically scales between min/max size to fit the zone
 	</div>
 
-	<FormGrid>
-		<FormSelect
-			label="Data Field"
-			value={component.dataField}
-			onchange={(v) => onUpdate('dataField', v)}
-			options={dataFields}
-		/>
-		<FormFontSelect
-			label="Font Family"
-			value={component.fontFamily}
-			onchange={(v) => onUpdate('fontFamily', v)}
-			options={fontOptions}
-		/>
-	</FormGrid>
+	<FormSelect
+		label="Preset Text"
+		value={component.textPreset ?? 'none'}
+		onchange={(v) => onUpdate('textPreset', v)}
+		options={flatTextPresets}
+	/>
+
+	<FormSelect
+		label="Data Field (overrides preset)"
+		value={component.dataField ?? ''}
+		onchange={(v) => onUpdate('dataField', v || undefined)}
+		options={dataFieldOptions}
+	/>
+
+	<FormFontSelect
+		label="Font Family"
+		value={component.fontFamily}
+		onchange={(v) => onUpdate('fontFamily', v)}
+		options={fontOptions}
+	/>
 
 	<div class="rounded border border-input p-2">
 		<label class="text-sm font-medium">Font Size Range</label>

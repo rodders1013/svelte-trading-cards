@@ -2,12 +2,14 @@ import type { AnimationConfig } from '$lib/animations';
 import type { EffectConfig } from '$lib/effects';
 import type { BlendMode } from '$lib/blend';
 import type { IconData } from '$lib/components/icons';
-import type { StatRow, ListStyle } from '$lib/components/fields';
-import type { BadgeShape, BadgePreset, BadgeSize, BadgeTextPreset } from '$lib/components/decorations';
+import type { StatRow, ListStyle, TextPreset } from '$lib/components/fields';
 import type { DividerStyle, DividerFade, DividerOrnament } from '$lib/components/decorations';
 import type { ProgressBarStyle, LabelPosition } from '$lib/components/decorations';
 import type { RibbonPosition, RibbonStyle, RibbonTextPreset } from '$lib/components/decorations';
 import type { FrameStyle, FrameSize } from '$lib/components/decorations';
+import type { RatingIconPreset, ValueFormat } from '$lib/components/decorations';
+import type { ShapeSource } from '$lib/shapes';
+import type { FilterConfig, ImageTransformConfig } from '$lib/filters';
 
 // Component type definitions for the visual creator
 
@@ -15,7 +17,8 @@ export interface TextComponent {
 	type: 'text';
 	id: string;
 	visible: boolean;
-	dataField: string;
+	textPreset?: TextPreset;
+	dataField?: string;
 	maxFontSize: number;
 	minFontSize: number;
 	fontWeight: string;
@@ -39,6 +42,12 @@ export interface ImageComponent {
 	dataField: string;
 	opacity: number;
 	preserveAspectRatio: string;
+	/** Shape to clip the image to (e.g., circle, star) */
+	shapeSource?: ShapeSource;
+	/** CSS filter adjustments (brightness, contrast, etc.) */
+	filter?: FilterConfig;
+	/** Image transform (pan, zoom, rotation, flip) */
+	transform?: ImageTransformConfig;
 	effect?: EffectConfig;
 	blendMode?: BlendMode;
 }
@@ -118,17 +127,12 @@ export interface BadgeComponent {
 	type: 'badge';
 	id: string;
 	visible: boolean;
-	textPreset: BadgeTextPreset;
-	dataField?: string;
-	shape: BadgeShape;
-	preset: BadgePreset;
+	/** Shape for the badge - uses icon-based shape system */
+	shapeSource: ShapeSource;
 	backgroundColor: string;
-	textColor: string;
 	borderColor?: string;
 	borderWidth: number;
-	size: BadgeSize;
-	fontFamily: string;
-	fontWeight: string;
+	/** Content icon (displayed inside the badge) */
 	icon?: IconData;
 	iconColor?: string;
 	opacity: number;
@@ -311,16 +315,6 @@ export type ComponentItem =
 	| ListComponent
 	| IconRatingComponent;
 
-export type ClipShape =
-	| 'rect'
-	| 'circle'
-	| 'ellipse'
-	| 'hexagon'
-	| 'octagon'
-	| 'diamond'
-	| 'shield'
-	| 'star';
-
 export interface ContainerState {
 	id: string;
 	name: string;
@@ -330,7 +324,8 @@ export interface ContainerState {
 	y: number;
 	width: number;
 	height: number;
-	clipShape: ClipShape;
+	/** Shape for clipping - uses icon-based shape system. Undefined = rect */
+	shapeSource?: ShapeSource;
 	radius: number;
 	clipContent: boolean;
 	animation?: AnimationConfig;
