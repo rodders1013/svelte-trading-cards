@@ -3,6 +3,7 @@
 	import { AnimationConfigSchema } from '$lib/styling/animations/types.js';
 	import { EffectConfigSchema } from '$lib/styling/effects/types.js';
 	import { BlendMode } from '$lib/styling/blend/types.js';
+	import { HolographicConfigSchema } from '$lib/styling/HolographicWrapper.svelte';
 
 	export const FrameStyleSchema = z.enum(['simple', 'ornate', 'art-deco', 'celtic', 'tribal', 'elegant']);
 	export type FrameStyle = z.infer<typeof FrameStyleSchema>;
@@ -21,16 +22,16 @@
 		opacity: z.number().min(0).max(1).default(1),
 		animation: AnimationConfigSchema.optional(),
 		effect: EffectConfigSchema.optional(),
-		blendMode: BlendMode.optional()
+		blendMode: BlendMode.optional(),
+		holographic: HolographicConfigSchema.optional()
 	});
 
 	export type FrameProps = z.infer<typeof FramePropsSchema>;
 </script>
 
 <script lang="ts">
-	import type { ContainerContext, CardData } from '$lib/types';
-	import { AnimationWrapper } from '$lib/styling/animations/index.js';
-	import { EffectWrapper } from '$lib/styling/effects/index.js';
+	import type { ContainerContext, CardData, UniversalModifiers } from '$lib/types';
+	import ComponentWrapper from '$lib/styling/ComponentWrapper.svelte';
 
 	let {
 		style = 'simple',
@@ -44,6 +45,7 @@
 		animation,
 		effect,
 		blendMode,
+		holographic,
 		container,
 		data
 	}: FrameProps & {
@@ -55,6 +57,9 @@
 	const height = $derived(container.height);
 	const cx = $derived(width / 2);
 	const cy = $derived(height / 2);
+
+	// Collect modifiers for unified wrapper
+	const modifiers: UniversalModifiers = $derived({ effect, animation, blendMode, holographic });
 
 	// Size multiplier
 	const sizeMultiplier = $derived.by(() => {
@@ -75,6 +80,10 @@
 
 	// Secondary color fallback
 	const secColor = $derived(secondaryColor ?? color);
+
+	// When holographic, use 'inherit' for colors
+	const effectiveStroke = $derived(holographic ? 'inherit' : color);
+	const effectiveFill = $derived(holographic ? 'inherit' : secColor);
 
 	// Generate corner path based on style
 	function getCornerPath(corner: 'tl' | 'tr' | 'bl' | 'br'): string {
@@ -174,44 +183,42 @@
 	]);
 </script>
 
-<EffectWrapper {effect} {blendMode} transformOrigin="{cx}px {cy}px">
-	<AnimationWrapper {animation} transformOrigin="{cx}px {cy}px">
-		<g opacity={opacity}>
-			<!-- Corner decorations -->
-			{#if corners}
-				{#each cornerConfigs as corner (corner.id)}
-					<g transform="translate({corner.x}, {corner.y}) rotate({corner.rotate})">
-						<path
-							d={getCornerPath(corner.id)}
-							fill="none"
-							stroke={color}
-							stroke-width={strokeWidth}
-							stroke-linecap="round"
-							stroke-linejoin="round"
-						/>
-						{#if style === 'ornate' || style === 'elegant'}
-							<!-- Additional decorative element -->
-							<circle cx={cornerSize * 0.15} cy={cornerSize * 0.15} r={3 * sizeMultiplier} fill={secColor} />
-						{/if}
-					</g>
-				{/each}
-			{/if}
+<ComponentWrapper {container} {modifiers}>
+	<g opacity={opacity}>
+		<!-- Corner decorations -->
+		{#if corners}
+			{#each cornerConfigs as corner (corner.id)}
+				<g transform="translate({corner.x}, {corner.y}) rotate({corner.rotate})">
+					<path
+						d={getCornerPath(corner.id)}
+						fill="none"
+						stroke={effectiveStroke}
+						stroke-width={strokeWidth}
+						stroke-linecap="round"
+						stroke-linejoin="round"
+					/>
+					{#if style === 'ornate' || style === 'elegant'}
+						<!-- Additional decorative element -->
+						<circle cx={cornerSize * 0.15} cy={cornerSize * 0.15} r={3 * sizeMultiplier} fill={effectiveFill} />
+					{/if}
+				</g>
+			{/each}
+		{/if}
 
-			<!-- Edge decorations -->
-			{#if edges}
-				{#each edgeConfigs as edge (edge.id)}
-					<g transform="translate({edge.x}, {edge.y}) rotate({edge.rotate})">
-						<path
-							d={getEdgePath(edge.id)}
-							fill="none"
-							stroke={color}
-							stroke-width={strokeWidth}
-							stroke-linecap="round"
-							stroke-linejoin="round"
-						/>
-					</g>
-				{/each}
-			{/if}
-		</g>
-	</AnimationWrapper>
-</EffectWrapper>
+		<!-- Edge decorations -->
+		{#if edges}
+			{#each edgeConfigs as edge (edge.id)}
+				<g transform="translate({edge.x}, {edge.y}) rotate({edge.rotate})">
+					<path
+						d={getEdgePath(edge.id)}
+						fill="none"
+						stroke={effectiveStroke}
+						stroke-width={strokeWidth}
+						stroke-linecap="round"
+						stroke-linejoin="round"
+					/>
+				</g>
+			{/each}
+		{/if}
+	</g>
+</ComponentWrapper>

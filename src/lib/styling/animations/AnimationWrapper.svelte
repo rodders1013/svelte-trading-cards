@@ -13,7 +13,7 @@
 
 <script lang="ts">
 	import type { Snippet } from 'svelte';
-	import { SPEED_DURATIONS } from './types.js';
+	import type { AnimationOrigin } from './types.js';
 	import { getAnimationName } from './presets.js';
 
 	let {
@@ -27,21 +27,57 @@
 	// Unique ID for trace filter
 	const uid = Math.random().toString(36).substring(2, 9);
 
-	// Get animation class name based on type and direction
+	// Convert AnimationOrigin enum to CSS transform-origin value
+	function originToCSS(origin: AnimationOrigin): string {
+		const map: Record<AnimationOrigin, string> = {
+			'center': 'center',
+			'top-left': 'top left',
+			'top': 'top center',
+			'top-right': 'top right',
+			'left': 'center left',
+			'right': 'center right',
+			'bottom-left': 'bottom left',
+			'bottom': 'bottom center',
+			'bottom-right': 'bottom right'
+		};
+		return map[origin] || 'center';
+	}
+
+	// Get animation class name based on type, direction, and pattern/style
 	const animationClass = $derived.by(() => {
 		if (!animation || animation.type === 'none') return '';
+
+		// Handle pulse patterns
+		if (animation.type === 'pulse' && animation.pulsePattern && animation.pulsePattern !== 'single') {
+			return `tc-pulse-${animation.pulsePattern}`;
+		}
+
+		// Handle float styles
+		if (animation.type === 'float' && animation.floatStyle && animation.floatStyle !== 'gentle') {
+			return `tc-float-${animation.floatStyle}`;
+		}
+
 		return getAnimationName(animation.type, animation.direction);
+	});
+
+	// Compute the effective transform origin
+	// If animation has a non-center origin, use it; otherwise fall back to prop
+	const effectiveOrigin = $derived.by(() => {
+		if (animation?.origin && animation.origin !== 'center') {
+			return originToCSS(animation.origin);
+		}
+		return transformOrigin || 'center';
 	});
 
 	// Generate CSS custom properties for animation configuration
 	const styleVars = $derived.by(() => {
 		if (!animation || animation.type === 'none') return '';
 
-		let duration = SPEED_DURATIONS[animation.speed];
+		let duration = animation.duration;
 
 		// Trace animation needs much longer duration for the neon sign effect
 		if (animation.type === 'trace') {
-			duration = duration * 6; // slow=18s, normal=9s, fast=4.5s
+			duration = duration * 6;
 		}
 
 		const vars: string[] = [
@@ -54,8 +90,19 @@
 			'transform-box: fill-box'
 		];
 
-		// Add transform-origin (use explicit coordinates or default to center)
-		vars.push(`transform-origin: ${transformOrigin || 'center'}`);
+		// Add scale for pulse animation
+		if (animation.type === 'pulse') {
+			vars.push(`--tc-scale: ${animation.scale}`);
+		}
+
+		// Add float variables
+		if (animation.type === 'float') {
+			vars.push(`--tc-float-distance: ${animation.floatDistance}`);
+			vars.push(`--tc-float-rotation: ${animation.floatRotation}`);
+		}
+
+		// Add transform-origin
+		vars.push(`transform-origin: ${effectiveOrigin}`);
 
 		return vars.join('; ');
 	});
@@ -88,7 +135,7 @@
 	</g>
 	<g
 		class="tc-animated {animationClass}"
-		style="{styleVars}; transform: scale(1.05); transform-origin: {transformOrigin || 'center'};"
+		style="{styleVars}; transform: scale(1.05); transform-origin: {effectiveOrigin};"
 		filter="url(#trace-glow-{uid})"
 	>
 		{@render children()}

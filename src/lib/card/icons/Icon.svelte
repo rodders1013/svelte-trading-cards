@@ -3,6 +3,7 @@
 	import { AnimationConfigSchema } from '$lib/styling/animations/types.js';
 	import { EffectConfigSchema } from '$lib/styling/effects/types.js';
 	import { BlendMode } from '$lib/styling/blend/types.js';
+	import { HolographicConfigSchema } from '$lib/styling/HolographicWrapper.svelte';
 
 	// IconifyIcon data format
 	export const IconDataSchema = z.object({
@@ -24,7 +25,8 @@
 		flipVertical: z.boolean().default(false),
 		animation: AnimationConfigSchema.optional(),
 		effect: EffectConfigSchema.optional(),
-		blendMode: BlendMode.optional()
+		blendMode: BlendMode.optional(),
+		holographic: HolographicConfigSchema.optional()
 	});
 
 	export type IconData = z.infer<typeof IconDataSchema>;
@@ -73,6 +75,7 @@
 		animation,
 		effect,
 		blendMode,
+		holographic,
 		container,
 		data
 	}: IconProps & {
@@ -119,8 +122,20 @@
 	// Sanitize icon body to prevent XSS
 	const sanitizedBody = $derived(iconData?.body ? sanitizeSvgBody(iconData.body) : '');
 
+	// Strip fill attributes from body so parent fill can be inherited (needed for holographic)
+	const strippedBody = $derived(
+		sanitizedBody
+			.replace(/fill="[^"]*"/gi, '')
+			.replace(/fill='[^']*'/gi, '')
+	);
+
 	// Collect modifiers for unified wrapper
-	const modifiers: UniversalModifiers = $derived({ effect, animation, blendMode });
+	const modifiers: UniversalModifiers = $derived({ effect, animation, blendMode, holographic });
+
+	// When holographic is enabled, use stripped body so gradient inherits properly
+	const effectiveBody = $derived(holographic ? strippedBody : sanitizedBody);
+	const effectiveFill = $derived(holographic ? 'inherit' : color);
+	const effectiveStyle = $derived(holographic ? '' : `color: ${color}`);
 </script>
 
 {#if iconData?.body}
@@ -135,8 +150,8 @@
 				fill="none"
 				xmlns="http://www.w3.org/2000/svg"
 			>
-				<g fill={color} style="color: {color}">
-					{@html sanitizedBody}
+				<g fill={effectiveFill} style={effectiveStyle}>
+					{@html effectiveBody}
 				</g>
 			</svg>
 		</g>

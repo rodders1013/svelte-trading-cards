@@ -77,7 +77,7 @@ export function getDefaultEffectConfig(type: EffectType) {
 				blur: 10,
 				intensity: 0.7,
 				animated: false,
-				speed: 'normal' as const
+				animationDuration: 1.5
 			};
 		case 'strokeGlow':
 			return {
@@ -86,7 +86,7 @@ export function getDefaultEffectConfig(type: EffectType) {
 				blur: 10,
 				intensity: 0.5,
 				animated: false,
-				speed: 'normal' as const
+				animationDuration: 1.5
 			};
 		case 'shadow':
 			return {
@@ -96,7 +96,7 @@ export function getDefaultEffectConfig(type: EffectType) {
 				offsetX: 4,
 				offsetY: 4,
 				animated: false,
-				speed: 'normal' as const
+				animationDuration: 1.5
 			};
 		case 'neon':
 			return {
@@ -105,7 +105,7 @@ export function getDefaultEffectConfig(type: EffectType) {
 				intensity: 0.9,
 				spread: 2,
 				animated: false,
-				speed: 'normal' as const
+				animationDuration: 1.5
 			};
 		case 'innerGlow':
 			return {
@@ -114,14 +114,14 @@ export function getDefaultEffectConfig(type: EffectType) {
 				blur: 8,
 				intensity: 0.5,
 				animated: false,
-				speed: 'normal' as const
+				animationDuration: 1.5
 			};
 		case 'lift':
 			return {
 				type: 'lift' as const,
 				elevation: 'md' as const,
 				animated: false,
-				speed: 'normal' as const
+				animationDuration: 1.5
 			};
 		case 'outline':
 			return {
@@ -129,7 +129,7 @@ export function getDefaultEffectConfig(type: EffectType) {
 				color: '#ffffff',
 				width: 2,
 				animated: false,
-				speed: 'normal' as const
+				animationDuration: 1.5
 			};
 		default:
 			return undefined;

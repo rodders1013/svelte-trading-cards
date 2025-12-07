@@ -16,7 +16,6 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
 	import { LIFT_ELEVATIONS } from './types.js';
-	import { SPEED_DURATIONS } from '$lib/styling/animations/types.js';
 
 	let {
 		effect,
@@ -34,15 +33,15 @@
 	// Get animation class if effect is animated
 	const animationClass = $derived.by(() => {
 		if (!effect || !effect.animated) return '';
-		// Use the existing glow animation for pulsing effects
-		return 'tc-glow';
+		// Use the fade animation for pulsing effects
+		return 'tc-fade';
 	});
 
 	// Generate CSS custom properties for animation
 	const styleVars = $derived.by(() => {
 		if (!effect || !effect.animated) return '';
 
-		const duration = SPEED_DURATIONS[effect.speed];
+		const duration = effect.animationDuration;
 		const vars: string[] = [
 			`--tc-duration: ${duration}s`,
 			`--tc-easing: ease-in-out`,

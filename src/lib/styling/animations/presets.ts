@@ -32,7 +32,7 @@ export const ANIMATION_PRESETS: Record<Exclude<AnimationType, 'none'>, Animation
 		keyframes: `
 			@keyframes tc-pulse {
 				0%, 100% { transform: scale(1); }
-				50% { transform: scale(1.1); }
+				50% { transform: scale(var(--tc-scale, 1.1)); }
 			}
 		`,
 		defaultEasing: 'ease-in-out',
@@ -79,12 +79,12 @@ export const ANIMATION_PRESETS: Record<Exclude<AnimationType, 'none'>, Animation
 		defaultEasing: 'ease-in-out',
 		supportsDirection: false
 	},
-	glow: {
-		name: 'glow',
-		label: 'Glow',
-		description: 'Pulsing opacity glow',
+	fade: {
+		name: 'fade',
+		label: 'Fade',
+		description: 'Pulsing opacity in and out',
 		keyframes: `
-			@keyframes tc-glow {
+			@keyframes tc-fade {
 				0%, 100% { opacity: 1; }
 				50% { opacity: 0.6; }
 			}

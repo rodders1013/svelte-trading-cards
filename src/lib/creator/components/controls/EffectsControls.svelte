@@ -5,10 +5,10 @@
 		type EffectConfig,
 		type EffectType
 	} from '$lib/styling/effects';
-	import type { AnimationSpeed } from '$lib/styling/animations';
 	import * as Select from '$lib/creator/ui/select';
 	import { Checkbox } from '$lib/creator/ui/checkbox';
 	import { Label } from '$lib/creator/ui/label';
+	import { Slider } from '$lib/creator/ui/slider';
 
 	let {
 		effect = $bindable<EffectConfig | undefined>(undefined)
@@ -17,12 +17,6 @@
 	} = $props();
 
 	const effectOptions = getEffectOptions();
-
-	const speedOptions: { value: AnimationSpeed; label: string }[] = [
-		{ value: 'slow', label: 'Slow' },
-		{ value: 'normal', label: 'Normal' },
-		{ value: 'fast', label: 'Fast' }
-	];
 
 	const liftOptions: { value: 'sm' | 'md' | 'lg' | 'xl'; label: string }[] = [
 		{ value: 'sm', label: 'Small' },
@@ -67,15 +61,6 @@
 		const e = effect;
 		if (e && e.type === 'lift') {
 			return liftOptions.find((opt) => opt.value === e.elevation)?.label ?? 'Medium';
-		}
-		return '';
-	});
-
-	// Get label for current speed
-	const currentSpeedLabel = $derived.by(() => {
-		const e = effect;
-		if (e && e.animated) {
-			return speedOptions.find((opt) => opt.value === e.speed)?.label ?? 'Normal';
 		}
 		return '';
 	});
@@ -355,17 +340,19 @@
 				</div>
 				{#if effect.animated}
 					<div class="mt-2">
-						<span class="text-sm text-muted-foreground">Speed</span>
-						<Select.Root type="single" value={effect.speed} onValueChange={(v) => v && updateEffect('speed', v)}>
-							<Select.Trigger class="mt-1 w-full">
-								{currentSpeedLabel}
-							</Select.Trigger>
-							<Select.Content>
-								{#each speedOptions as opt (opt.value)}
-									<Select.Item value={opt.value} label={opt.label} />
-								{/each}
-							</Select.Content>
-						</Select.Root>
+						<div class="flex items-center justify-between">
+							<span class="text-sm text-muted-foreground">Duration</span>
+							<span class="text-sm text-muted-foreground">{effect.animationDuration.toFixed(1)}s</span>
+						</div>
+						<Slider
+							type="single"
+							class="mt-2"
+							value={effect.animationDuration}
+							min={0.1}
+							max={5}
+							step={0.1}
+							onValueChange={(v: number) => updateEffect('animationDuration', v)}
+						/>
 					</div>
 				{/if}
 			</div>

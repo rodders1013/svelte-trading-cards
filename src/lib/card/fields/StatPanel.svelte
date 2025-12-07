@@ -3,6 +3,7 @@
 	import { AnimationConfigSchema } from '$lib/styling/animations/types.js';
 	import { EffectConfigSchema } from '$lib/styling/effects/types.js';
 	import { BlendMode } from '$lib/styling/blend/types.js';
+	import { HolographicConfigSchema } from '$lib/styling/HolographicWrapper.svelte';
 
 	// Predefined label options - no free text allowed
 	export const StatLabelPresetSchema = z.enum([
@@ -49,16 +50,16 @@
 		opacity: z.number().min(0).max(1).default(1),
 		animation: AnimationConfigSchema.optional(),
 		effect: EffectConfigSchema.optional(),
-		blendMode: BlendMode.optional()
+		blendMode: BlendMode.optional(),
+		holographic: HolographicConfigSchema.optional()
 	});
 
 	export type StatPanelProps = z.infer<typeof StatPanelPropsSchema>;
 </script>
 
 <script lang="ts">
-	import type { ContainerContext, CardData } from '$lib/types';
-	import { AnimationWrapper } from '$lib/styling/animations/index.js';
-	import { EffectWrapper } from '$lib/styling/effects/index.js';
+	import type { ContainerContext, CardData, UniversalModifiers } from '$lib/types';
+	import ComponentWrapper from '$lib/styling/ComponentWrapper.svelte';
 	import FitText from '$lib/utils/FitText.svelte';
 
 	let {
@@ -78,6 +79,7 @@
 		animation,
 		effect,
 		blendMode,
+		holographic,
 		container,
 		data
 	}: StatPanelProps & {
@@ -87,8 +89,9 @@
 
 	const width = $derived(container.width);
 	const height = $derived(container.height);
-	const cx = $derived(width / 2);
-	const cy = $derived(height / 2);
+
+	// Collect modifiers for unified wrapper
+	const modifiers: UniversalModifiers = $derived({ effect, animation, blendMode, holographic });
 
 	// Calculate row layout
 	const padding = $derived(compact ? 4 : 8);
@@ -127,90 +130,96 @@
 		const numValue = typeof value === 'number' ? value : parseFloat(value) || 0;
 		return Math.min(100, Math.max(0, (numValue / max) * 100));
 	}
+
+	// When holographic, use 'inherit' for fill colors
+	const effectiveLabelFill = $derived(holographic ? 'inherit' : labelColor);
+	const effectiveValueFill = $derived(holographic ? 'inherit' : valueColor);
 </script>
 
-<EffectWrapper {effect} {blendMode} transformOrigin="{cx}px {cy}px">
-	<AnimationWrapper {animation} transformOrigin="{cx}px {cy}px">
-		<g opacity={opacity}>
-			{#each resolvedRows as row, index (index)}
-				{@const y = padding + index * rowHeight}
-				{@const showBarForRow = row.showBar && typeof row.value === 'number'}
-				{@const barY = y + textRowHeight + 2}
-				{@const textHeight = showBarForRow ? textRowHeight - 2 : textRowHeight}
+{#snippet statPanelContent()}
+	<g opacity={opacity}>
+		{#each resolvedRows as row, index (index)}
+			{@const y = padding + index * rowHeight}
+			{@const showBarForRow = row.showBar && typeof row.value === 'number'}
+			{@const barY = y + textRowHeight + 2}
+			{@const textHeight = showBarForRow ? textRowHeight - 2 : textRowHeight}
 
-				<!-- Divider line (except for first row) -->
-				{#if divider && index > 0}
-					<line
-						x1={padding}
-						y1={y}
-						x2={width - padding}
-						y2={y}
-						stroke={dividerColor}
-						stroke-width="1"
-					/>
-				{/if}
+			<!-- Divider line (except for first row) -->
+			{#if divider && index > 0}
+				<line
+					x1={padding}
+					y1={y}
+					x2={width - padding}
+					y2={y}
+					stroke={dividerColor}
+					stroke-width="1"
+				/>
+			{/if}
 
-				<!-- Label - auto-fits to available space -->
-				<FitText
-					text={row.label}
+			<!-- Label - auto-fits to available space -->
+			<FitText
+				text={row.label}
+				x={padding}
+				y={y}
+				width={labelWidth}
+				height={textHeight}
+				minSize={6}
+				maxSize={labelFontSize}
+				{fontFamily}
+				fontWeight="normal"
+				horizontalAlign="left"
+				verticalAlign="center"
+				fill={effectiveLabelFill}
+				singleLine={true}
+			/>
+
+			<!-- Value - auto-fits to available space -->
+			<FitText
+				text={String(row.value)}
+				x={width - padding - valueWidth}
+				y={y}
+				width={valueWidth}
+				height={textHeight}
+				minSize={6}
+				maxSize={valueFontSize}
+				{fontFamily}
+				fontWeight="bold"
+				horizontalAlign="right"
+				verticalAlign="center"
+				fill={effectiveValueFill}
+				singleLine={true}
+			/>
+
+			<!-- Bar (if enabled and value is numeric) -->
+			{#if showBarForRow}
+				{@const barWidth = width - padding * 2}
+				{@const percentage = getBarPercentage(row.value, row.barMax)}
+				{@const filledWidth = (barWidth * percentage) / 100}
+
+				<!-- Bar background -->
+				<rect
 					x={padding}
-					y={y}
-					width={labelWidth}
-					height={textHeight}
-					minSize={6}
-					maxSize={labelFontSize}
-					{fontFamily}
-					fontWeight="normal"
-					horizontalAlign="left"
-					verticalAlign="center"
-					fill={labelColor}
-					singleLine={true}
+					y={barY}
+					width={barWidth}
+					height={barHeight}
+					rx={barBorderRadius}
+					fill={barBackgroundColor}
 				/>
 
-				<!-- Value - auto-fits to available space -->
-				<FitText
-					text={String(row.value)}
-					x={width - padding - valueWidth}
-					y={y}
-					width={valueWidth}
-					height={textHeight}
-					minSize={6}
-					maxSize={valueFontSize}
-					{fontFamily}
-					fontWeight="bold"
-					horizontalAlign="right"
-					verticalAlign="center"
-					fill={valueColor}
-					singleLine={true}
+				<!-- Bar fill -->
+				<rect
+					x={padding}
+					y={barY}
+					width={filledWidth}
+					height={barHeight}
+					rx={barBorderRadius}
+					fill={holographic ? 'inherit' : row.barColor}
 				/>
+			{/if}
+		{/each}
+	</g>
+{/snippet}
 
-				<!-- Bar (if enabled and value is numeric) -->
-				{#if showBarForRow}
-					{@const barWidth = width - padding * 2}
-					{@const percentage = getBarPercentage(row.value, row.barMax)}
-					{@const filledWidth = (barWidth * percentage) / 100}
-
-					<!-- Bar background -->
-					<rect
-						x={padding}
-						y={barY}
-						width={barWidth}
-						height={barHeight}
-						rx={barBorderRadius}
-						fill={barBackgroundColor}
-					/>
-
-					<!-- Bar fill -->
-					<rect
-						x={padding}
-						y={barY}
-						width={filledWidth}
-						height={barHeight}
-						rx={barBorderRadius}
-						fill={row.barColor}
-					/>
-				{/if}
-			{/each}
-		</g>
-	</AnimationWrapper>
-</EffectWrapper>
+<ComponentWrapper {container} {modifiers}>
+	{@render statPanelContent()}
+</ComponentWrapper>

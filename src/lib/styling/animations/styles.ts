@@ -28,7 +28,27 @@ export const ANIMATION_KEYFRAMES = `
 /* Pulse - scale up and down */
 @keyframes tc-pulse {
   0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.1); }
+  50% { transform: scale(var(--tc-scale, 1.1)); }
+}
+
+/* Pulse Heartbeat - double pulse (ba-bump) */
+@keyframes tc-pulse-heartbeat {
+  0%, 100% { transform: scale(1); }
+  15% { transform: scale(var(--tc-scale, 1.1)); }
+  30% { transform: scale(1); }
+  45% { transform: scale(calc(var(--tc-scale, 1.1) * 0.85)); }
+  60% { transform: scale(1); }
+}
+
+/* Pulse Triple - three quick pulses */
+@keyframes tc-pulse-triple {
+  0%, 100% { transform: scale(1); }
+  10% { transform: scale(var(--tc-scale, 1.1)); }
+  20% { transform: scale(1); }
+  35% { transform: scale(calc(var(--tc-scale, 1.1) * 0.9)); }
+  45% { transform: scale(1); }
+  60% { transform: scale(calc(var(--tc-scale, 1.1) * 0.8)); }
+  70% { transform: scale(1); }
 }
 
 /* Bounce - vertical movement */
@@ -44,15 +64,37 @@ export const ANIMATION_KEYFRAMES = `
   20%, 40%, 60%, 80% { transform: translateX(2%); }
 }
 
-/* Float - gentle floating motion */
+/* Float - gentle floating motion (vertical + rotation) */
 @keyframes tc-float {
   0%, 100% { transform: translateY(0) rotate(0deg); }
-  25% { transform: translateY(-3%) rotate(1deg); }
-  75% { transform: translateY(3%) rotate(-1deg); }
+  25% { transform: translateY(calc(var(--tc-float-distance, 3) * -1%)) rotate(calc(var(--tc-float-rotation, 1) * 1deg)); }
+  75% { transform: translateY(calc(var(--tc-float-distance, 3) * 1%)) rotate(calc(var(--tc-float-rotation, 1) * -1deg)); }
 }
 
-/* Glow - pulsing opacity */
-@keyframes tc-glow {
+/* Float Bob - vertical only, no rotation */
+@keyframes tc-float-bob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(calc(var(--tc-float-distance, 3) * -1%)); }
+}
+
+/* Float Sway - horizontal movement */
+@keyframes tc-float-sway {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(calc(var(--tc-float-distance, 3) * -1%)); }
+  75% { transform: translateX(calc(var(--tc-float-distance, 3) * 1%)); }
+}
+
+/* Float Orbit - circular motion */
+@keyframes tc-float-orbit {
+  0% { transform: translate(0, calc(var(--tc-float-distance, 3) * -1%)); }
+  25% { transform: translate(calc(var(--tc-float-distance, 3) * 1%), 0); }
+  50% { transform: translate(0, calc(var(--tc-float-distance, 3) * 1%)); }
+  75% { transform: translate(calc(var(--tc-float-distance, 3) * -1%), 0); }
+  100% { transform: translate(0, calc(var(--tc-float-distance, 3) * -1%)); }
+}
+
+/* Fade - pulsing opacity */
+@keyframes tc-fade {
   0%, 100% { opacity: 1; }
   50% { opacity: 0.6; }
 }
@@ -110,6 +152,14 @@ export const ANIMATION_CLASSES = `
   animation: tc-pulse var(--tc-duration, 1.5s) var(--tc-easing, ease-in-out) var(--tc-delay, 0s) var(--tc-iterations, infinite) normal both;
   animation-play-state: var(--tc-play-state, running);
 }
+.tc-pulse-heartbeat {
+  animation: tc-pulse-heartbeat var(--tc-duration, 1.5s) var(--tc-easing, ease-in-out) var(--tc-delay, 0s) var(--tc-iterations, infinite) normal both;
+  animation-play-state: var(--tc-play-state, running);
+}
+.tc-pulse-triple {
+  animation: tc-pulse-triple var(--tc-duration, 1.5s) var(--tc-easing, ease-in-out) var(--tc-delay, 0s) var(--tc-iterations, infinite) normal both;
+  animation-play-state: var(--tc-play-state, running);
+}
 
 /* Bounce animation */
 .tc-bounce {
@@ -128,10 +178,22 @@ export const ANIMATION_CLASSES = `
   animation: tc-float var(--tc-duration, 3s) var(--tc-easing, ease-in-out) var(--tc-delay, 0s) var(--tc-iterations, infinite) normal both;
   animation-play-state: var(--tc-play-state, running);
 }
+.tc-float-bob {
+  animation: tc-float-bob var(--tc-duration, 3s) var(--tc-easing, ease-in-out) var(--tc-delay, 0s) var(--tc-iterations, infinite) normal both;
+  animation-play-state: var(--tc-play-state, running);
+}
+.tc-float-sway {
+  animation: tc-float-sway var(--tc-duration, 3s) var(--tc-easing, ease-in-out) var(--tc-delay, 0s) var(--tc-iterations, infinite) normal both;
+  animation-play-state: var(--tc-play-state, running);
+}
+.tc-float-orbit {
+  animation: tc-float-orbit var(--tc-duration, 3s) var(--tc-easing, ease-in-out) var(--tc-delay, 0s) var(--tc-iterations, infinite) normal both;
+  animation-play-state: var(--tc-play-state, running);
+}
 
-/* Glow animation */
-.tc-glow {
-  animation: tc-glow var(--tc-duration, 1.5s) var(--tc-easing, ease-in-out) var(--tc-delay, 0s) var(--tc-iterations, infinite) normal both;
+/* Fade animation */
+.tc-fade {
+  animation: tc-fade var(--tc-duration, 1.5s) var(--tc-easing, ease-in-out) var(--tc-delay, 0s) var(--tc-iterations, infinite) normal both;
   animation-play-state: var(--tc-play-state, running);
 }
 

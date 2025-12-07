@@ -3,6 +3,7 @@
 	import { AnimationConfigSchema } from '$lib/styling/animations/types.js';
 	import { EffectConfigSchema } from '$lib/styling/effects/types.js';
 	import { BlendMode } from '$lib/styling/blend/types.js';
+	import { HolographicConfigSchema } from '$lib/styling/HolographicWrapper.svelte';
 
 	// Text preset options - predefined labels (moved from Badge)
 	export const TextPresetSchema = z.enum([
@@ -37,7 +38,8 @@
 		lineHeight: z.number().optional(),
 		animation: AnimationConfigSchema.optional(),
 		effect: EffectConfigSchema.optional(),
-		blendMode: BlendMode.optional()
+		blendMode: BlendMode.optional(),
+		holographic: HolographicConfigSchema.optional()
 	});
 
 	export type TextFieldProps = z.infer<typeof TextFieldPropsSchema>;
@@ -67,6 +69,7 @@
 		animation,
 		effect,
 		blendMode,
+		holographic,
 		container,
 		data
 	}: TextFieldProps & {
@@ -83,7 +86,10 @@
 	const totalInset = $derived(radiusInset + padding);
 
 	// Collect modifiers for unified wrapper
-	const modifiers: UniversalModifiers = $derived({ effect, animation, blendMode });
+	const modifiers: UniversalModifiers = $derived({ effect, animation, blendMode, holographic });
+
+	// When holographic is enabled, use 'inherit' so gradient from HolographicWrapper applies
+	const effectiveFill = $derived(holographic ? 'inherit' : color);
 </script>
 
 <ComponentWrapper {container} {modifiers}>
@@ -103,7 +109,7 @@
 		{textTransform}
 		horizontalAlign={alignment}
 		{verticalAlign}
-		fill={color}
+		fill={effectiveFill}
 		{opacity}
 	/>
 </ComponentWrapper>

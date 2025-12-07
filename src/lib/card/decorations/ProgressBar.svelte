@@ -3,6 +3,7 @@
 	import { AnimationConfigSchema } from '$lib/styling/animations/types.js';
 	import { EffectConfigSchema } from '$lib/styling/effects/types.js';
 	import { BlendMode } from '$lib/styling/blend/types.js';
+	import { HolographicConfigSchema } from '$lib/styling/HolographicWrapper.svelte';
 
 	export const ProgressBarStyleSchema = z.enum(['rounded', 'square', 'pointed']);
 	export type ProgressBarStyle = z.infer<typeof ProgressBarStyleSchema>;
@@ -30,16 +31,16 @@
 		opacity: z.number().min(0).max(1).default(1),
 		animation: AnimationConfigSchema.optional(),
 		effect: EffectConfigSchema.optional(),
-		blendMode: BlendMode.optional()
+		blendMode: BlendMode.optional(),
+		holographic: HolographicConfigSchema.optional()
 	});
 
 	export type ProgressBarProps = z.infer<typeof ProgressBarPropsSchema>;
 </script>
 
 <script lang="ts">
-	import type { ContainerContext, CardData } from '$lib/types';
-	import { AnimationWrapper } from '$lib/styling/animations/index.js';
-	import { EffectWrapper } from '$lib/styling/effects/index.js';
+	import type { ContainerContext, CardData, UniversalModifiers } from '$lib/types';
+	import ComponentWrapper from '$lib/styling/ComponentWrapper.svelte';
 
 	let {
 		value = 0,
@@ -62,6 +63,7 @@
 		animation,
 		effect,
 		blendMode,
+		holographic,
 		container,
 		data
 	}: ProgressBarProps & {
@@ -73,6 +75,9 @@
 	const height = $derived(container.height);
 	const cx = $derived(width / 2);
 	const cy = $derived(height / 2);
+
+	// Collect modifiers for unified wrapper
+	const modifiers: UniversalModifiers = $derived({ effect, animation, blendMode, holographic });
 
 	// Resolve value from dataField
 	const resolvedValue = $derived.by(() => {
@@ -126,87 +131,88 @@
 	const segmentCount = $derived(segments > 0 ? segments : 0);
 	const segmentWidth = $derived(segmentCount > 0 ? (barWidth - (segmentCount - 1) * segmentGap) / segmentCount : 0);
 	const filledSegments = $derived(segmentCount > 0 ? Math.ceil((percentage / 100) * segmentCount) : 0);
+
+	// When holographic, use 'inherit' for fill color
+	const effectiveFillColor = $derived(holographic ? 'inherit' : color);
 </script>
 
-<EffectWrapper {effect} {blendMode} transformOrigin="{cx}px {cy}px">
-	<AnimationWrapper {animation} transformOrigin="{cx}px {cy}px">
-		<g opacity={opacity}>
-			<!-- Background bar -->
-			{#if segments === 0}
+<ComponentWrapper {container} {modifiers}>
+	<g opacity={opacity}>
+		<!-- Background bar -->
+		{#if segments === 0}
+			<rect
+				x={barX}
+				y={barY}
+				width={barWidth}
+				height={barHeight}
+				rx={borderRadius}
+				fill={backgroundColor}
+				stroke={borderColor}
+				stroke-width={borderWidth}
+			/>
+		{:else}
+			<!-- Segmented background -->
+			{#each Array(segmentCount) as _, i (i)}
+				<rect
+					x={barX + i * (segmentWidth + segmentGap)}
+					y={barY}
+					width={segmentWidth}
+					height={barHeight}
+					rx={style === 'rounded' ? 2 : 0}
+					fill={backgroundColor}
+				/>
+			{/each}
+		{/if}
+
+		<!-- Filled bar -->
+		{#if segments === 0}
+			{#if filledWidth > 0}
 				<rect
 					x={barX}
 					y={barY}
-					width={barWidth}
+					width={filledWidth}
 					height={barHeight}
 					rx={borderRadius}
-					fill={backgroundColor}
-					stroke={borderColor}
-					stroke-width={borderWidth}
+					fill={effectiveFillColor}
 				/>
-			{:else}
-				<!-- Segmented background -->
-				{#each Array(segmentCount) as _, i (i)}
-					<rect
-						x={barX + i * (segmentWidth + segmentGap)}
-						y={barY}
-						width={segmentWidth}
-						height={barHeight}
-						rx={style === 'rounded' ? 2 : 0}
-						fill={backgroundColor}
-					/>
-				{/each}
 			{/if}
+		{:else}
+			<!-- Segmented fill -->
+			{#each Array(filledSegments) as _, i (i)}
+				{@const isLastFilled = i === filledSegments - 1}
+				{@const segmentFillWidth = isLastFilled
+					? segmentWidth * ((percentage % (100 / segmentCount)) / (100 / segmentCount) || 1)
+					: segmentWidth}
+				<rect
+					x={barX + i * (segmentWidth + segmentGap)}
+					y={barY}
+					width={segmentFillWidth}
+					height={barHeight}
+					rx={style === 'rounded' ? 2 : 0}
+					fill={effectiveFillColor}
+				/>
+			{/each}
+		{/if}
 
-			<!-- Filled bar -->
-			{#if segments === 0}
-				{#if filledWidth > 0}
-					<rect
-						x={barX}
-						y={barY}
-						width={filledWidth}
-						height={barHeight}
-						rx={borderRadius}
-						fill={color}
-					/>
-				{/if}
-			{:else}
-				<!-- Segmented fill -->
-				{#each Array(filledSegments) as _, i (i)}
-					{@const isLastFilled = i === filledSegments - 1}
-					{@const segmentFillWidth = isLastFilled
-						? segmentWidth * ((percentage % (100 / segmentCount)) / (100 / segmentCount) || 1)
-						: segmentWidth}
-					<rect
-						x={barX + i * (segmentWidth + segmentGap)}
-						y={barY}
-						width={segmentFillWidth}
-						height={barHeight}
-						rx={style === 'rounded' ? 2 : 0}
-						fill={color}
-					/>
-				{/each}
-			{/if}
-
-			<!-- Label -->
-			{#if showLabel && labelPosition !== 'none'}
-				<text
-					x={labelPosition === 'left' ? 0 :
-					   labelPosition === 'right' ? width :
-					   labelPosition === 'center' ? cx :
-					   barX + filledWidth / 2}
-					y={cy}
-					text-anchor={labelPosition === 'left' ? 'start' :
-					            labelPosition === 'right' ? 'end' :
-					            'middle'}
-					dominant-baseline="central"
-					font-family={labelFontFamily}
-					font-size={labelFontSize}
-					font-weight="600"
-					fill={labelPosition === 'inside' && percentage > 10 ? '#ffffff' : labelColor}
-				>
-					{labelText}
-				</text>
-			{/if}
-		</g>
-	</AnimationWrapper>
-</EffectWrapper>
+		<!-- Label -->
+		{#if showLabel && labelPosition !== 'none'}
+			<text
+				x={labelPosition === 'left' ? 0 :
+				   labelPosition === 'right' ? width :
+				   labelPosition === 'center' ? cx :
+				   barX + filledWidth / 2}
+				y={cy}
+				text-anchor={labelPosition === 'left' ? 'start' :
+				            labelPosition === 'right' ? 'end' :
+				            'middle'}
+				dominant-baseline="central"
+				font-family={labelFontFamily}
+				font-size={labelFontSize}
+				font-weight="600"
+				fill={labelPosition === 'inside' && percentage > 10 ? '#ffffff' : labelColor}
+			>
+				{labelText}
+			</text>
+		{/if}
+	</g>
+</ComponentWrapper>

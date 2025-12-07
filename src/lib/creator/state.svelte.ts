@@ -202,7 +202,7 @@ const componentBuildConfig: Partial<Record<ComponentItem['type'], ComponentBuild
 	},
 	divider: {
 		renderType: 'Divider',
-		props: ['style', 'color', 'secondaryColor', 'thickness', 'fade', 'ornament', 'ornamentSize', 'ornamentColor', 'dashLength', 'gapLength', 'opacity']
+		props: ['style', 'color', 'secondaryColor', 'thickness', 'fade', 'ornamentPreset', 'customOrnament', 'customOrnamentName', 'ornamentSize', 'ornamentColor', 'dashLength', 'gapLength', 'opacity']
 	},
 	progressbar: {
 		renderType: 'ProgressBar',
@@ -604,8 +604,10 @@ export function createDividerComponent(): DividerComponent {
 		secondaryColor: undefined,
 		thickness: 2,
 		fade: 'both',
-		ornament: 'none',
-		ornamentSize: 12,
+		ornamentPreset: 'none',
+		customOrnament: undefined,
+		customOrnamentName: undefined,
+		ornamentSize: 16,
 		ornamentColor: undefined,
 		dashLength: 8,
 		gapLength: 4,

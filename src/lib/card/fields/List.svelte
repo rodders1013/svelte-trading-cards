@@ -3,6 +3,7 @@
 	import { AnimationConfigSchema } from '$lib/styling/animations/types.js';
 	import { EffectConfigSchema } from '$lib/styling/effects/types.js';
 	import { BlendMode } from '$lib/styling/blend/types.js';
+	import { HolographicConfigSchema } from '$lib/styling/HolographicWrapper.svelte';
 
 	export const ListStyleSchema = z.enum(['bullet', 'numbered', 'dash', 'arrow', 'none']);
 	export type ListStyle = z.infer<typeof ListStyleSchema>;
@@ -42,16 +43,16 @@
 		opacity: z.number().min(0).max(1).default(1),
 		animation: AnimationConfigSchema.optional(),
 		effect: EffectConfigSchema.optional(),
-		blendMode: BlendMode.optional()
+		blendMode: BlendMode.optional(),
+		holographic: HolographicConfigSchema.optional()
 	});
 
 	export type ListProps = z.infer<typeof ListPropsSchema>;
 </script>
 
 <script lang="ts">
-	import type { ContainerContext, CardData } from '$lib/types';
-	import { AnimationWrapper } from '$lib/styling/animations/index.js';
-	import { EffectWrapper } from '$lib/styling/effects/index.js';
+	import type { ContainerContext, CardData, UniversalModifiers } from '$lib/types';
+	import ComponentWrapper from '$lib/styling/ComponentWrapper.svelte';
 	import FitText from '$lib/utils/FitText.svelte';
 
 	let {
@@ -77,6 +78,7 @@
 		animation,
 		effect,
 		blendMode,
+		holographic,
 		container,
 		data
 	}: ListProps & {
@@ -88,7 +90,9 @@
 	const width = $derived(container.width);
 	const height = $derived(container.height);
 	const cx = $derived(width / 2);
-	const cy = $derived(height / 2);
+
+	// Collect modifiers for unified wrapper
+	const modifiers: UniversalModifiers = $derived({ effect, animation, blendMode, holographic });
 
 	// Resolve items from data
 	const resolvedItems = $derived.by(() => {
@@ -189,6 +193,11 @@
 	const effectiveBulletColor = $derived(bulletColor ?? color);
 	const effectiveOverflowColor = $derived(overflowColor ?? color);
 
+	// When holographic, use 'inherit' for fill colors
+	const effectiveFill = $derived(holographic ? 'inherit' : color);
+	const effectiveBulletFill = $derived(holographic ? 'inherit' : effectiveBulletColor);
+	const effectiveOverflowFill = $derived(holographic ? 'inherit' : effectiveOverflowColor);
+
 	// Get bullet/marker for style
 	function getMarker(index: number): string {
 		switch (style) {
@@ -204,75 +213,77 @@
 	}
 </script>
 
-<EffectWrapper {effect} {blendMode} transformOrigin="{cx}px {cy}px">
-	<AnimationWrapper {animation} transformOrigin="{cx}px {cy}px">
-		<g {opacity}>
-			{#each displayData.items as item, index (index)}
-				{@const y = startY + index * itemHeight}
-				{@const itemTextHeight = fontSize * lineHeight}
+{#snippet listContent()}
+	<g {opacity}>
+		{#each displayData.items as item, index (index)}
+			{@const y = startY + index * itemHeight}
+			{@const itemTextHeight = fontSize * lineHeight}
 
-				<!-- Bullet (circle) -->
-				{#if style === 'bullet'}
-					<circle
-						cx={bulletX}
-						cy={y + fontSize * 0.5}
-						r={bulletRadius}
-						fill={effectiveBulletColor}
-					/>
-				{:else if style !== 'none'}
-					<!-- Numbered, Dash, Arrow markers -->
-					<text
-						x={bulletX}
-						{y}
-						font-family={fontFamily}
-						font-size={fontSize}
-						fill={effectiveBulletColor}
-						dominant-baseline="hanging"
-						text-anchor={alignment === 'right' ? 'end' : 'start'}
-					>
-						{getMarker(index)}
-					</text>
-				{/if}
-
-				<!-- Item text - auto-fits to available space -->
-				<FitText
-					text={item}
-					x={style === 'none' ? 0 : textX}
-					{y}
-					width={textAreaWidth}
-					height={itemTextHeight}
-					minSize={6}
-					maxSize={fontSize}
-					{fontFamily}
-					{fontWeight}
-					horizontalAlign={style === 'none' ? alignment : 'left'}
-					verticalAlign="top"
-					fill={color}
-					singleLine={true}
+			<!-- Bullet (circle) -->
+			{#if style === 'bullet'}
+				<circle
+					cx={bulletX}
+					cy={y + fontSize * 0.5}
+					r={bulletRadius}
+					fill={effectiveBulletFill}
 				/>
-			{/each}
-
-			<!-- Overflow indicator -->
-			{#if displayData.overflow > 0}
-				{@const y = startY + displayData.items.length * itemHeight}
-				{@const overflowTextHeight = fontSize * lineHeight}
-				<FitText
-					text={overflowText.replace('{n}', String(displayData.overflow))}
-					x={style === 'none' ? 0 : textX}
+			{:else if style !== 'none'}
+				<!-- Numbered, Dash, Arrow markers -->
+				<text
+					x={bulletX}
 					{y}
-					width={textAreaWidth}
-					height={overflowTextHeight}
-					minSize={6}
-					maxSize={fontSize * 0.9}
-					{fontFamily}
-					fontWeight="normal"
-					horizontalAlign={style === 'none' ? alignment : 'left'}
-					verticalAlign="top"
-					fill={effectiveOverflowColor}
-					opacity={0.7}
-					singleLine={true}
-				/>
+					font-family={fontFamily}
+					font-size={fontSize}
+					fill={effectiveBulletFill}
+					dominant-baseline="hanging"
+					text-anchor={alignment === 'right' ? 'end' : 'start'}
+				>
+					{getMarker(index)}
+				</text>
 			{/if}
-		</g>
-	</AnimationWrapper>
-</EffectWrapper>
+
+			<!-- Item text - auto-fits to available space -->
+			<FitText
+				text={item}
+				x={style === 'none' ? 0 : textX}
+				{y}
+				width={textAreaWidth}
+				height={itemTextHeight}
+				minSize={6}
+				maxSize={fontSize}
+				{fontFamily}
+				{fontWeight}
+				horizontalAlign={style === 'none' ? alignment : 'left'}
+				verticalAlign="top"
+				fill={effectiveFill}
+				singleLine={true}
+			/>
+		{/each}
+
+		<!-- Overflow indicator -->
+		{#if displayData.overflow > 0}
+			{@const y = startY + displayData.items.length * itemHeight}
+			{@const overflowTextHeight = fontSize * lineHeight}
+			<FitText
+				text={overflowText.replace('{n}', String(displayData.overflow))}
+				x={style === 'none' ? 0 : textX}
+				{y}
+				width={textAreaWidth}
+				height={overflowTextHeight}
+				minSize={6}
+				maxSize={fontSize * 0.9}
+				{fontFamily}
+				fontWeight="normal"
+				horizontalAlign={style === 'none' ? alignment : 'left'}
+				verticalAlign="top"
+				fill={effectiveOverflowFill}
+				opacity={0.7}
+				singleLine={true}
+			/>
+		{/if}
+	</g>
+{/snippet}
+
+<ComponentWrapper {container} {modifiers}>
+	{@render listContent()}
+</ComponentWrapper>

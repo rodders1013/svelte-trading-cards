@@ -1,5 +1,4 @@
 import { z } from 'zod';
-import { AnimationSpeed } from '$lib/styling/animations/types.js';
 
 /**
  * Effects System Types
@@ -28,7 +27,7 @@ export const GlowEffectSchema = z.object({
 	blur: z.number().min(1).max(50).default(10),
 	intensity: z.number().min(0).max(1).default(0.7),
 	animated: z.boolean().default(false),
-	speed: AnimationSpeed.default('normal')
+	animationDuration: z.number().min(0.1).max(10).default(1.5)
 });
 export type GlowEffect = z.infer<typeof GlowEffectSchema>;
 
@@ -39,7 +38,7 @@ export const StrokeGlowEffectSchema = z.object({
 	blur: z.number().min(1).max(50).default(10),
 	intensity: z.number().min(0).max(1).default(0.5),
 	animated: z.boolean().default(false),
-	speed: AnimationSpeed.default('normal')
+	animationDuration: z.number().min(0.1).max(10).default(1.5)
 });
 export type StrokeGlowEffect = z.infer<typeof StrokeGlowEffectSchema>;
 
@@ -51,7 +50,7 @@ export const ShadowEffectSchema = z.object({
 	offsetX: z.number().min(-50).max(50).default(4),
 	offsetY: z.number().min(-50).max(50).default(4),
 	animated: z.boolean().default(false),
-	speed: AnimationSpeed.default('normal')
+	animationDuration: z.number().min(0.1).max(10).default(1.5)
 });
 export type ShadowEffect = z.infer<typeof ShadowEffectSchema>;
 
@@ -62,7 +61,7 @@ export const NeonEffectSchema = z.object({
 	intensity: z.number().min(0).max(1).default(0.9),
 	spread: z.number().min(1).max(3).default(2), // Number of glow layers
 	animated: z.boolean().default(false),
-	speed: AnimationSpeed.default('normal')
+	animationDuration: z.number().min(0.1).max(10).default(1.5)
 });
 export type NeonEffect = z.infer<typeof NeonEffectSchema>;
 
@@ -73,7 +72,7 @@ export const InnerGlowEffectSchema = z.object({
 	blur: z.number().min(1).max(30).default(8),
 	intensity: z.number().min(0).max(1).default(0.5),
 	animated: z.boolean().default(false),
-	speed: AnimationSpeed.default('normal')
+	animationDuration: z.number().min(0.1).max(10).default(1.5)
 });
 export type InnerGlowEffect = z.infer<typeof InnerGlowEffectSchema>;
 
@@ -82,7 +81,7 @@ export const LiftEffectSchema = z.object({
 	type: z.literal('lift'),
 	elevation: z.enum(['sm', 'md', 'lg', 'xl']).default('md'),
 	animated: z.boolean().default(false),
-	speed: AnimationSpeed.default('normal')
+	animationDuration: z.number().min(0.1).max(10).default(1.5)
 });
 export type LiftEffect = z.infer<typeof LiftEffectSchema>;
 
@@ -92,7 +91,7 @@ export const OutlineEffectSchema = z.object({
 	color: z.string().default('#ffffff'),
 	width: z.number().min(1).max(10).default(2),
 	animated: z.boolean().default(false),
-	speed: AnimationSpeed.default('normal')
+	animationDuration: z.number().min(0.1).max(10).default(1.5)
 });
 export type OutlineEffect = z.infer<typeof OutlineEffectSchema>;
 

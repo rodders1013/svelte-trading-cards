@@ -8,7 +8,10 @@
 		FormGrid
 	} from '../form';
 	import ModifiersPanel from './ModifiersPanel.svelte';
+	import { IconPicker } from '$lib/card/icons';
 	import type { DividerComponent } from '../../types';
+	import type { IconData } from '$lib/card/icons';
+	import { ORNAMENT_PRESET_LABELS, type DividerOrnamentPreset } from '$lib/card/decorations';
 
 	let {
 		component,
@@ -28,7 +31,22 @@
 
 	const styles = ['solid', 'dashed', 'dotted', 'gradient', 'double'];
 	const fades = ['none', 'left', 'right', 'both'];
-	const ornaments = ['none', 'diamond', 'star', 'circle', 'square'];
+
+	// Ornament options from the preset labels
+	const ornamentOptions = Object.entries(ORNAMENT_PRESET_LABELS).map(([value, label]) => ({
+		value,
+		label
+	}));
+
+	function handleOrnamentChange(value: string) {
+		const preset = value as DividerOrnamentPreset;
+		onUpdate('ornamentPreset', preset);
+	}
+
+	function handleIconSelect(icon: { iconData: IconData; iconName: string }) {
+		onUpdate('customOrnament', icon.iconData);
+		onUpdate('customOrnamentName', icon.iconName);
+	}
 </script>
 
 <ComponentPanel
@@ -79,24 +97,37 @@
 		suffix="px"
 	/>
 
-	<FormGrid>
-		<FormSelect
-			label="Ornament"
-			value={component.ornament}
-			onchange={(v) => onUpdate('ornament', v)}
-			options={ornaments}
+	<FormSelect
+		label="Ornament"
+		value={component.ornamentPreset}
+		onchange={handleOrnamentChange}
+		options={ornamentOptions}
+	/>
+
+	{#if component.ornamentPreset === 'custom'}
+		<IconPicker
+			value={component.customOrnament ? { iconData: component.customOrnament, iconName: component.customOrnamentName ?? '' } : undefined}
+			onSelect={handleIconSelect}
 		/>
-		{#if component.ornament !== 'none'}
+	{/if}
+
+	{#if component.ornamentPreset !== 'none'}
+		<FormGrid>
 			<FormInput
 				label="Ornament Size"
 				type="number"
 				value={component.ornamentSize}
 				onchange={(v) => onUpdate('ornamentSize', Number(v))}
 				min={6}
-				max={30}
+				max={40}
 			/>
-		{/if}
-	</FormGrid>
+			<FormColorPicker
+				label="Ornament Color"
+				value={component.ornamentColor ?? component.color}
+				onchange={(v) => onUpdate('ornamentColor', v)}
+			/>
+		</FormGrid>
+	{/if}
 
 	<FormSlider
 		label="Opacity"

@@ -13,13 +13,13 @@ export type { StatPanelProps, StatRow, ListProps, ListStyle } from './card/field
 export { Badge, Divider, ProgressBar, Ribbon, Frame, IconRating } from './card/decorations/index.js';
 export type {
 	BadgeProps,
-	DividerProps, DividerStyle, DividerFade, DividerOrnament,
+	DividerProps, DividerStyle, DividerFade, DividerOrnamentPreset,
 	ProgressBarProps, ProgressBarStyle, LabelPosition,
 	RibbonProps, RibbonPosition, RibbonStyle,
 	FrameProps, FrameStyle, FrameSize,
 	IconRatingProps, RatingIconPreset, ValueFormat
 } from './card/decorations/index.js';
-export { RATING_ICON_PRESETS, RATING_ICON_LABELS } from './card/decorations/index.js';
+export { RATING_ICON_PRESETS, RATING_ICON_LABELS, ORNAMENT_PRESET_ICONS, ORNAMENT_PRESET_LABELS } from './card/decorations/index.js';
 
 // Shapes
 export { ShapePicker, BUNDLED_SHAPES, SHAPE_CATEGORIES, BUILT_IN_SHAPES } from './styling/shapes/index.js';
@@ -30,14 +30,15 @@ export {
 	AnimationWrapper,
 	getAnimationOptions,
 	getAnimationCSS,
-	ANIMATION_PRESETS,
-	SPEED_DURATIONS
+	ANIMATION_PRESETS
 } from './styling/animations/index.js';
 export type {
 	AnimationType,
-	AnimationSpeed,
 	AnimationDirection,
 	AnimationEasing,
+	AnimationOrigin,
+	PulsePattern,
+	FloatStyle,
 	AnimationConfig,
 	AnimationPreset
 } from './styling/animations/index.js';

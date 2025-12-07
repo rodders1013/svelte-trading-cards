@@ -3,6 +3,7 @@
 	import { AnimationConfigSchema } from '$lib/styling/animations/types.js';
 	import { EffectConfigSchema } from '$lib/styling/effects/types.js';
 	import { BlendMode } from '$lib/styling/blend/types.js';
+	import { HolographicConfigSchema } from '$lib/styling/HolographicWrapper.svelte';
 	import { IconDataSchema } from '$lib/card/icons/Icon.svelte';
 
 	// Preset icon options
@@ -69,7 +70,8 @@
 		opacity: z.number().min(0).max(1).default(1),
 		animation: AnimationConfigSchema.optional(),
 		effect: EffectConfigSchema.optional(),
-		blendMode: BlendMode.optional()
+		blendMode: BlendMode.optional(),
+		holographic: HolographicConfigSchema.optional()
 	});
 
 	export type IconRatingProps = z.infer<typeof IconRatingPropsSchema>;
@@ -149,9 +151,8 @@
 </script>
 
 <script lang="ts">
-	import type { ContainerContext, CardData } from '$lib/types';
-	import { AnimationWrapper } from '$lib/styling/animations/index.js';
-	import { EffectWrapper } from '$lib/styling/effects/index.js';
+	import type { ContainerContext, CardData, UniversalModifiers } from '$lib/types';
+	import ComponentWrapper from '$lib/styling/ComponentWrapper.svelte';
 	import { sanitizeSvgBody } from '$lib/card/icons/Icon.svelte';
 
 	let {
@@ -181,6 +182,7 @@
 		animation,
 		effect,
 		blendMode,
+		holographic,
 		container,
 		data
 	}: IconRatingProps & {
@@ -189,6 +191,9 @@
 	} = $props();
 
 	const uid = Math.random().toString(36).substring(2, 9);
+
+	// Collect modifiers for unified wrapper
+	const modifiers: UniversalModifiers = $derived({ effect, animation, blendMode, holographic });
 
 	// Resolve value from data or static
 	const resolvedValue = $derived.by(() => {
@@ -284,141 +289,156 @@
 
 	// Sanitize icon body
 	const sanitizedBody = $derived(iconData?.body ? sanitizeSvgBody(iconData.body) : '');
+
+	// Strip fill attributes when holographic is enabled
+	const strippedBody = $derived(
+		sanitizedBody
+			.replace(/fill="[^"]*"/gi, '')
+			.replace(/fill='[^']*'/gi, '')
+	);
+
+	// Use stripped body when holographic is enabled
+	const effectiveBody = $derived(holographic ? strippedBody : sanitizedBody);
+
+	// Effective fill color - use 'inherit' when holographic
+	const effectiveFilledColor = $derived(holographic ? 'inherit' : filledColor);
 </script>
 
-<EffectWrapper {effect} {blendMode} transformOrigin="{centerX}px {centerY}px">
-	<AnimationWrapper {animation} transformOrigin="{centerX}px {centerY}px">
-		<g opacity={opacity}>
-			<!-- Value display (left) -->
-			{#if showValue && valuePosition === 'left' && formattedValue}
-				<text
-					x={startX - valueGap - valueTextWidth / 2}
-					y={centerY}
-					text-anchor="middle"
-					dominant-baseline="central"
-					font-family={valueFontFamily}
-					font-size={valueFontSize}
-					font-weight="600"
-					fill={valueColor}
-				>
-					{formattedValue}
-				</text>
-			{/if}
+{#snippet iconRatingContent()}
+	<g opacity={opacity}>
+		<!-- Value display (left) -->
+		{#if showValue && valuePosition === 'left' && formattedValue}
+			<text
+				x={startX - valueGap - valueTextWidth / 2}
+				y={centerY}
+				text-anchor="middle"
+				dominant-baseline="central"
+				font-family={valueFontFamily}
+				font-size={valueFontSize}
+				font-weight="600"
+				fill={valueColor}
+			>
+				{formattedValue}
+			</text>
+		{/if}
 
-			<!-- Icons -->
-			{#if iconData}
-				{#each Array(max) as _, index}
-					{@const x = startX + index * (size + gap)}
-					{@const isFilled = index < iconStates.filled}
-					{@const isHalf =
-						!isFilled && index === iconStates.filled && iconStates.hasHalf}
-					{@const clipId = `half-clip-${uid}-${index}`}
+		<!-- Icons -->
+		{#if iconData}
+			{#each Array(max) as _, index}
+				{@const x = startX + index * (size + gap)}
+				{@const isFilled = index < iconStates.filled}
+				{@const isHalf =
+					!isFilled && index === iconStates.filled && iconStates.hasHalf}
+				{@const clipId = `half-clip-${uid}-${index}`}
 
-					<g transform="translate({x}, {startY})">
-						{#if isFilled}
-							<!-- Fully filled icon -->
-							<svg
-								width={size}
-								height={size}
-								viewBox="0 0 {iconData.width ?? 24} {iconData.height ?? 24}"
-								fill="none"
-							>
-								<g fill={filledColor} style="color: {filledColor}">
-									{@html sanitizedBody}
-								</g>
-							</svg>
-						{:else if isHalf}
-							<!-- Half-filled icon using clip-path -->
-							<defs>
-								<!-- Use objectBoundingBox so coordinates are 0-1 relative -->
-								<clipPath id={clipId} clipPathUnits="objectBoundingBox">
-									<rect x="0" y="0" width="0.5" height="1" />
-								</clipPath>
-							</defs>
-
-							<!-- Empty background (full icon) -->
-							<svg
-								width={size}
-								height={size}
-								viewBox="0 0 {iconData.width ?? 24} {iconData.height ?? 24}"
-								fill="none"
-							>
-								<g
-									fill={useEmptyOpacity ? filledColor : emptyColor}
-									opacity={useEmptyOpacity ? emptyOpacity : 1}
-									style="color: {useEmptyOpacity ? filledColor : emptyColor}"
-								>
-									{@html sanitizedBody}
-								</g>
-							</svg>
-
-							<!-- Filled half (clipped) - positioned on top -->
-							<svg
-								width={size}
-								height={size}
-								viewBox="0 0 {iconData.width ?? 24} {iconData.height ?? 24}"
-								fill="none"
-								style="position: absolute; top: 0; left: 0;"
-								clip-path="url(#{clipId})"
-							>
-								<g fill={filledColor} style="color: {filledColor}">
-									{@html sanitizedBody}
-								</g>
-							</svg>
-						{:else}
-							<!-- Empty icon -->
-							<svg
-								width={size}
-								height={size}
-								viewBox="0 0 {iconData.width ?? 24} {iconData.height ?? 24}"
-								fill="none"
-							>
-								<g
-									fill={useEmptyOpacity ? filledColor : emptyColor}
-									opacity={useEmptyOpacity ? emptyOpacity : 1}
-									style="color: {useEmptyOpacity ? filledColor : emptyColor}"
-								>
-									{@html sanitizedBody}
-								</g>
-							</svg>
-						{/if}
-					</g>
-				{/each}
-			{:else}
-				<!-- Placeholder when no icon selected -->
-				<g opacity={0.3}>
-					{#each Array(max) as _, index}
-						{@const x = startX + index * (size + gap)}
-						<rect
-							x={x}
-							y={startY}
+				<g transform="translate({x}, {startY})">
+					{#if isFilled}
+						<!-- Fully filled icon -->
+						<svg
 							width={size}
 							height={size}
+							viewBox="0 0 {iconData.width ?? 24} {iconData.height ?? 24}"
 							fill="none"
-							stroke="#888"
-							stroke-width="1"
-							stroke-dasharray="2 2"
-							rx="2"
-						/>
-					{/each}
-				</g>
-			{/if}
+						>
+							<g fill={effectiveFilledColor} style="color: {effectiveFilledColor}">
+								{@html effectiveBody}
+							</g>
+						</svg>
+					{:else if isHalf}
+						<!-- Half-filled icon using clip-path -->
+						<defs>
+							<!-- Use objectBoundingBox so coordinates are 0-1 relative -->
+							<clipPath id={clipId} clipPathUnits="objectBoundingBox">
+								<rect x="0" y="0" width="0.5" height="1" />
+							</clipPath>
+						</defs>
 
-			<!-- Value display (right) -->
-			{#if showValue && valuePosition === 'right' && formattedValue}
-				<text
-					x={startX + totalIconsWidth + valueGap}
-					y={centerY}
-					text-anchor="start"
-					dominant-baseline="central"
-					font-family={valueFontFamily}
-					font-size={valueFontSize}
-					font-weight="600"
-					fill={valueColor}
-				>
-					{formattedValue}
-				</text>
-			{/if}
-		</g>
-	</AnimationWrapper>
-</EffectWrapper>
+						<!-- Empty background (full icon) -->
+						<svg
+							width={size}
+							height={size}
+							viewBox="0 0 {iconData.width ?? 24} {iconData.height ?? 24}"
+							fill="none"
+						>
+							<g
+								fill={useEmptyOpacity ? filledColor : emptyColor}
+								opacity={useEmptyOpacity ? emptyOpacity : 1}
+								style="color: {useEmptyOpacity ? filledColor : emptyColor}"
+							>
+								{@html sanitizedBody}
+							</g>
+						</svg>
+
+						<!-- Filled half (clipped) - positioned on top -->
+						<svg
+							width={size}
+							height={size}
+							viewBox="0 0 {iconData.width ?? 24} {iconData.height ?? 24}"
+							fill="none"
+							style="position: absolute; top: 0; left: 0;"
+							clip-path="url(#{clipId})"
+						>
+							<g fill={effectiveFilledColor} style="color: {effectiveFilledColor}">
+								{@html effectiveBody}
+							</g>
+						</svg>
+					{:else}
+						<!-- Empty icon -->
+						<svg
+							width={size}
+							height={size}
+							viewBox="0 0 {iconData.width ?? 24} {iconData.height ?? 24}"
+							fill="none"
+						>
+							<g
+								fill={useEmptyOpacity ? filledColor : emptyColor}
+								opacity={useEmptyOpacity ? emptyOpacity : 1}
+								style="color: {useEmptyOpacity ? filledColor : emptyColor}"
+							>
+								{@html sanitizedBody}
+							</g>
+						</svg>
+					{/if}
+				</g>
+			{/each}
+		{:else}
+			<!-- Placeholder when no icon selected -->
+			<g opacity={0.3}>
+				{#each Array(max) as _, index}
+					{@const x = startX + index * (size + gap)}
+					<rect
+						x={x}
+						y={startY}
+						width={size}
+						height={size}
+						fill="none"
+						stroke="#888"
+						stroke-width="1"
+						stroke-dasharray="2 2"
+						rx="2"
+					/>
+				{/each}
+			</g>
+		{/if}
+
+		<!-- Value display (right) -->
+		{#if showValue && valuePosition === 'right' && formattedValue}
+			<text
+				x={startX + totalIconsWidth + valueGap}
+				y={centerY}
+				text-anchor="start"
+				dominant-baseline="central"
+				font-family={valueFontFamily}
+				font-size={valueFontSize}
+				font-weight="600"
+				fill={valueColor}
+			>
+				{formattedValue}
+			</text>
+		{/if}
+	</g>
+{/snippet}
+
+<ComponentWrapper {container} {modifiers}>
+	{@render iconRatingContent()}
+</ComponentWrapper>

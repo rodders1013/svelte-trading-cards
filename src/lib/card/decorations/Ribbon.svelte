@@ -3,6 +3,7 @@
 	import { AnimationConfigSchema } from '$lib/styling/animations/types.js';
 	import { EffectConfigSchema } from '$lib/styling/effects/types.js';
 	import { BlendMode } from '$lib/styling/blend/types.js';
+	import { HolographicConfigSchema } from '$lib/styling/HolographicWrapper.svelte';
 
 	export const RibbonPositionSchema = z.enum(['top-left', 'top-right', 'bottom-left', 'bottom-right', 'top', 'bottom']);
 	export type RibbonPosition = z.infer<typeof RibbonPositionSchema>;
@@ -44,16 +45,16 @@
 		opacity: z.number().min(0).max(1).default(1),
 		animation: AnimationConfigSchema.optional(),
 		effect: EffectConfigSchema.optional(),
-		blendMode: BlendMode.optional()
+		blendMode: BlendMode.optional(),
+		holographic: HolographicConfigSchema.optional()
 	});
 
 	export type RibbonProps = z.infer<typeof RibbonPropsSchema>;
 </script>
 
 <script lang="ts">
-	import type { ContainerContext, CardData } from '$lib/types';
-	import { AnimationWrapper } from '$lib/styling/animations/index.js';
-	import { EffectWrapper } from '$lib/styling/effects/index.js';
+	import type { ContainerContext, CardData, UniversalModifiers } from '$lib/types';
+	import ComponentWrapper from '$lib/styling/ComponentWrapper.svelte';
 	import FitText from '$lib/utils/FitText.svelte';
 
 	let {
@@ -73,6 +74,7 @@
 		animation,
 		effect,
 		blendMode,
+		holographic,
 		container,
 		data
 	}: RibbonProps & {
@@ -83,7 +85,9 @@
 	const width = $derived(container.width);
 	const height = $derived(container.height);
 	const cx = $derived(width / 2);
-	const cy = $derived(height / 2);
+
+	// Collect modifiers for unified wrapper
+	const modifiers: UniversalModifiers = $derived({ effect, animation, blendMode, holographic });
 
 	// Text from data field (trusted) or preset only - no free text
 	const resolvedText = $derived.by(() => {
@@ -230,36 +234,37 @@
 
 		return { left: leftShadow, right: rightShadow };
 	});
+
+	// When holographic, use 'inherit' for ribbon color
+	const effectiveRibbonFill = $derived(holographic ? 'inherit' : color);
 </script>
 
-<EffectWrapper {effect} {blendMode} transformOrigin="{cx}px {cy}px">
-	<AnimationWrapper {animation} transformOrigin="{cx}px {cy}px">
-		<g opacity={opacity} transform={transform}>
-			<!-- Shadow/fold for folded style -->
-			{#if shadowPath}
-				<path d={shadowPath.left} fill={shadowColor} />
-				<path d={shadowPath.right} fill={shadowColor} />
-			{/if}
+<ComponentWrapper {container} {modifiers}>
+	<g opacity={opacity} transform={transform}>
+		<!-- Shadow/fold for folded style -->
+		{#if shadowPath}
+			<path d={shadowPath.left} fill={shadowColor} />
+			<path d={shadowPath.right} fill={shadowColor} />
+		{/if}
 
-			<!-- Main ribbon -->
-			<path d={ribbonPath} fill={color} />
+		<!-- Main ribbon -->
+		<path d={ribbonPath} fill={effectiveRibbonFill} />
 
-			<!-- Text - auto-fits to available space -->
-			<FitText
-				text={resolvedText.toUpperCase()}
-				x={-textAreaWidth / 2}
-				y={style === 'bookmark' ? -rHeight * 0.5 - textAreaHeight * 0.1 : -textAreaHeight / 2}
-				width={textAreaWidth}
-				height={textAreaHeight}
-				minSize={6}
-				maxSize={fontSize}
-				{fontFamily}
-				{fontWeight}
-				horizontalAlign="center"
-				verticalAlign="center"
-				fill={textColor}
-				singleLine={true}
-			/>
-		</g>
-	</AnimationWrapper>
-</EffectWrapper>
+		<!-- Text - auto-fits to available space -->
+		<FitText
+			text={resolvedText.toUpperCase()}
+			x={-textAreaWidth / 2}
+			y={style === 'bookmark' ? -rHeight * 0.5 - textAreaHeight * 0.1 : -textAreaHeight / 2}
+			width={textAreaWidth}
+			height={textAreaHeight}
+			minSize={6}
+			maxSize={fontSize}
+			{fontFamily}
+			{fontWeight}
+			horizontalAlign="center"
+			verticalAlign="center"
+			fill={textColor}
+			singleLine={true}
+		/>
+	</g>
+</ComponentWrapper>

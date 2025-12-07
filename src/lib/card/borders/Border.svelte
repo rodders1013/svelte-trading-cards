@@ -22,10 +22,8 @@
 </script>
 
 <script lang="ts">
-	import type { ContainerContext, CardData } from '$lib/types';
-	import { AnimationWrapper } from '$lib/styling/animations/index.js';
-	import { EffectWrapper } from '$lib/styling/effects/index.js';
-	import HolographicWrapper from '$lib/styling/HolographicWrapper.svelte';
+	import type { ContainerContext, CardData, UniversalModifiers } from '$lib/types';
+	import ComponentWrapper from '$lib/styling/ComponentWrapper.svelte';
 	import { getShapeRenderData } from '$lib/styling/shapes';
 
 	let {
@@ -71,12 +69,11 @@
 		shapeRender ? width * (shapeRender.width / container.width) : width
 	);
 
-	// Calculate center point for animation transform-origin
-	const centerX = $derived(container.width / 2);
-	const centerY = $derived(container.height / 2);
+	// Collect modifiers for unified wrapper
+	const modifiers: UniversalModifiers = $derived({ effect, animation, blendMode, holographic });
 
-	// Check if holographic is enabled
-	const hasHolographic = $derived(!!holographic);
+	// When holographic, use 'inherit' for stroke
+	const effectiveStroke = $derived(holographic ? 'inherit' : color);
 </script>
 
 {#snippet rectBorder(strokeColor: string, strokeOpacity: number, inset: number = 0)}
@@ -111,39 +108,20 @@
 	{/if}
 {/snippet}
 
-{#snippet borderContent()}
+<ComponentWrapper {container} {modifiers}>
 	{#if isSimpleRect}
 		<!-- Rect-based border -->
 		{#if layerCount > 1}
 			{#each Array(layerCount) as _, i (i)}
-				{@const layerColor = effectiveLayerColors[i] ?? color}
+				{@const layerColor = holographic ? 'inherit' : (effectiveLayerColors[i] ?? color)}
 				{@const layerOpacity = opacity * (1 - i * 0.15)}
 				{@render rectBorder(layerColor, layerOpacity, i * layerSpacing)}
 			{/each}
 		{:else}
-			{@render rectBorder(color, opacity)}
+			{@render rectBorder(effectiveStroke, opacity)}
 		{/if}
 	{:else if shapeRender}
 		<!-- Shape-based border -->
-		{@render shapeBorder(color, opacity)}
+		{@render shapeBorder(effectiveStroke, opacity)}
 	{/if}
-{/snippet}
-
-<EffectWrapper {effect} {blendMode} transformOrigin="{centerX}px {centerY}px">
-	<AnimationWrapper {animation} transformOrigin="{centerX}px {centerY}px">
-		{#if hasHolographic && holographic}
-			<HolographicWrapper
-				color={holographic.color ?? color}
-				secondaryColor={holographic.secondaryColor}
-				tertiaryColor={holographic.tertiaryColor}
-				speed={holographic.speed}
-				angle={holographic.angle}
-				apply="stroke"
-			>
-				{@render borderContent()}
-			</HolographicWrapper>
-		{:else}
-			{@render borderContent()}
-		{/if}
-	</AnimationWrapper>
-</EffectWrapper>
+</ComponentWrapper>

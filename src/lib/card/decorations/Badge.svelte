@@ -3,6 +3,7 @@
 	import { AnimationConfigSchema } from '$lib/styling/animations/types.js';
 	import { EffectConfigSchema } from '$lib/styling/effects/types.js';
 	import { BlendMode } from '$lib/styling/blend/types.js';
+	import { HolographicConfigSchema } from '$lib/styling/HolographicWrapper.svelte';
 	import { IconDataSchema } from '$lib/card/icons/Icon.svelte';
 	import { BuiltInShapeSchema, type ShapeSource } from '$lib/styling/shapes/types.js';
 
@@ -28,7 +29,8 @@
 		opacity: z.number().min(0).max(1).default(1),
 		animation: AnimationConfigSchema.optional(),
 		effect: EffectConfigSchema.optional(),
-		blendMode: BlendMode.optional()
+		blendMode: BlendMode.optional(),
+		holographic: HolographicConfigSchema.optional()
 	});
 
 	export type BadgeProps = z.infer<typeof BadgePropsSchema>;
@@ -51,6 +53,7 @@
 		animation,
 		effect,
 		blendMode,
+		holographic,
 		container,
 		data
 	}: BadgeProps & {
@@ -78,7 +81,10 @@
 	const sanitizedIconBody = $derived(icon?.body ? sanitizeSvgBody(icon.body) : '');
 
 	// Collect modifiers for unified wrapper
-	const modifiers: UniversalModifiers = $derived({ effect, animation, blendMode });
+	const modifiers: UniversalModifiers = $derived({ effect, animation, blendMode, holographic });
+
+	// When holographic is enabled, use 'inherit' so gradient from HolographicWrapper applies
+	const effectiveBackgroundFill = $derived(holographic ? 'inherit' : backgroundColor);
 </script>
 
 <ComponentWrapper {container} {modifiers}>
@@ -99,7 +105,7 @@
 				y="0"
 				width={width}
 				height={height}
-				fill={backgroundColor}
+				fill={effectiveBackgroundFill}
 				mask="url(#{maskId})"
 			/>
 

@@ -173,6 +173,37 @@
 	});
 </script>
 
+{#snippet imageContent()}
+	<g
+		clip-path={!useMask ? `url(#${clipId})` : undefined}
+		mask={useMask ? `url(#${maskId})` : undefined}
+	>
+		{#if imgData.transform}
+			<g transform={imgData.transform}>
+				<image
+					href={resolvedImageUrl}
+					x={imgData.x}
+					y={imgData.y}
+					width={imgData.w}
+					height={imgData.h}
+					{preserveAspectRatio}
+					{opacity}
+				/>
+			</g>
+		{:else}
+			<image
+				href={resolvedImageUrl}
+				x={imgData.x}
+				y={imgData.y}
+				width={imgData.w}
+				height={imgData.h}
+				{preserveAspectRatio}
+				{opacity}
+			/>
+		{/if}
+	</g>
+{/snippet}
+
 {#if resolvedImageUrl}
 	<defs>
 		<!-- Clip path: rounded rect or simple rect for container bounds -->
@@ -202,65 +233,12 @@
 			<FilterWrapper {filter}>
 				{#if holographic}
 					<HolographicWrapper {...holographic}>
-						<g
-							clip-path={!useMask ? `url(#${clipId})` : undefined}
-							mask={useMask ? `url(#${maskId})` : undefined}
-						>
-							{#if imgData.transform}
-								<g transform={imgData.transform}>
-									<image
-										href={resolvedImageUrl}
-										x={imgData.x}
-										y={imgData.y}
-										width={imgData.w}
-										height={imgData.h}
-										{preserveAspectRatio}
-										{opacity}
-									/>
-								</g>
-							{:else}
-								<image
-									href={resolvedImageUrl}
-									x={imgData.x}
-									y={imgData.y}
-									width={imgData.w}
-									height={imgData.h}
-									{preserveAspectRatio}
-									{opacity}
-								/>
-							{/if}
-						</g>
+						{@render imageContent()}
 					</HolographicWrapper>
 				{:else}
-					<g
-						clip-path={!useMask ? `url(#${clipId})` : undefined}
-						mask={useMask ? `url(#${maskId})` : undefined}
-					>
-						{#if imgData.transform}
-							<g transform={imgData.transform}>
-								<image
-									href={resolvedImageUrl}
-									x={imgData.x}
-									y={imgData.y}
-									width={imgData.w}
-									height={imgData.h}
-									{preserveAspectRatio}
-									{opacity}
-								/>
-							</g>
-						{:else}
-							<image
-								href={resolvedImageUrl}
-								x={imgData.x}
-								y={imgData.y}
-								width={imgData.w}
-								height={imgData.h}
-								{preserveAspectRatio}
-								{opacity}
-							/>
-						{/if}
-					</g>
+					{@render imageContent()}
 				{/if}
+
 				<!-- Border follows clip shape -->
 				{#if border}
 					<BorderRenderer

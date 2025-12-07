@@ -1,20 +1,23 @@
 // Animation Types
 export type {
 	AnimationType,
-	AnimationSpeed,
 	AnimationDirection,
 	AnimationEasing,
+	AnimationOrigin,
+	PulsePattern,
+	FloatStyle,
 	AnimationConfig,
 	AnimationPreset
 } from './types.js';
 
 export {
 	AnimationType as AnimationTypeSchema,
-	AnimationSpeed as AnimationSpeedSchema,
 	AnimationDirection as AnimationDirectionSchema,
 	AnimationEasing as AnimationEasingSchema,
-	AnimationConfigSchema,
-	SPEED_DURATIONS
+	AnimationOrigin as AnimationOriginSchema,
+	PulsePattern as PulsePatternSchema,
+	FloatStyle as FloatStyleSchema,
+	AnimationConfigSchema
 } from './types.js';
 
 // Presets and utilities
