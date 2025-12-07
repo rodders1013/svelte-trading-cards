@@ -1,5 +1,4 @@
 export { default as BackgroundPanel } from './BackgroundPanel.svelte';
-export { default as BadgePanel } from './BadgePanel.svelte';
 export { default as BorderPanel } from './BorderPanel.svelte';
 export { default as DividerPanel } from './DividerPanel.svelte';
 export { default as FramePanel } from './FramePanel.svelte';

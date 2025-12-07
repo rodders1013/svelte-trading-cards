@@ -3,7 +3,7 @@ import type { EffectConfig } from '$lib/styling/effects';
 import type { BlendMode } from '$lib/styling/blend';
 import type { IconData } from '$lib/card/icons';
 import type { StatRow, ListStyle, TextPreset } from '$lib/card/fields';
-import type { DividerStyle, DividerFade, DividerOrnamentPreset } from '$lib/card/decorations';
+import type { DividerStyle, DividerFade, DividerIconPreset } from '$lib/card/decorations';
 import type { ProgressBarStyle, LabelPosition } from '$lib/card/decorations';
 import type { RibbonPosition, RibbonStyle, RibbonTextPreset } from '$lib/card/decorations';
 import type { FrameStyle, FrameSize } from '$lib/card/decorations';
@@ -11,6 +11,7 @@ import type { RatingIconPreset, ValueFormat } from '$lib/card/decorations';
 import type { ShapeSource } from '$lib/styling/shapes';
 import type { FilterConfig, ImageTransformConfig } from '$lib/styling/filters';
 import type { BorderModifier, HolographicConfig } from '$lib/types/modifiers';
+import type { IconTransformConfig } from '$lib/styling/IconRenderer.svelte';
 
 // Component type definitions for the visual creator
 
@@ -118,32 +119,16 @@ export interface IconComponent {
 	iconData?: IconData;
 	iconName?: string;
 	color: string;
-	size?: number;
+	stroke?: string;
+	strokeWidth: number;
 	opacity: number;
+	// Legacy transform props (for backward compatibility)
 	rotation: number;
 	flipHorizontal: boolean;
 	flipVertical: boolean;
+	// New unified transform (takes precedence if set)
+	transform?: Partial<IconTransformConfig>;
 	shapeSource?: ShapeSource;
-	effect?: EffectConfig;
-	blendMode?: BlendMode;
-	animation?: AnimationConfig;
-	border?: BorderModifier;
-	holographic?: HolographicConfig;
-}
-
-export interface BadgeComponent {
-	type: 'badge';
-	id: string;
-	visible: boolean;
-	/** Shape for the badge - uses icon-based shape system */
-	shapeSource: ShapeSource;
-	backgroundColor: string;
-	borderColor?: string;
-	borderWidth: number;
-	/** Content icon (displayed inside the badge) */
-	icon?: IconData;
-	iconColor?: string;
-	opacity: number;
 	effect?: EffectConfig;
 	blendMode?: BlendMode;
 	animation?: AnimationConfig;
@@ -185,11 +170,14 @@ export interface DividerComponent {
 	secondaryColor?: string;
 	thickness: number;
 	fade: DividerFade;
-	ornamentPreset: DividerOrnamentPreset;
-	customOrnament?: IconData;
-	customOrnamentName?: string;
-	ornamentSize: number;
-	ornamentColor?: string;
+	iconPreset: DividerIconPreset;
+	customIcon?: IconData;
+	customIconName?: string;
+	iconSize: number;
+	iconColor?: string;
+	iconStroke?: string;
+	iconStrokeWidth: number;
+	iconTransform?: Partial<IconTransformConfig>;
 	dashLength: number;
 	gapLength: number;
 	opacity: number;
@@ -347,7 +335,6 @@ export type ComponentItem =
 	| BackgroundComponent
 	| BorderComponent
 	| IconComponent
-	| BadgeComponent
 	| StatPanelComponent
 	| DividerComponent
 	| ProgressBarComponent

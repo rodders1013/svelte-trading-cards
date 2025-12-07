@@ -4,6 +4,7 @@
 	import { EffectConfigSchema } from '$lib/styling/effects/types.js';
 	import { BlendMode } from '$lib/styling/blend/types.js';
 	import { HolographicConfigSchema } from '$lib/styling/HolographicWrapper.svelte';
+	import { IconTransformConfigSchema } from '$lib/styling/IconRenderer.svelte';
 
 	// IconifyIcon data format
 	export const IconDataSchema = z.object({
@@ -18,11 +19,15 @@
 		iconData: IconDataSchema.optional(),
 		iconName: z.string().optional(), // For reference/display only
 		color: z.string().default('currentColor'),
-		size: z.number().optional(), // If not set, fills container
+		stroke: z.string().optional(), // Stroke color
+		strokeWidth: z.number().default(1), // Stroke width
 		opacity: z.number().min(0).max(1).default(1),
-		rotation: z.number().default(0), // Degrees
+		// Legacy individual transform props (for backward compatibility)
+		rotation: z.number().default(0),
 		flipHorizontal: z.boolean().default(false),
 		flipVertical: z.boolean().default(false),
+		// New unified transform (takes precedence if set)
+		transform: IconTransformConfigSchema.optional(),
 		animation: AnimationConfigSchema.optional(),
 		effect: EffectConfigSchema.optional(),
 		blendMode: BlendMode.optional(),
@@ -35,6 +40,7 @@
 	/**
 	 * Sanitizes SVG body content to prevent XSS attacks.
 	 * Removes script tags, event handlers, and dangerous elements/attributes.
+	 * @deprecated Use sanitizeSvgBody from IconRenderer instead
 	 */
 	export function sanitizeSvgBody(body: string): string {
 		return body
@@ -62,16 +68,19 @@
 <script lang="ts">
 	import type { ContainerContext, CardData, UniversalModifiers } from '$lib/types';
 	import ComponentWrapper from '$lib/styling/ComponentWrapper.svelte';
+	import IconRenderer, { type IconTransformConfig } from '$lib/styling/IconRenderer.svelte';
 
 	let {
 		iconData,
 		iconName,
 		color = 'currentColor',
-		size,
+		stroke,
+		strokeWidth = 1,
 		opacity = 1,
 		rotation = 0,
 		flipHorizontal = false,
 		flipVertical = false,
+		transform,
 		animation,
 		effect,
 		blendMode,
@@ -83,78 +92,37 @@
 		data?: CardData;
 	} = $props();
 
-	// Calculate icon dimensions and positioning
-	const iconSize = $derived.by(() => {
-		if (size) return size;
-		// Fit to container while maintaining aspect ratio
-		return Math.min(container.width, container.height);
+	// Merge legacy transform props with new transform object
+	// New transform takes precedence if set
+	const effectiveTransform: Partial<IconTransformConfig> = $derived({
+		scale: transform?.scale ?? 1,
+		offsetX: transform?.offsetX ?? 0,
+		offsetY: transform?.offsetY ?? 0,
+		rotation: transform?.rotation ?? rotation,
+		flipHorizontal: transform?.flipHorizontal ?? flipHorizontal,
+		flipVertical: transform?.flipVertical ?? flipVertical
 	});
 
-	const iconWidth = $derived(iconData?.width ?? 24);
-	const iconHeight = $derived(iconData?.height ?? 24);
-
-	// Center the icon in the container
-	const x = $derived((container.width - iconSize) / 2);
-	const y = $derived((container.height - iconSize) / 2);
-
-	// Build transform string for rotation/flip
-	const transform = $derived.by(() => {
-		const transforms: string[] = [];
-		const cx = x + iconSize / 2;
-		const cy = y + iconSize / 2;
-
-		if (rotation !== 0) {
-			transforms.push(`rotate(${rotation} ${cx} ${cy})`);
-		}
-
-		if (flipHorizontal || flipVertical) {
-			const scaleX = flipHorizontal ? -1 : 1;
-			const scaleY = flipVertical ? -1 : 1;
-			transforms.push(`translate(${cx} ${cy}) scale(${scaleX} ${scaleY}) translate(${-cx} ${-cy})`);
-		}
-
-		return transforms.join(' ');
-	});
-
-	// Build viewBox from icon data
-	const viewBox = $derived(`${iconData?.left ?? 0} ${iconData?.top ?? 0} ${iconWidth} ${iconHeight}`);
-
-	// Sanitize icon body to prevent XSS
-	const sanitizedBody = $derived(iconData?.body ? sanitizeSvgBody(iconData.body) : '');
-
-	// Strip fill attributes from body so parent fill can be inherited (needed for holographic)
-	const strippedBody = $derived(
-		sanitizedBody
-			.replace(/fill="[^"]*"/gi, '')
-			.replace(/fill='[^']*'/gi, '')
-	);
-
-	// Collect modifiers for unified wrapper
-	const modifiers: UniversalModifiers = $derived({ effect, animation, blendMode, holographic });
-
-	// When holographic is enabled, use stripped body so gradient inherits properly
-	const effectiveBody = $derived(holographic ? strippedBody : sanitizedBody);
-	const effectiveFill = $derived(holographic ? 'inherit' : color);
-	const effectiveStyle = $derived(holographic ? '' : `color: ${color}`);
+	// Collect modifiers for unified wrapper (excluding holographic - handled by IconRenderer)
+	const modifiers: UniversalModifiers = $derived({ effect, animation, blendMode });
 </script>
 
 {#if iconData?.body}
 	<ComponentWrapper {container} {modifiers}>
-		<g transform={transform} opacity={opacity}>
-			<svg
-				x={x}
-				y={y}
-				width={iconSize}
-				height={iconSize}
-				viewBox={viewBox}
-				fill="none"
-				xmlns="http://www.w3.org/2000/svg"
-			>
-				<g fill={effectiveFill} style={effectiveStyle}>
-					{@html effectiveBody}
-				</g>
-			</svg>
-		</g>
+		<IconRenderer
+			body={iconData.body}
+			width={iconData.width ?? 24}
+			height={iconData.height ?? 24}
+			containerWidth={container.width}
+			containerHeight={container.height}
+			scaleMode="contain"
+			transform={effectiveTransform}
+			fill={color}
+			{stroke}
+			{strokeWidth}
+			{holographic}
+			{opacity}
+		/>
 	</ComponentWrapper>
 {:else}
 	<!-- Placeholder when no icon selected -->

@@ -17,7 +17,10 @@ export {
 export {
 	BUNDLED_SHAPES,
 	getShapeData,
-	isBuiltInShape
+	isBuiltInShape,
+	ICON_PRESETS,
+	ICON_PRESET_LABELS,
+	getIconPreset
 } from './bundledShapes';
 
 // Utilities

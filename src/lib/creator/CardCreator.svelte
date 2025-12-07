@@ -7,7 +7,7 @@
 	import { TextField, StatPanel, List } from '$lib/card/fields';
 	import { Icon } from '$lib/card/icons';
 	import type { IconData } from '$lib/card/icons';
-	import { Badge, Divider, ProgressBar, Ribbon, Frame, IconRating } from '$lib/card/decorations';
+	import { Divider, ProgressBar, Ribbon, Frame, IconRating } from '$lib/card/decorations';
 	import { CARD_WIDTH, CARD_HEIGHT } from '$lib/types';
 	import type { CardTemplate } from '$lib/types';
 	import * as Card from '$lib/creator/ui/card';
@@ -45,7 +45,6 @@ import { extractFontsFromCard, loadGoogleFonts } from '$lib/fonts';
 		createBackgroundComponent,
 		createBorderComponent,
 		createIconComponent,
-		createBadgeComponent,
 		createStatPanelComponent,
 		createDividerComponent,
 		createProgressBarComponent,
@@ -114,7 +113,6 @@ import { extractFontsFromCard, loadGoogleFonts } from '$lib/fonts';
 	registerComponent('Border', Border);
 	registerComponent('TextField', TextField);
 	registerComponent('Icon', Icon);
-	registerComponent('Badge', Badge);
 	registerComponent('StatPanel', StatPanel);
 	registerComponent('Divider', Divider);
 	registerComponent('ProgressBar', ProgressBar);
@@ -688,7 +686,6 @@ import { extractFontsFromCard, loadGoogleFonts } from '$lib/fonts';
 		background: createBackgroundComponent,
 		border: createBorderComponent,
 		icon: createIconComponent,
-		badge: createBadgeComponent,
 		statpanel: createStatPanelComponent,
 		divider: createDividerComponent,
 		progressbar: createProgressBarComponent,
@@ -763,7 +760,6 @@ import { extractFontsFromCard, loadGoogleFonts } from '$lib/fonts';
 		}
 	}
 	const addIconComponent = () => addComponent('icon');
-	const addBadgeComponent = () => addComponent('badge');
 	const addStatPanelComponent = () => addComponent('statpanel');
 	const addDividerComponent = () => addComponent('divider');
 	const addProgressBarComponent = () => addComponent('progressbar');
@@ -821,7 +817,6 @@ import { extractFontsFromCard, loadGoogleFonts } from '$lib/fonts';
 		});
 	}
 	const updateIconComponent = (key: string, value: unknown) => updateComponent('icon', key, value);
-	const updateBadgeComponent = (key: string, value: unknown) => updateComponent('badge', key, value);
 	const updateStatPanelComponent = (key: string, value: unknown) => updateComponent('statpanel', key, value);
 	const updateDividerComponent = (key: string, value: unknown) => updateComponent('divider', key, value);
 	const updateProgressBarComponent = (key: string, value: unknown) => updateComponent('progressbar', key, value);
@@ -1311,7 +1306,6 @@ import { extractFontsFromCard, loadGoogleFonts } from '$lib/fonts';
 						onAddBackgroundComponent={addBackgroundComponent}
 						onAddBorderComponent={addBorderComponent}
 						onAddIconComponent={addIconComponent}
-						onAddBadgeComponent={addBadgeComponent}
 						onAddStatPanelComponent={addStatPanelComponent}
 						onAddDividerComponent={addDividerComponent}
 						onAddProgressBarComponent={addProgressBarComponent}
@@ -1325,7 +1319,6 @@ import { extractFontsFromCard, loadGoogleFonts } from '$lib/fonts';
 						onUpdateBorderComponent={updateBorderComponent}
 						onUpdateIconComponent={updateIconComponent}
 						onUpdateIconSelection={updateIconSelection}
-						onUpdateBadgeComponent={updateBadgeComponent}
 						onUpdateStatPanelComponent={updateStatPanelComponent}
 						onUpdateDividerComponent={updateDividerComponent}
 						onUpdateProgressBarComponent={updateProgressBarComponent}
@@ -1490,7 +1483,6 @@ import { extractFontsFromCard, loadGoogleFonts } from '$lib/fonts';
 						onAddBackgroundComponent={addBackgroundComponent}
 						onAddBorderComponent={addBorderComponent}
 						onAddIconComponent={addIconComponent}
-						onAddBadgeComponent={addBadgeComponent}
 						onAddStatPanelComponent={addStatPanelComponent}
 						onAddDividerComponent={addDividerComponent}
 						onAddProgressBarComponent={addProgressBarComponent}
@@ -1504,7 +1496,6 @@ import { extractFontsFromCard, loadGoogleFonts } from '$lib/fonts';
 						onUpdateBorderComponent={updateBorderComponent}
 						onUpdateIconComponent={updateIconComponent}
 						onUpdateIconSelection={updateIconSelection}
-						onUpdateBadgeComponent={updateBadgeComponent}
 						onUpdateStatPanelComponent={updateStatPanelComponent}
 						onUpdateDividerComponent={updateDividerComponent}
 						onUpdateProgressBarComponent={updateProgressBarComponent}
@@ -1633,7 +1624,6 @@ import { extractFontsFromCard, loadGoogleFonts } from '$lib/fonts';
 						onAddBackgroundComponent={addBackgroundComponent}
 						onAddBorderComponent={addBorderComponent}
 						onAddIconComponent={addIconComponent}
-						onAddBadgeComponent={addBadgeComponent}
 						onAddStatPanelComponent={addStatPanelComponent}
 						onAddDividerComponent={addDividerComponent}
 						onAddProgressBarComponent={addProgressBarComponent}
@@ -1647,7 +1637,6 @@ import { extractFontsFromCard, loadGoogleFonts } from '$lib/fonts';
 						onUpdateBorderComponent={updateBorderComponent}
 						onUpdateIconComponent={updateIconComponent}
 						onUpdateIconSelection={updateIconSelection}
-						onUpdateBadgeComponent={updateBadgeComponent}
 						onUpdateStatPanelComponent={updateStatPanelComponent}
 						onUpdateDividerComponent={updateDividerComponent}
 						onUpdateProgressBarComponent={updateProgressBarComponent}

@@ -133,6 +133,77 @@ export const BUNDLED_SHAPES: Record<BuiltInShape, ShapeData> = {
 	}
 };
 
+// ============================================
+// ICON PRESETS - Used by IconRating, Divider ornaments, etc.
+// These can be used anywhere icons are needed.
+// ============================================
+export const ICON_PRESETS: Record<string, ShapeData> = {
+	// From BUNDLED_SHAPES (reuse existing)
+	star: BUNDLED_SHAPES.star,
+	heart: BUNDLED_SHAPES.heart,
+	diamond: BUNDLED_SHAPES.diamond,
+	circle: BUNDLED_SHAPES.circle,
+	square: BUNDLED_SHAPES.square,
+	trophy: BUNDLED_SHAPES.trophy,
+
+	// Additional rating/decorative icons
+	fire: {
+		body: '<path fill="currentColor" d="M17.66 11.2c-.23-.3-.51-.56-.77-.82c-.67-.6-1.43-1.03-2.07-1.66C13.33 7.26 13 4.85 13.95 3c-.95.23-1.78.75-2.49 1.32c-2.59 2.08-3.61 5.75-2.39 8.9c.04.1.08.2.08.33c0 .22-.15.42-.35.5c-.23.1-.47.04-.66-.12a.58.58 0 0 1-.14-.17c-1.13-1.43-1.31-3.48-.55-5.12C5.78 10 4.87 12.3 5 14.47c.06.5.12 1 .29 1.5c.14.6.41 1.2.71 1.73c1.08 1.73 2.95 2.97 4.96 3.22c2.14.27 4.43-.12 6.07-1.6c1.83-1.66 2.47-4.32 1.53-6.6l-.13-.26c-.21-.46-.77-1.26-.77-1.26zm-3.16 6.3c-.28.24-.74.5-1.1.6c-1.12.4-2.24-.16-2.9-.82c1.19-.28 1.9-1.16 2.11-2.05c.17-.8-.15-1.46-.28-2.23c-.12-.74-.1-1.37.17-2.06c.19.38.39.76.63 1.06c.77 1 1.98 1.44 2.24 2.8c.04.14.06.28.06.43c.03.82-.33 1.72-.93 2.27z"/>',
+		width: 24,
+		height: 24
+	},
+	'thumbs-up': {
+		body: '<path fill="currentColor" d="M1 21h4V9H1v12zm22-11c0-1.1-.9-2-2-2h-6.31l.95-4.57l.03-.32c0-.41-.17-.79-.44-1.06L14.17 1L7.59 7.59C7.22 7.95 7 8.45 7 9v10c0 1.1.9 2 2 2h9c.83 0 1.54-.5 1.84-1.22l3.02-7.05c.09-.23.14-.47.14-.73v-2z"/>',
+		width: 24,
+		height: 24
+	},
+	lightning: {
+		body: '<path fill="currentColor" d="M11 21h-1l1-7H7.5c-.58 0-.57-.32-.38-.66c.19-.34.05-.08.07-.12C8.48 10.94 10.42 7.54 13 3h1l-1 7h3.5c.49 0 .56.33.47.51l-.07.15C12.96 17.55 11 21 11 21z"/>',
+		width: 24,
+		height: 24
+	},
+	flower: {
+		body: '<path fill="currentColor" d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm0-18C8.1 4 5 7.1 5 11c0 2.4 1.2 4.5 3 5.7V18c0 .6.4 1 1 1h6c.6 0 1-.4 1-1v-1.3c1.8-1.3 3-3.4 3-5.7c0-3.9-3.1-7-7-7zm2.9 10.5l-.9.6V17H10v-1.9l-.9-.6C7.8 13.6 7 12.4 7 11c0-2.8 2.2-5 5-5s5 2.2 5 5c0 1.4-.8 2.6-2.1 3.5z"/>',
+		width: 24,
+		height: 24
+	},
+	pepper: {
+		body: '<path fill="currentColor" d="M16.71 4.29a1 1 0 0 0-1.42 0l-1 1A6 6 0 0 0 12 5a5.78 5.78 0 0 0-3.4 1.1a9.57 9.57 0 0 0-3.26 5.24A14.43 14.43 0 0 0 5 16c0 1.5.31 2.54.82 3.18A2.18 2.18 0 0 0 7.5 20c1.51 0 2.72-1.17 4.5-3.26C13.72 18.83 14.99 20 16.5 20a2.18 2.18 0 0 0 1.68-.82c.51-.64.82-1.68.82-3.18a14.43 14.43 0 0 0-.34-4.66a9.57 9.57 0 0 0-3.26-5.24A1 1 0 0 0 14.29 5L16.71 7.42a1 1 0 0 0 0-1.42l-1-1.71zM12 7a3.5 3.5 0 0 1 2.08.69a7.58 7.58 0 0 1 2.57 4.19A12.15 12.15 0 0 1 17 16c0 1.07-.18 1.63-.38 1.88a.33.33 0 0 1-.12.12c-.62 0-1.62-.88-3.24-2.76a1 1 0 0 0-1.52 0C10.12 17.12 9.12 18 8.5 18a.33.33 0 0 1-.12-.12C8.18 17.63 8 17.07 8 16a12.15 12.15 0 0 1 .35-4.12a7.58 7.58 0 0 1 2.57-4.19A3.5 3.5 0 0 1 12 7z"/>',
+		width: 24,
+		height: 24
+	},
+	skull: {
+		body: '<path fill="currentColor" d="M12 2C6.48 2 2 6.48 2 12v8c0 1.1.9 2 2 2h3v-2H4v-6h3v-1c0-2.76 2.24-5 5-5s5 2.24 5 5v1h3v6h-3v2h3c1.1 0 2-.9 2-2v-8c0-5.52-4.48-10-10-10zm-2 14c-.83 0-1.5-.67-1.5-1.5S9.17 13 10 13s1.5.67 1.5 1.5S10.83 16 10 16zm4 0c-.83 0-1.5-.67-1.5-1.5S13.17 13 14 13s1.5.67 1.5 1.5S14.83 16 14 16zm-3.5 2h3v2h-3v-2z"/>',
+		width: 24,
+		height: 24
+	}
+};
+
+/**
+ * Labels for icon presets (for UI dropdowns)
+ */
+export const ICON_PRESET_LABELS: Record<string, string> = {
+	star: 'Star',
+	heart: 'Heart',
+	diamond: 'Diamond',
+	circle: 'Circle',
+	square: 'Square',
+	trophy: 'Trophy',
+	fire: 'Fire',
+	'thumbs-up': 'Thumbs Up',
+	lightning: 'Lightning',
+	flower: 'Flower',
+	pepper: 'Pepper',
+	skull: 'Skull'
+};
+
+/**
+ * Get icon preset data by name
+ */
+export function getIconPreset(name: string): ShapeData | undefined {
+	return ICON_PRESETS[name];
+}
+
 /**
  * Get shape data by name
  */

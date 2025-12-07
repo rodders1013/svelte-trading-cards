@@ -18,7 +18,6 @@ import type {
 	BackgroundComponent,
 	BorderComponent,
 	IconComponent,
-	BadgeComponent,
 	StatPanelComponent,
 	DividerComponent,
 	ProgressBarComponent,
@@ -125,8 +124,6 @@ export function getComponentIcon(type: string): string {
 			return 'bdr';
 		case 'icon':
 			return 'ico';
-		case 'badge':
-			return 'bdg';
 		case 'statpanel':
 			return 'stat';
 		case 'divider':
@@ -189,12 +186,8 @@ const componentBuildConfig: Partial<Record<ComponentItem['type'], ComponentBuild
 	},
 	icon: {
 		renderType: 'Icon',
-		props: ['iconData', 'iconName', 'color', 'size', 'opacity', 'rotation', 'flipHorizontal', 'flipVertical'],
+		props: ['iconData', 'iconName', 'color', 'stroke', 'strokeWidth', 'opacity', 'rotation', 'flipHorizontal', 'flipVertical', 'transform'],
 		guard: (comp) => !!(comp as IconComponent).iconData?.body
-	},
-	badge: {
-		renderType: 'Badge',
-		props: ['shapeSource', 'backgroundColor', 'borderColor', 'borderWidth', 'icon', 'iconColor', 'opacity']
 	},
 	statpanel: {
 		renderType: 'StatPanel',
@@ -202,7 +195,7 @@ const componentBuildConfig: Partial<Record<ComponentItem['type'], ComponentBuild
 	},
 	divider: {
 		renderType: 'Divider',
-		props: ['style', 'color', 'secondaryColor', 'thickness', 'fade', 'ornamentPreset', 'customOrnament', 'customOrnamentName', 'ornamentSize', 'ornamentColor', 'dashLength', 'gapLength', 'opacity']
+		props: ['style', 'color', 'secondaryColor', 'thickness', 'fade', 'iconPreset', 'customIcon', 'customIconName', 'iconSize', 'iconColor', 'iconStroke', 'iconStrokeWidth', 'iconTransform', 'dashLength', 'gapLength', 'opacity']
 	},
 	progressbar: {
 		renderType: 'ProgressBar',
@@ -546,26 +539,13 @@ export function createIconComponent(): IconComponent {
 		iconData: undefined,
 		iconName: undefined,
 		color: '#ffffff',
-		size: undefined,
+		stroke: undefined,
+		strokeWidth: 1,
 		opacity: 1,
 		rotation: 0,
 		flipHorizontal: false,
-		flipVertical: false
-	};
-}
-
-export function createBadgeComponent(): BadgeComponent {
-	return {
-		type: 'badge',
-		id: generateComponentId('badge'),
-		visible: true,
-		shapeSource: { type: 'builtin', shape: 'circle' },
-		backgroundColor: '#3b82f6',
-		borderColor: undefined,
-		borderWidth: 0,
-		icon: undefined,
-		iconColor: undefined,
-		opacity: 1
+		flipVertical: false,
+		transform: undefined
 	};
 }
 
@@ -604,11 +584,14 @@ export function createDividerComponent(): DividerComponent {
 		secondaryColor: undefined,
 		thickness: 2,
 		fade: 'both',
-		ornamentPreset: 'none',
-		customOrnament: undefined,
-		customOrnamentName: undefined,
-		ornamentSize: 16,
-		ornamentColor: undefined,
+		iconPreset: 'none',
+		customIcon: undefined,
+		customIconName: undefined,
+		iconSize: 16,
+		iconColor: undefined,
+		iconStroke: undefined,
+		iconStrokeWidth: 1,
+		iconTransform: undefined,
 		dashLength: 8,
 		gapLength: 4,
 		opacity: 1

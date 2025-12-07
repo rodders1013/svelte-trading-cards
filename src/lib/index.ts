@@ -10,16 +10,15 @@ export type { IconData, IconProps } from './card/icons/index.js';
 export type { StatPanelProps, StatRow, ListProps, ListStyle } from './card/fields/index.js';
 
 // Decorations
-export { Badge, Divider, ProgressBar, Ribbon, Frame, IconRating } from './card/decorations/index.js';
+export { Divider, ProgressBar, Ribbon, Frame, IconRating } from './card/decorations/index.js';
 export type {
-	BadgeProps,
-	DividerProps, DividerStyle, DividerFade, DividerOrnamentPreset,
+	DividerProps, DividerStyle, DividerFade, DividerIconPreset,
 	ProgressBarProps, ProgressBarStyle, LabelPosition,
 	RibbonProps, RibbonPosition, RibbonStyle,
 	FrameProps, FrameStyle, FrameSize,
 	IconRatingProps, RatingIconPreset, ValueFormat
 } from './card/decorations/index.js';
-export { RATING_ICON_PRESETS, RATING_ICON_LABELS, ORNAMENT_PRESET_ICONS, ORNAMENT_PRESET_LABELS } from './card/decorations/index.js';
+export { RATING_ICON_PRESETS, RATING_ICON_LABELS, DIVIDER_ICON_LABELS } from './card/decorations/index.js';
 
 // Shapes
 export { ShapePicker, BUNDLED_SHAPES, SHAPE_CATEGORIES, BUILT_IN_SHAPES } from './styling/shapes/index.js';
@@ -170,7 +169,6 @@ export type {
 	BackgroundComponent,
 	BorderComponent,
 	IconComponent,
-	BadgeComponent,
 	StatPanelComponent,
 	DividerComponent,
 	ProgressBarComponent,

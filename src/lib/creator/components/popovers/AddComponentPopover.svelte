@@ -9,7 +9,6 @@
 	import Square from '@lucide/svelte/icons/square';
 	import Frame from '@lucide/svelte/icons/frame';
 	import Minus from '@lucide/svelte/icons/minus';
-	import Award from '@lucide/svelte/icons/award';
 	import BarChart3 from '@lucide/svelte/icons/bar-chart-3';
 	import Gauge from '@lucide/svelte/icons/gauge';
 	import Star from '@lucide/svelte/icons/star';
@@ -38,7 +37,6 @@
 		hasBorder,
 		hasFrame,
 		hasDivider,
-		hasBadge,
 		hasStatPanel,
 		hasProgressBar,
 		hasIconRating,
@@ -51,7 +49,6 @@
 		onAddBorder,
 		onAddFrame,
 		onAddDivider,
-		onAddBadge,
 		onAddStatPanel,
 		onAddProgressBar,
 		onAddIconRating,
@@ -65,7 +62,6 @@
 		hasBorder: boolean;
 		hasFrame: boolean;
 		hasDivider: boolean;
-		hasBadge: boolean;
 		hasStatPanel: boolean;
 		hasProgressBar: boolean;
 		hasIconRating: boolean;
@@ -78,7 +74,6 @@
 		onAddBorder: () => void;
 		onAddFrame: () => void;
 		onAddDivider: () => void;
-		onAddBadge: () => void;
 		onAddStatPanel: () => void;
 		onAddProgressBar: () => void;
 		onAddIconRating: () => void;
@@ -109,7 +104,6 @@
 		{
 			name: 'Data',
 			items: [
-				{ type: 'badge', label: 'Badge', icon: Award, onAdd: onAddBadge, disabled: hasBadge },
 				{ type: 'statpanel', label: 'Stats', icon: BarChart3, onAdd: onAddStatPanel, disabled: hasStatPanel },
 				{ type: 'progressbar', label: 'Progress', icon: Gauge, onAdd: onAddProgressBar, disabled: hasProgressBar },
 				{ type: 'iconrating', label: 'Rating', icon: Star, onAdd: onAddIconRating, disabled: hasIconRating }

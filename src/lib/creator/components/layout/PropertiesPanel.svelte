@@ -13,7 +13,6 @@
 	import BackgroundPanel from '../panels/BackgroundPanel.svelte';
 	import BorderPanel from '../panels/BorderPanel.svelte';
 	import IconPanel from '../panels/IconPanel.svelte';
-	import BadgePanel from '../panels/BadgePanel.svelte';
 	import StatPanelPanel from '../panels/StatPanelPanel.svelte';
 	import DividerPanel from '../panels/DividerPanel.svelte';
 	import ProgressBarPanel from '../panels/ProgressBarPanel.svelte';
@@ -28,7 +27,6 @@
 		BackgroundComponent,
 		BorderComponent,
 		IconComponent,
-		BadgeComponent,
 		StatPanelComponent,
 		DividerComponent,
 		ProgressBarComponent,
@@ -66,7 +64,6 @@
 		onAddBackgroundComponent,
 		onAddBorderComponent,
 		onAddIconComponent,
-		onAddBadgeComponent,
 		onAddStatPanelComponent,
 		onAddDividerComponent,
 		onAddProgressBarComponent,
@@ -80,7 +77,6 @@
 		onUpdateBorderComponent,
 		onUpdateIconComponent,
 		onUpdateIconSelection,
-		onUpdateBadgeComponent,
 		onUpdateStatPanelComponent,
 		onUpdateDividerComponent,
 		onUpdateProgressBarComponent,
@@ -118,7 +114,6 @@
 		onAddBackgroundComponent: () => void;
 		onAddBorderComponent: () => void;
 		onAddIconComponent: () => void;
-		onAddBadgeComponent: () => void;
 		onAddStatPanelComponent: () => void;
 		onAddDividerComponent: () => void;
 		onAddProgressBarComponent: () => void;
@@ -132,7 +127,6 @@
 		onUpdateBorderComponent: (key: keyof Omit<BorderComponent, 'type' | 'id'>, value: unknown) => void;
 		onUpdateIconComponent: (key: keyof Omit<IconComponent, 'type' | 'id'>, value: unknown) => void;
 		onUpdateIconSelection: (icon: { iconData: IconData; iconName: string }) => void;
-		onUpdateBadgeComponent: (key: keyof Omit<BadgeComponent, 'type' | 'id'>, value: unknown) => void;
 		onUpdateStatPanelComponent: (key: keyof Omit<StatPanelComponent, 'type' | 'id'>, value: unknown) => void;
 		onUpdateDividerComponent: (key: keyof Omit<DividerComponent, 'type' | 'id'>, value: unknown) => void;
 		onUpdateProgressBarComponent: (key: keyof Omit<ProgressBarComponent, 'type' | 'id'>, value: unknown) => void;
@@ -140,7 +134,7 @@
 		onUpdateFrameComponent: (key: keyof Omit<FrameComponent, 'type' | 'id'>, value: unknown) => void;
 		onUpdateListComponent: (key: keyof Omit<ListComponent, 'type' | 'id'>, value: unknown) => void;
 		onUpdateIconRatingComponent: (key: keyof Omit<IconRatingComponent, 'type' | 'id'>, value: unknown) => void;
-		onRemoveComponent: (type: 'text' | 'image' | 'background' | 'border' | 'icon' | 'badge' | 'statpanel' | 'divider' | 'progressbar' | 'ribbon' | 'frame' | 'list' | 'iconrating') => void;
+		onRemoveComponent: (type: 'text' | 'image' | 'background' | 'border' | 'icon' | 'statpanel' | 'divider' | 'progressbar' | 'ribbon' | 'frame' | 'list' | 'iconrating') => void;
 		onMoveComponentUp: (componentId: string) => void;
 		onMoveComponentDown: (componentId: string) => void;
 		onSelectComponent?: (componentId: string | null) => void;
@@ -153,7 +147,6 @@
 	const selectedBackground = $derived(container ? getComponentByType(container, 'background') : undefined);
 	const selectedBorder = $derived(container ? getComponentByType(container, 'border') : undefined);
 	const selectedIcon = $derived(container ? getComponentByType(container, 'icon') : undefined);
-	const selectedBadge = $derived(container ? getComponentByType(container, 'badge') : undefined);
 	const selectedStatPanel = $derived(container ? getComponentByType(container, 'statpanel') : undefined);
 	const selectedDivider = $derived(container ? getComponentByType(container, 'divider') : undefined);
 	const selectedProgressBar = $derived(container ? getComponentByType(container, 'progressbar') : undefined);
@@ -210,7 +203,6 @@
 					hasBorder={!!selectedBorder}
 					hasFrame={!!selectedFrame}
 					hasDivider={!!selectedDivider}
-					hasBadge={!!selectedBadge}
 					hasStatPanel={!!selectedStatPanel}
 					hasProgressBar={!!selectedProgressBar}
 					hasIconRating={!!selectedIconRating}
@@ -223,7 +215,6 @@
 					onAddBorder={onAddBorderComponent}
 					onAddFrame={onAddFrameComponent}
 					onAddDivider={onAddDividerComponent}
-					onAddBadge={onAddBadgeComponent}
 					onAddStatPanel={onAddStatPanelComponent}
 					onAddProgressBar={onAddProgressBarComponent}
 					onAddIconRating={onAddIconRatingComponent}
@@ -367,17 +358,6 @@
 												onUpdate={onUpdateIconComponent}
 												onUpdateIcon={onUpdateIconSelection}
 												onRemove={() => onRemoveComponent('icon')}
-												onMoveUp={() => onMoveComponentUp(component.id)}
-												onMoveDown={() => onMoveComponentDown(component.id)}
-											/>
-										{:else if component.type === 'badge'}
-											<BadgePanel
-												{component}
-												{dataFields}
-												{datasetId}
-												expanded={expandedPanels.has('comp-badge')}
-												onUpdate={onUpdateBadgeComponent}
-												onRemove={() => onRemoveComponent('badge')}
 												onMoveUp={() => onMoveComponentUp(component.id)}
 												onMoveDown={() => onMoveComponentDown(component.id)}
 											/>

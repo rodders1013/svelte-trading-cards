@@ -2,7 +2,6 @@
 	import FitText from '$lib/utils/FitText.svelte';
 	import StatPanel from '$lib/card/fields/StatPanel.svelte';
 	import List from '$lib/card/fields/List.svelte';
-	import Badge from '$lib/card/decorations/Badge.svelte';
 	import Ribbon from '$lib/card/decorations/Ribbon.svelte';
 	import TextField from '$lib/card/fields/TextField.svelte';
 	import type { ContainerContext } from '$lib/types';
@@ -366,16 +365,16 @@
 		</div>
 	</section>
 
-	<!-- Badge Tests -->
+	<!-- Badge-style Tests (shape + text) -->
 	<section class="mb-12">
-		<h2 class="mb-4 text-2xl font-semibold">Badge Component Tests</h2>
-		<p class="mb-4 text-slate-400">Badge with auto-fitting text</p>
+		<h2 class="mb-4 text-2xl font-semibold">Shape + Text Tests</h2>
+		<p class="mb-4 text-slate-400">Ellipse background with auto-fitting text overlay</p>
 
 		<div class="grid grid-cols-1 gap-6 md:grid-cols-3">
 			{#each [
-				{ label: 'Small Badge - Short', width: 80, height: 30, text: 'NEW' },
-				{ label: 'Small Badge - Long', width: 80, height: 30, text: 'LEGENDARY' },
-				{ label: 'Medium Badge - Long', width: 120, height: 36, text: 'ULTRA RARE EDITION' }
+				{ label: 'Small - Short', width: 80, height: 30, text: 'NEW' },
+				{ label: 'Small - Long', width: 80, height: 30, text: 'LEGENDARY' },
+				{ label: 'Medium - Long', width: 120, height: 36, text: 'ULTRA RARE EDITION' }
 			] as test}
 				<div class="rounded-lg border border-slate-700 bg-slate-800 p-4">
 					<h3 class="mb-2 text-sm font-medium text-slate-400">{test.label}</h3>
@@ -386,13 +385,12 @@
 							height={test.height}
 							viewBox="0 0 {test.width} {test.height}"
 						>
-							<Badge
-								shapeSource={{ type: 'builtin', shape: 'ellipse' }}
-								backgroundColor="#f59e0b"
-								borderWidth={0}
-								opacity={1}
-								container={{ width: test.width, height: test.height, radius: 0 }}
-								data={{ badgeText: test.text }}
+							<ellipse
+								cx={test.width / 2}
+								cy={test.height / 2}
+								rx={test.width / 2}
+								ry={test.height / 2}
+								fill="#f59e0b"
 							/>
 							<TextField
 								dataField="badgeText"
