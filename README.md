@@ -116,6 +116,13 @@ The `CardCreator` component is a full-featured template designer you can embed i
 **Features:**
 - Zone hierarchy with drag-to-reorder
 - Property panels for all component settings
+- **Unified ModifiersPanel** - All components share consistent modifier controls:
+  - Clip Shape (mask any component to a shape)
+  - Effect (glow, strokeGlow, shadow, neon, innerGlow, lift, outline)
+  - Animation (spin, pulse, bounce, shake, float, glow, ping, trace)
+  - Border (color, width, opacity, style)
+  - Holographic (animated color-shift effect)
+  - Blend Mode (multiply, screen, overlay, etc.)
 - Per-dataset data fields (different data shapes for different use cases)
 - Field remapping when switching datasets
 - Undo/Redo with keyboard shortcuts (Cmd/Ctrl+Z)
@@ -263,10 +270,17 @@ Text automatically scales between min and max sizes to fit the container. All te
   props: {
     color: '#fbbf24',
     width: 8,
-    glow: { enabled: true, color: '#fbbf24', blur: 10, animated: true },
-    holographic: { enabled: true, secondaryColor: '#06b6d4', speed: 3 },
     layers: 3,
-    layerColors: ['#gold', '#silver', '#bronze']
+    layerColors: ['#gold', '#silver', '#bronze'],
+    // Use standard effect system for glow (strokeGlow for border blur)
+    effect: { type: 'strokeGlow', blur: 10, intensity: 0.5, animated: true },
+    // Standard holographic config
+    holographic: {
+      color: '#fbbf24',
+      secondaryColor: '#06b6d4',
+      speed: 3,
+      apply: 'stroke'
+    }
   }
 }
 ```
@@ -412,7 +426,7 @@ All components support SVG filter-based effects that can be combined with animat
 ```typescript
 {
   effect: {
-    type: 'glow',          // glow, shadow, neon, innerGlow, lift, outline
+    type: 'glow',          // glow, strokeGlow, shadow, neon, innerGlow, lift, outline
     color: '#3b82f6',
     blur: 10,
     intensity: 0.7,
@@ -426,12 +440,18 @@ All components support SVG filter-based effects that can be combined with animat
 
 | Type | Description | Controls |
 |------|-------------|----------|
-| `glow` | Soft outer glow | color, blur, intensity |
+| `glow` | Soft outer glow (drop shadow style) | color, blur, intensity |
+| `strokeGlow` | Blur glow on strokes/borders | color (optional), blur, intensity |
 | `shadow` | Drop shadow | color, blur, offsetX, offsetY |
 | `neon` | Neon sign effect (overrides color) | color, intensity, spread |
 | `innerGlow` | Inward glow | color, blur, intensity |
 | `lift` | Paper elevation shadow | elevation (sm/md/lg/xl) |
 | `outline` | Stroke outline | color, width |
+
+### Stroke Glow vs Glow
+
+- **`glow`** - Creates a drop shadow around the entire element
+- **`strokeGlow`** - Creates a blur glow specifically on strokes/borders (uses element's stroke color if no color specified)
 
 ### Neon Effect
 
