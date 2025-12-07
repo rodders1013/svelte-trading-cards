@@ -3,6 +3,7 @@
 	import { AnimationConfigSchema } from '$lib/styling/animations/types.js';
 	import { EffectConfigSchema } from '$lib/styling/effects/types.js';
 	import { BlendMode } from '$lib/styling/blend/types.js';
+	import { HolographicConfigSchema } from '$lib/styling/HolographicWrapper.svelte';
 
 	export const GradientBackgroundPropsSchema = z.object({
 		colors: z.array(z.string()).min(2).max(4),
@@ -10,16 +11,16 @@
 		direction: z.enum(['vertical', 'horizontal', 'diagonal']).default('vertical'),
 		animation: AnimationConfigSchema.optional(),
 		effect: EffectConfigSchema.optional(),
-		blendMode: BlendMode.optional()
+		blendMode: BlendMode.optional(),
+		holographic: HolographicConfigSchema.optional()
 	});
 
 	export type GradientBackgroundProps = z.infer<typeof GradientBackgroundPropsSchema>;
 </script>
 
 <script lang="ts">
-	import type { ContainerContext, CardData } from '$lib/types';
-	import { AnimationWrapper } from '$lib/styling/animations/index.js';
-	import { EffectWrapper } from '$lib/styling/effects/index.js';
+	import type { ContainerContext, CardData, UniversalModifiers } from '$lib/types';
+	import ComponentWrapper from '$lib/styling/ComponentWrapper.svelte';
 
 	let {
 		colors,
@@ -28,6 +29,7 @@
 		animation,
 		effect,
 		blendMode,
+		holographic,
 		container,
 		data
 	}: GradientBackgroundProps & {
@@ -50,29 +52,32 @@
 		}
 	});
 
-	// Calculate center point for animation transform-origin
-	const centerX = $derived(container.width / 2);
-	const centerY = $derived(container.height / 2);
+	// Collect modifiers for unified wrapper
+	const modifiers: UniversalModifiers = $derived({ effect, animation, blendMode, holographic });
+
+	// When holographic is enabled, use 'inherit' so gradient from HolographicWrapper applies
+	// For gradient backgrounds, holographic replaces the gradient entirely
+	const effectiveFill = $derived(holographic ? 'inherit' : `url(#${gradientId})`);
 </script>
 
 <defs>
-	<linearGradient id={gradientId} x1={gradientCoords.x1} y1={gradientCoords.y1} x2={gradientCoords.x2} y2={gradientCoords.y2}>
-		{#each colors as color, i (i)}
-			<stop offset="{(i / (colors.length - 1)) * 100}%" style="stop-color:{color}" />
-		{/each}
-	</linearGradient>
+	{#if !holographic}
+		<linearGradient id={gradientId} x1={gradientCoords.x1} y1={gradientCoords.y1} x2={gradientCoords.x2} y2={gradientCoords.y2}>
+			{#each colors as color, i (i)}
+				<stop offset="{(i / (colors.length - 1)) * 100}%" style="stop-color:{color}" />
+			{/each}
+		</linearGradient>
+	{/if}
 </defs>
 
-<EffectWrapper {effect} {blendMode} transformOrigin="{centerX}px {centerY}px">
-	<AnimationWrapper {animation} transformOrigin="{centerX}px {centerY}px">
-		<rect
-			x="0"
-			y="0"
-			width={container.width}
-			height={container.height}
-			rx={container.radius}
-			fill="url(#{gradientId})"
-			{opacity}
-		/>
-	</AnimationWrapper>
-</EffectWrapper>
+<ComponentWrapper {container} {modifiers}>
+	<rect
+		x="0"
+		y="0"
+		width={container.width}
+		height={container.height}
+		rx={container.radius}
+		fill={effectiveFill}
+		{opacity}
+	/>
+</ComponentWrapper>

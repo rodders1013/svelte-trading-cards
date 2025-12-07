@@ -182,7 +182,7 @@ const componentBuildConfig: Partial<Record<ComponentItem['type'], ComponentBuild
 	},
 	text: {
 		renderType: 'TextField',
-		props: ['textPreset', 'dataField', 'maxFontSize', 'minFontSize', 'fontWeight', 'fontStyle', 'textDecoration', 'textTransform', 'fontFamily', { from: 'fill', to: 'color' }, 'opacity', 'alignment', 'verticalAlign', 'padding']
+		props: ['textPreset', 'dataField', 'maxFontSize', 'minFontSize', 'fontWeight', 'fontStyle', 'textDecoration', 'textTransform', 'fontFamily', { from: 'fill', to: 'color' }, 'opacity', 'alignment', 'verticalAlign', 'padding', 'bounds']
 	},
 	icon: {
 		renderType: 'Icon',
@@ -268,6 +268,7 @@ function buildBackgroundChildren(comp: BackgroundComponent): ComponentDefinition
 		if (comp.effect) props.effect = comp.effect;
 		if (comp.blendMode && comp.blendMode !== 'normal') props.blendMode = comp.blendMode;
 		if (comp.animation && comp.animation.type !== 'none') props.animation = comp.animation;
+		if (comp.holographic) props.holographic = comp.holographic;
 		children.push({ id: `${comp.id}-fill`, type: 'SolidBackground', props });
 	} else if (comp.fillType === 'gradient') {
 		const props: Record<string, unknown> = {
@@ -278,6 +279,7 @@ function buildBackgroundChildren(comp: BackgroundComponent): ComponentDefinition
 		if (comp.effect) props.effect = comp.effect;
 		if (comp.blendMode && comp.blendMode !== 'normal') props.blendMode = comp.blendMode;
 		if (comp.animation && comp.animation.type !== 'none') props.animation = comp.animation;
+		if (comp.holographic) props.holographic = comp.holographic;
 		children.push({ id: `${comp.id}-fill`, type: 'GradientBackground', props });
 	}
 
@@ -311,6 +313,7 @@ function buildBackgroundChildren(comp: BackgroundComponent): ComponentDefinition
 		if (comp.effect) props.effect = comp.effect;
 		if (comp.blendMode && comp.blendMode !== 'normal') props.blendMode = comp.blendMode;
 		if (comp.animation && comp.animation.type !== 'none') props.animation = comp.animation;
+		if (comp.holographic) props.holographic = comp.holographic;
 		children.push({ id: `${comp.id}-pattern`, type: 'PatternBackground', props });
 	}
 

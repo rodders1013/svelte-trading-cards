@@ -18,6 +18,26 @@
 	]);
 	export type TextPreset = z.infer<typeof TextPresetSchema>;
 
+	/**
+	 * Text bounds configuration for constraining text within a safe zone.
+	 * Useful when layer has a clip shape - insets define where text can render.
+	 * Values are percentages (0-50) of the container dimensions.
+	 */
+	export const TextBoundsConfigSchema = z.object({
+		/** Inset from left edge as percentage of container width */
+		insetLeft: z.number().min(0).max(50).default(0),
+		/** Inset from right edge as percentage of container width */
+		insetRight: z.number().min(0).max(50).default(0),
+		/** Inset from top edge as percentage of container height */
+		insetTop: z.number().min(0).max(50).default(0),
+		/** Inset from bottom edge as percentage of container height */
+		insetBottom: z.number().min(0).max(50).default(0),
+		/** Show visual guide for the safe text area (editor only) */
+		showGuide: z.boolean().default(false)
+	});
+
+	export type TextBoundsConfig = z.infer<typeof TextBoundsConfigSchema>;
+
 	export const TextFieldPropsSchema = z.object({
 		// Text from preset OR data field (dataField takes priority)
 		textPreset: TextPresetSchema.optional(),
@@ -36,6 +56,8 @@
 		/** Additional padding (e.g., for border width). Added to auto-calculated radius padding. */
 		padding: z.number().optional(),
 		lineHeight: z.number().optional(),
+		/** Text bounds - constrain text to a safe zone within the container */
+		bounds: TextBoundsConfigSchema.optional(),
 		animation: AnimationConfigSchema.optional(),
 		effect: EffectConfigSchema.optional(),
 		blendMode: BlendMode.optional(),
@@ -66,6 +88,7 @@
 		alignment = 'left',
 		verticalAlign = 'center',
 		padding = 0,
+		bounds,
 		animation,
 		effect,
 		blendMode,
@@ -85,6 +108,30 @@
 	const radiusInset = $derived((container.radius ?? 0) * 0.3);
 	const totalInset = $derived(radiusInset + padding);
 
+	// Calculate effective text area from bounds (percentage-based insets)
+	const boundsInsets = $derived({
+		left: (bounds?.insetLeft ?? 0) / 100 * container.width,
+		right: (bounds?.insetRight ?? 0) / 100 * container.width,
+		top: (bounds?.insetTop ?? 0) / 100 * container.height,
+		bottom: (bounds?.insetBottom ?? 0) / 100 * container.height
+	});
+
+	// Effective dimensions for text fitting (container minus bounds insets)
+	const effectiveWidth = $derived(container.width - boundsInsets.left - boundsInsets.right);
+	const effectiveHeight = $derived(container.height - boundsInsets.top - boundsInsets.bottom);
+
+	// Position offset for the text area
+	const textAreaX = $derived(boundsInsets.left);
+	const textAreaY = $derived(boundsInsets.top);
+
+	// Check if bounds are active (any inset > 0)
+	const hasBounds = $derived(
+		(bounds?.insetLeft ?? 0) > 0 ||
+		(bounds?.insetRight ?? 0) > 0 ||
+		(bounds?.insetTop ?? 0) > 0 ||
+		(bounds?.insetBottom ?? 0) > 0
+	);
+
 	// Collect modifiers for unified wrapper
 	const modifiers: UniversalModifiers = $derived({ effect, animation, blendMode, holographic });
 
@@ -93,12 +140,42 @@
 </script>
 
 <ComponentWrapper {container} {modifiers}>
+	<!-- Visual guide for safe text area (editor only) -->
+	{#if bounds?.showGuide && hasBounds}
+		<rect
+			x={textAreaX}
+			y={textAreaY}
+			width={effectiveWidth}
+			height={effectiveHeight}
+			fill="none"
+			stroke="#00aaff"
+			stroke-width="1"
+			stroke-dasharray="4 2"
+			opacity="0.7"
+		/>
+		<!-- Corner markers for better visibility -->
+		<g stroke="#00aaff" stroke-width="1.5" opacity="0.8">
+			<!-- Top-left corner -->
+			<line x1={textAreaX} y1={textAreaY} x2={textAreaX + 8} y2={textAreaY} />
+			<line x1={textAreaX} y1={textAreaY} x2={textAreaX} y2={textAreaY + 8} />
+			<!-- Top-right corner -->
+			<line x1={textAreaX + effectiveWidth} y1={textAreaY} x2={textAreaX + effectiveWidth - 8} y2={textAreaY} />
+			<line x1={textAreaX + effectiveWidth} y1={textAreaY} x2={textAreaX + effectiveWidth} y2={textAreaY + 8} />
+			<!-- Bottom-left corner -->
+			<line x1={textAreaX} y1={textAreaY + effectiveHeight} x2={textAreaX + 8} y2={textAreaY + effectiveHeight} />
+			<line x1={textAreaX} y1={textAreaY + effectiveHeight} x2={textAreaX} y2={textAreaY + effectiveHeight - 8} />
+			<!-- Bottom-right corner -->
+			<line x1={textAreaX + effectiveWidth} y1={textAreaY + effectiveHeight} x2={textAreaX + effectiveWidth - 8} y2={textAreaY + effectiveHeight} />
+			<line x1={textAreaX + effectiveWidth} y1={textAreaY + effectiveHeight} x2={textAreaX + effectiveWidth} y2={textAreaY + effectiveHeight - 8} />
+		</g>
+	{/if}
+
 	<FitText
 		text={resolvedText}
-		x={0}
-		y={0}
-		width={container.width}
-		height={container.height}
+		x={textAreaX}
+		y={textAreaY}
+		width={effectiveWidth}
+		height={effectiveHeight}
 		minSize={minFontSize}
 		maxSize={maxFontSize}
 		inset={totalInset}

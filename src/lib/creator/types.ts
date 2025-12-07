@@ -2,7 +2,7 @@ import type { AnimationConfig } from '$lib/styling/animations';
 import type { EffectConfig } from '$lib/styling/effects';
 import type { BlendMode } from '$lib/styling/blend';
 import type { IconData } from '$lib/card/icons';
-import type { StatRow, ListStyle, TextPreset } from '$lib/card/fields';
+import type { StatRow, ListStyle, TextPreset, TextBoundsConfig } from '$lib/card/fields';
 import type { DividerStyle, DividerFade, DividerIconPreset } from '$lib/card/decorations';
 import type { ProgressBarStyle, LabelPosition } from '$lib/card/decorations';
 import type { RibbonPosition, RibbonStyle, RibbonTextPreset } from '$lib/card/decorations';
@@ -33,6 +33,8 @@ export interface TextComponent {
 	alignment: 'left' | 'center' | 'right';
 	verticalAlign: 'top' | 'center' | 'bottom';
 	padding: number;
+	/** Text bounds - constrain text to a safe zone (useful with clip shapes) */
+	bounds?: TextBoundsConfig;
 	shapeSource?: ShapeSource;
 	effect?: EffectConfig;
 	blendMode?: BlendMode;

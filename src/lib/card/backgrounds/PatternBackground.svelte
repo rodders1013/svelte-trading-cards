@@ -3,6 +3,7 @@
 	import { AnimationConfigSchema } from '$lib/styling/animations/types.js';
 	import { EffectConfigSchema } from '$lib/styling/effects/types.js';
 	import { BlendMode } from '$lib/styling/blend/types.js';
+	import { HolographicConfigSchema } from '$lib/styling/HolographicWrapper.svelte';
 	import { IconDataSchema } from '$lib/card/icons/Icon.svelte';
 
 	export const PatternTypeSchema = z.enum([
@@ -64,10 +65,11 @@
 		icons: z.array(PatternIconItemSchema).optional(),
 		rowOffset: z.number().default(0), // Offset alternating rows (stagger/brick effect)
 
-		// Animation, effects, and blending
+		// Animation, effects, blending, and holographic
 		animation: AnimationConfigSchema.optional(),
 		effect: EffectConfigSchema.optional(),
-		blendMode: BlendMode.optional()
+		blendMode: BlendMode.optional(),
+		holographic: HolographicConfigSchema.optional()
 	});
 
 	export type PatternBackgroundProps = z.infer<typeof PatternBackgroundPropsSchema>;
@@ -120,9 +122,8 @@
 </script>
 
 <script lang="ts">
-	import type { ContainerContext, CardData } from '$lib/types';
-	import { AnimationWrapper } from '$lib/styling/animations/index.js';
-	import { EffectWrapper } from '$lib/styling/effects/index.js';
+	import type { ContainerContext, CardData, UniversalModifiers } from '$lib/types';
+	import ComponentWrapper from '$lib/styling/ComponentWrapper.svelte';
 	import { sanitizeSvgBody } from '$lib/card/icons/Icon.svelte';
 
 	let {
@@ -142,6 +143,7 @@
 		animation,
 		effect,
 		blendMode,
+		holographic,
 		container,
 		data
 	}: PatternBackgroundProps & {
@@ -156,9 +158,8 @@
 	// Only clip if container has radius
 	const needsClip = $derived(container.radius > 0);
 
-	// Calculate center point for animation transform-origin
-	const centerX = $derived(container.width / 2);
-	const centerY = $derived(container.height / 2);
+	// Collect modifiers for unified wrapper
+	const modifiers: UniversalModifiers = $derived({ effect, animation, blendMode, holographic });
 
 	// Calculate effective cell size (size + spacing)
 	const cellSize = $derived(size + spacing);
@@ -485,16 +486,14 @@
 	{/if}
 </defs>
 
-<EffectWrapper {effect} {blendMode} transformOrigin="{centerX}px {centerY}px">
-	<AnimationWrapper {animation} transformOrigin="{centerX}px {centerY}px">
-		<rect
-			x="0"
-			y="0"
-			width={container.width}
-			height={container.height}
-			fill="url(#{patternId})"
-			{opacity}
-			clip-path={needsClip ? `url(#${clipId})` : undefined}
-		/>
-	</AnimationWrapper>
-</EffectWrapper>
+<ComponentWrapper {container} {modifiers}>
+	<rect
+		x="0"
+		y="0"
+		width={container.width}
+		height={container.height}
+		fill="url(#{patternId})"
+		{opacity}
+		clip-path={needsClip ? `url(#${clipId})` : undefined}
+	/>
+</ComponentWrapper>

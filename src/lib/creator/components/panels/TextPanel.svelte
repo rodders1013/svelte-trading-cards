@@ -6,10 +6,12 @@
 		FormInput,
 		FormSlider,
 		FormColorPicker,
-		FormGrid
+		FormGrid,
+		FormSwitch
 	} from '../form';
 	import ModifiersPanel from './ModifiersPanel.svelte';
 	import type { TextComponent, DataFieldOption } from '../../types';
+	import type { TextBoundsConfig } from '$lib/card/fields';
 	import { getAllFontsForDataset } from '$lib/fonts';
 	import {
 		getLabelsByCategory,
@@ -112,6 +114,26 @@
 		{ value: 'center', label: 'Center' },
 		{ value: 'bottom', label: 'Bottom' }
 	];
+
+	// Check if any bounds inset is set
+	const hasBoundsActive = $derived(
+		(component.bounds?.insetLeft ?? 0) > 0 ||
+		(component.bounds?.insetRight ?? 0) > 0 ||
+		(component.bounds?.insetTop ?? 0) > 0 ||
+		(component.bounds?.insetBottom ?? 0) > 0
+	);
+
+	// Helper to update bounds
+	function updateBounds(key: keyof TextBoundsConfig, value: number | boolean) {
+		const currentBounds = component.bounds ?? {
+			insetLeft: 0,
+			insetRight: 0,
+			insetTop: 0,
+			insetBottom: 0,
+			showGuide: false
+		};
+		onUpdate('bounds', { ...currentBounds, [key]: value });
+	}
 </script>
 
 <ComponentPanel
@@ -236,6 +258,60 @@
 			percent
 		/>
 	</FormGrid>
+
+	<!-- Text Bounds Section -->
+	<div class="rounded border border-input p-2">
+		<div class="mb-2 flex items-center justify-between">
+			<label class="text-sm font-medium">Text Bounds</label>
+			{#if hasBoundsActive}
+				<span class="rounded bg-blue-500/20 px-1.5 py-0.5 text-xs text-blue-400">Active</span>
+			{/if}
+		</div>
+		<p class="mb-2 text-xs text-muted-foreground">
+			Constrain text to a safe zone within the layer. Useful when using clip shapes.
+		</p>
+		<FormGrid>
+			<FormSlider
+				label="Left %"
+				value={component.bounds?.insetLeft ?? 0}
+				onchange={(v) => updateBounds('insetLeft', v)}
+				min={0}
+				max={50}
+				step={1}
+			/>
+			<FormSlider
+				label="Right %"
+				value={component.bounds?.insetRight ?? 0}
+				onchange={(v) => updateBounds('insetRight', v)}
+				min={0}
+				max={50}
+				step={1}
+			/>
+		</FormGrid>
+		<FormGrid>
+			<FormSlider
+				label="Top %"
+				value={component.bounds?.insetTop ?? 0}
+				onchange={(v) => updateBounds('insetTop', v)}
+				min={0}
+				max={50}
+				step={1}
+			/>
+			<FormSlider
+				label="Bottom %"
+				value={component.bounds?.insetBottom ?? 0}
+				onchange={(v) => updateBounds('insetBottom', v)}
+				min={0}
+				max={50}
+				step={1}
+			/>
+		</FormGrid>
+		<FormSwitch
+			label="Show Guide"
+			checked={component.bounds?.showGuide ?? false}
+			onchange={(v) => updateBounds('showGuide', v)}
+		/>
+	</div>
 
 	<ModifiersPanel
 		bind:shapeSource={component.shapeSource}
