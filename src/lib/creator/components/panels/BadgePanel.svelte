@@ -6,7 +6,7 @@
 		FormSlider,
 		FormGrid
 	} from '../form';
-	import PanelEffects from './PanelEffects.svelte';
+	import ModifiersPanel from './ModifiersPanel.svelte';
 	import type { BadgeComponent, DataFieldOption } from '../../types';
 	import { DEFAULT_DATASET, type DatasetId } from '$lib/presets';
 	import ShapePicker from '$lib/styling/shapes/ShapePicker.svelte';
@@ -91,5 +91,12 @@
 		percent
 	/>
 
-	<PanelEffects bind:effect={component.effect} />
+	<ModifiersPanel
+		bind:effect={component.effect}
+		bind:animation={component.animation}
+		bind:blendMode={component.blendMode}
+		bind:border={component.border}
+		bind:holographic={component.holographic}
+		showClipShape={false}
+	/>
 </ComponentPanel>

@@ -2,7 +2,7 @@
 
 **Package:** `svelte-trading-cards`
 **Version:** 0.1.0
-**Last Updated:** 2025-12-06
+**Last Updated:** 2025-12-07
 **Status:** In Development (~97% complete)
 
 ---
@@ -164,7 +164,7 @@ src/routes/
 
 ### Border
 
-Single unified border component with composable effects:
+Single unified border component using standard modifier systems:
 
 ```typescript
 {
@@ -173,23 +173,30 @@ Single unified border component with composable effects:
     color: '#ffffff',
     width: 8,
     opacity: 1,
-    // Optional effects
-    glow: {
-      enabled: true,
-      color: '#3b82f6',
-      intensity: 0.5,
-      blur: 10,
-      animated: true,
-      speed: 2
-    },
-    holographic: {
-      enabled: true,
-      secondaryColor: '#ec4899',
-      speed: 3
-    },
+    // Multi-layer support
     layers: 3,
     layerColors: ['#gold', '#silver', '#bronze'],
-    layerSpacing: 4
+    layerSpacing: 4,
+    // Standard effect system (use strokeGlow for border glow)
+    effect: {
+      type: 'strokeGlow',
+      color: '#3b82f6',
+      blur: 10,
+      intensity: 0.5,
+      animated: true,
+      speed: 'normal'
+    },
+    // Standard holographic config
+    holographic: {
+      color: '#3b82f6',
+      secondaryColor: '#ec4899',
+      tertiaryColor: '#06b6d4',  // Optional rainbow
+      speed: 3,
+      angle: 45,
+      apply: 'stroke'  // fill, stroke, or both
+    },
+    animation: { ... },
+    blendMode: 'normal'
   }
 }
 ```
@@ -599,6 +606,7 @@ All visual components support SVG filter-based effects that can be combined with
 ```typescript
 type EffectConfig =
   | { type: 'glow'; color: string; blur: number; intensity: number; animated?: boolean; speed?: AnimationSpeed }
+  | { type: 'strokeGlow'; color?: string; blur: number; intensity: number; animated?: boolean; speed?: AnimationSpeed }
   | { type: 'shadow'; color: string; blur: number; offsetX: number; offsetY: number; animated?: boolean; speed?: AnimationSpeed }
   | { type: 'neon'; color: string; intensity: number; spread: number; animated?: boolean; speed?: AnimationSpeed }
   | { type: 'innerGlow'; color: string; blur: number; intensity: number; animated?: boolean; speed?: AnimationSpeed }
@@ -610,12 +618,21 @@ type EffectConfig =
 
 | Effect | Description | Controls |
 |--------|-------------|----------|
-| `glow` | Soft outer glow | color, blur, intensity |
+| `glow` | Soft outer glow (drop shadow style) | color, blur, intensity |
+| `strokeGlow` | Blur glow on strokes/borders | color (optional), blur, intensity |
 | `shadow` | Drop shadow | color, blur, offsetX, offsetY |
 | `neon` | Multi-layer neon glow (overrides component color) | color, intensity, spread |
 | `innerGlow` | Inward glow effect | color, blur, intensity |
 | `lift` | Paper elevation shadow | elevation (sm/md/lg/xl) |
 | `outline` | Stroke outline around content | color, width |
+
+### Stroke Glow Effect
+
+The `strokeGlow` effect creates a blur glow specifically for strokes and borders:
+
+- If no color is specified, uses the element's stroke color
+- Great for glowing borders, outlines, and traced elements
+- Different from `glow` which creates a drop shadow around the entire element
 
 ### Neon Effect
 

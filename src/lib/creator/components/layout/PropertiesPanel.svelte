@@ -78,8 +78,6 @@
 		onUpdateImageComponent,
 		onUpdateBackgroundComponent,
 		onUpdateBorderComponent,
-		onUpdateBorderGlow,
-		onUpdateBorderHolographic,
 		onUpdateIconComponent,
 		onUpdateIconSelection,
 		onUpdateBadgeComponent,
@@ -132,8 +130,6 @@
 		onUpdateImageComponent: (key: keyof Omit<ImageComponent, 'type' | 'id'>, value: unknown) => void;
 		onUpdateBackgroundComponent: (key: keyof Omit<BackgroundComponent, 'type' | 'id'>, value: unknown) => void;
 		onUpdateBorderComponent: (key: keyof Omit<BorderComponent, 'type' | 'id'>, value: unknown) => void;
-		onUpdateBorderGlow: (key: string, value: unknown) => void;
-		onUpdateBorderHolographic: (key: string, value: unknown) => void;
 		onUpdateIconComponent: (key: keyof Omit<IconComponent, 'type' | 'id'>, value: unknown) => void;
 		onUpdateIconSelection: (icon: { iconData: IconData; iconName: string }) => void;
 		onUpdateBadgeComponent: (key: keyof Omit<BadgeComponent, 'type' | 'id'>, value: unknown) => void;
@@ -315,8 +311,6 @@
 												expanded={expandedPanels.has('comp-border')}
 												{isCardBase}
 												onUpdate={onUpdateBorderComponent}
-												onUpdateGlow={onUpdateBorderGlow}
-												onUpdateHolographic={onUpdateBorderHolographic}
 												onRemove={() => onRemoveComponent('border')}
 												onMoveUp={() => onMoveComponentUp(component.id)}
 												onMoveDown={() => onMoveComponentDown(component.id)}

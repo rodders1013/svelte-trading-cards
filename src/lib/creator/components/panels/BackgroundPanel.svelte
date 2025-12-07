@@ -1,8 +1,7 @@
 <script lang="ts">
 	import ComponentPanel from '../ComponentPanel.svelte';
 	import { FormSelect, FormSlider, FormColorPicker, FormInput, FormGrid } from '../form';
-	import PanelEffects from './PanelEffects.svelte';
-	import PanelBlend from './PanelBlend.svelte';
+	import ModifiersPanel from './ModifiersPanel.svelte';
 	import { IconPicker } from '$lib/card/icons';
 	import type { IconData } from '$lib/card/icons';
 	import { PATTERN_LABELS, PATTERN_PRESETS } from '$lib/card/backgrounds/PatternBackground.svelte';
@@ -339,6 +338,13 @@
 		</div>
 	</div>
 
-	<PanelEffects bind:effect={component.effect} />
-	<PanelBlend bind:blendMode={component.blendMode} />
+	<!-- Unified Modifiers (no clip shape for backgrounds) -->
+	<ModifiersPanel
+		bind:effect={component.effect}
+		bind:animation={component.animation}
+		bind:blendMode={component.blendMode}
+		bind:border={component.border}
+		bind:holographic={component.holographic}
+		showClipShape={false}
+	/>
 </ComponentPanel>

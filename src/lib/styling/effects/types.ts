@@ -11,7 +11,8 @@ import { AnimationSpeed } from '$lib/styling/animations/types.js';
 // Available effect types
 export const EffectType = z.enum([
 	'none',
-	'glow', // Soft outer glow
+	'glow', // Soft outer glow (drop shadow style)
+	'strokeGlow', // Blur glow on strokes/borders
 	'shadow', // Drop shadow
 	'neon', // Intense multi-layer glow
 	'innerGlow', // Inward glow effect
@@ -20,7 +21,7 @@ export const EffectType = z.enum([
 ]);
 export type EffectType = z.infer<typeof EffectType>;
 
-// Glow effect configuration
+// Glow effect configuration (drop shadow style)
 export const GlowEffectSchema = z.object({
 	type: z.literal('glow'),
 	color: z.string().default('#3b82f6'),
@@ -30,6 +31,17 @@ export const GlowEffectSchema = z.object({
 	speed: AnimationSpeed.default('normal')
 });
 export type GlowEffect = z.infer<typeof GlowEffectSchema>;
+
+// Stroke glow effect configuration (blur filter on strokes/borders)
+export const StrokeGlowEffectSchema = z.object({
+	type: z.literal('strokeGlow'),
+	color: z.string().optional(), // If not set, uses stroke color
+	blur: z.number().min(1).max(50).default(10),
+	intensity: z.number().min(0).max(1).default(0.5),
+	animated: z.boolean().default(false),
+	speed: AnimationSpeed.default('normal')
+});
+export type StrokeGlowEffect = z.infer<typeof StrokeGlowEffectSchema>;
 
 // Drop shadow effect configuration
 export const ShadowEffectSchema = z.object({
@@ -87,6 +99,7 @@ export type OutlineEffect = z.infer<typeof OutlineEffectSchema>;
 // Union of all effect configurations
 export const EffectConfigSchema = z.discriminatedUnion('type', [
 	GlowEffectSchema,
+	StrokeGlowEffectSchema,
 	ShadowEffectSchema,
 	NeonEffectSchema,
 	InnerGlowEffectSchema,

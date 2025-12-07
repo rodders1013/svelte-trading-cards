@@ -1,21 +1,16 @@
 <script lang="ts">
 	import ComponentPanel from '../ComponentPanel.svelte';
 	import { FormSelect, FormSlider, FormGrid } from '../form';
-	import PanelEffects from './PanelEffects.svelte';
-	import PanelBlend from './PanelBlend.svelte';
+	import ModifiersPanel from './ModifiersPanel.svelte';
 	import type { ImageComponent, DataFieldOption } from '../../types';
-	import ShapePicker from '$lib/styling/shapes/ShapePicker.svelte';
-	import type { ShapeSource } from '$lib/styling/shapes';
 	import type { FilterConfig, ImageTransformConfig } from '$lib/styling/filters';
 	import { DEFAULT_FILTER_CONFIG, DEFAULT_IMAGE_TRANSFORM, hasActiveFilters, hasActiveTransform } from '$lib/styling/filters';
 	import * as Collapsible from '$lib/creator/ui/collapsible';
-	import * as Tooltip from '$lib/creator/ui/tooltip';
 	import ChevronDown from '@lucide/svelte/icons/chevron-down';
-	import RotateCw from '@lucide/svelte/icons/rotate-cw';
 	import X from '@lucide/svelte/icons/x';
 	import FlipHorizontal from '@lucide/svelte/icons/flip-horizontal';
 	import FlipVertical from '@lucide/svelte/icons/flip-vertical';
-	import CircleHelp from '@lucide/svelte/icons/circle-help';
+	import HelpTooltip from '../HelpTooltip.svelte';
 
 	let {
 		component,
@@ -51,27 +46,6 @@
 		{ value: 'xMidYMid meet', label: 'Contain (fit)' },
 		{ value: 'none', label: 'Stretch' }
 	];
-
-	// Shape section state
-	let showShape = $state(false);
-
-	// Handle shape source change
-	function handleShapeChange(source: ShapeSource) {
-		// If selecting rectangle, clear shapeSource
-		if (source.type === 'builtin' && source.shape === 'rectangle') {
-			onUpdate('shapeSource', undefined);
-		} else {
-			onUpdate('shapeSource', source);
-		}
-	}
-
-	// Get current shape for display
-	const currentShapeValue = $derived<ShapeSource>(
-		component.shapeSource ?? { type: 'builtin', shape: 'rectangle' }
-	);
-
-	// Check if has custom shape
-	const hasShape = $derived(!!component.shapeSource);
 
 	// Transform section state
 	let showTransform = $state(false);
@@ -167,39 +141,7 @@
 		/>
 	</FormGrid>
 
-	<!-- Clip Shape Section -->
-	<Collapsible.Root bind:open={showShape}>
-		<div class="flex items-center gap-2 rounded border border-purple-500/30 bg-purple-500/5 px-2 py-1.5 text-sm hover:bg-purple-500/10">
-			<Collapsible.Trigger class="flex flex-1 items-center gap-2">
-				<ChevronDown class="h-3 w-3 transition-transform {showShape ? '' : '-rotate-90'}" />
-				<span class="font-medium text-purple-400">Clip Shape</span>
-				{#if hasShape && component.shapeSource}
-					<span class="ml-auto rounded bg-purple-500/20 px-1.5 py-0.5 text-xs text-purple-400 capitalize">
-						{component.shapeSource.type === 'builtin' ? component.shapeSource.shape : 'custom'}
-					</span>
-				{/if}
-			</Collapsible.Trigger>
-			{#if hasShape}
-				<button
-					class="rounded p-0.5 text-purple-400 hover:bg-purple-500/20"
-					onclick={() => onUpdate('shapeSource', undefined)}
-					title="Remove clip shape"
-				>
-					<X class="h-3 w-3" />
-				</button>
-			{/if}
-		</div>
-		<Collapsible.Content>
-			<div class="mt-2 rounded border border-purple-500/20 bg-purple-500/5 p-2">
-				<ShapePicker
-					value={currentShapeValue}
-					onchange={handleShapeChange}
-				/>
-			</div>
-		</Collapsible.Content>
-	</Collapsible.Root>
-
-	<!-- Transform Section (Pan/Zoom/Rotation/Flip) -->
+	<!-- Transform Section (Pan/Zoom/Rotation/Flip) - Image specific -->
 	<Collapsible.Root bind:open={showTransform}>
 		<div class="flex items-center gap-2 rounded border border-cyan-500/30 bg-cyan-500/5 px-2 py-1.5 text-sm hover:bg-cyan-500/10">
 			<Collapsible.Trigger class="flex flex-1 items-center gap-2">
@@ -211,26 +153,16 @@
 					</span>
 				{/if}
 			</Collapsible.Trigger>
-			<Tooltip.Provider>
-				<Tooltip.Root>
-					<Tooltip.Trigger>
-						<CircleHelp class="h-3.5 w-3.5 text-cyan-400/60 hover:text-cyan-400" />
-					</Tooltip.Trigger>
-					<Tooltip.Content side="left" class="max-w-[240px] text-xs">
-						<p class="font-medium mb-1">How Transform Works</p>
-						<p class="text-muted-foreground">Zoom in first (scale {'>'} 1), then use Pan to move around the image. At zoom = 1, the image fills the container exactly.</p>
-					</Tooltip.Content>
-				</Tooltip.Root>
-			</Tooltip.Provider>
 			{#if hasTransform}
 				<button
 					class="rounded p-0.5 text-cyan-400 hover:bg-cyan-500/20"
 					onclick={resetTransform}
 					title="Reset transform"
 				>
-					<RotateCw class="h-3 w-3" />
+					<X class="h-3 w-3" />
 				</button>
 			{/if}
+			<HelpTooltip text="Zoom in first, then use Pan to move around. At zoom = 1, the image fills the container exactly." />
 		</div>
 		<Collapsible.Content>
 			<div class="mt-2 space-y-3 rounded border border-cyan-500/20 bg-cyan-500/5 p-2">
@@ -295,7 +227,7 @@
 		</Collapsible.Content>
 	</Collapsible.Root>
 
-	<!-- Filters Section (Brightness/Contrast/etc) -->
+	<!-- Filters Section (Brightness/Contrast/etc) - Image specific -->
 	<Collapsible.Root bind:open={showFilters}>
 		<div class="flex items-center gap-2 rounded border border-amber-500/30 bg-amber-500/5 px-2 py-1.5 text-sm hover:bg-amber-500/10">
 			<Collapsible.Trigger class="flex flex-1 items-center gap-2">
@@ -313,9 +245,10 @@
 					onclick={resetFilters}
 					title="Reset adjustments"
 				>
-					<RotateCw class="h-3 w-3" />
+					<X class="h-3 w-3" />
 				</button>
 			{/if}
+			<HelpTooltip text="Adjust image filters like brightness, contrast, saturation, and more." />
 		</div>
 		<Collapsible.Content>
 			<div class="mt-2 space-y-3 rounded border border-amber-500/20 bg-amber-500/5 p-2">
@@ -405,6 +338,13 @@
 		</Collapsible.Content>
 	</Collapsible.Root>
 
-	<PanelEffects bind:effect={component.effect} />
-	<PanelBlend bind:blendMode={component.blendMode} />
+	<!-- Unified Modifiers (Clip Shape, Effect, Animation, Border, Holographic, Blend) -->
+	<ModifiersPanel
+		bind:shapeSource={component.shapeSource}
+		bind:effect={component.effect}
+		bind:animation={component.animation}
+		bind:blendMode={component.blendMode}
+		bind:border={component.border}
+		bind:holographic={component.holographic}
+	/>
 </ComponentPanel>

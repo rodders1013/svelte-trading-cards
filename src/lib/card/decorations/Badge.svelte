@@ -35,9 +35,8 @@
 </script>
 
 <script lang="ts">
-	import type { ContainerContext, CardData } from '$lib/types';
-	import { AnimationWrapper } from '$lib/styling/animations/index.js';
-	import { EffectWrapper } from '$lib/styling/effects/index.js';
+	import type { ContainerContext, CardData, UniversalModifiers } from '$lib/types';
+	import ComponentWrapper from '$lib/styling/ComponentWrapper.svelte';
 	import { sanitizeSvgBody } from '$lib/card/icons/Icon.svelte';
 	import { getShapeRenderData } from '$lib/styling/shapes/shapeUtils.js';
 
@@ -77,59 +76,60 @@
 
 	// Sanitize content icon body
 	const sanitizedIconBody = $derived(icon?.body ? sanitizeSvgBody(icon.body) : '');
+
+	// Collect modifiers for unified wrapper
+	const modifiers: UniversalModifiers = $derived({ effect, animation, blendMode });
 </script>
 
-<EffectWrapper {effect} {blendMode} transformOrigin="{cx}px {cy}px">
-	<AnimationWrapper {animation} transformOrigin="{cx}px {cy}px">
-		<g opacity={opacity}>
-			{#if shapeRender}
-				<!-- Define mask for the shape -->
-				<defs>
-					<mask id={maskId}>
-						<g transform={shapeRender.transform} fill="white">
-							{@html shapeRender.strippedBody}
-						</g>
-					</mask>
-				</defs>
-
-				<!-- Background fill using mask -->
-				<rect
-					x="0"
-					y="0"
-					width={width}
-					height={height}
-					fill={backgroundColor}
-					mask="url(#{maskId})"
-				/>
-
-				<!-- Border stroke (rendered directly on shape path) -->
-				{#if borderColor && borderWidth > 0}
-					<g
-						transform={shapeRender.transform}
-						fill="none"
-						stroke={borderColor}
-						stroke-width={borderWidth * (shapeRender.width / width)}
-					>
+<ComponentWrapper {container} {modifiers}>
+	<g opacity={opacity}>
+		{#if shapeRender}
+			<!-- Define mask for the shape -->
+			<defs>
+				<mask id={maskId}>
+					<g transform={shapeRender.transform} fill="white">
 						{@html shapeRender.strippedBody}
 					</g>
-				{/if}
+				</mask>
+			</defs>
 
-				<!-- Content icon (if provided) - centered in the badge -->
-				{#if hasIcon && icon}
-					<svg
-						x={cx - iconSize / 2}
-						y={cy - iconSize / 2}
-						width={iconSize}
-						height={iconSize}
-						viewBox="0 0 {icon.width ?? 24} {icon.height ?? 24}"
-						fill="none"
-					>
-						<g fill={iconColor ?? '#ffffff'} style="color: {iconColor ?? '#ffffff'}">
-							{@html sanitizedIconBody}
-						</g>
-					</svg>
-				{/if}
+			<!-- Background fill using mask -->
+			<rect
+				x="0"
+				y="0"
+				width={width}
+				height={height}
+				fill={backgroundColor}
+				mask="url(#{maskId})"
+			/>
+
+			<!-- Border stroke (rendered directly on shape path) -->
+			{#if borderColor && borderWidth > 0}
+				<g
+					transform={shapeRender.transform}
+					fill="none"
+					stroke={borderColor}
+					stroke-width={borderWidth * (shapeRender.width / width)}
+				>
+					{@html shapeRender.strippedBody}
+				</g>
 			{/if}
-		</g>
-	</AnimationWrapper>
-</EffectWrapper>
+
+			<!-- Content icon (if provided) - centered in the badge -->
+			{#if hasIcon && icon}
+				<svg
+					x={cx - iconSize / 2}
+					y={cy - iconSize / 2}
+					width={iconSize}
+					height={iconSize}
+					viewBox="0 0 {icon.width ?? 24} {icon.height ?? 24}"
+					fill="none"
+				>
+					<g fill={iconColor ?? '#ffffff'} style="color: {iconColor ?? '#ffffff'}">
+						{@html sanitizedIconBody}
+					</g>
+				</svg>
+			{/if}
+		{/if}
+	</g>
+</ComponentWrapper>

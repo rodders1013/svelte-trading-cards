@@ -8,7 +8,7 @@
 		FormSlider,
 		FormGrid
 	} from '../form';
-	import PanelEffects from './PanelEffects.svelte';
+	import ModifiersPanel from './ModifiersPanel.svelte';
 	import type { ListComponent, DataFieldOption } from '../../types';
 	import { getAllFontsForDataset } from '$lib/fonts';
 	import { DEFAULT_DATASET, type DatasetId } from '$lib/presets';
@@ -200,5 +200,12 @@
 		percent
 	/>
 
-	<PanelEffects bind:effect={component.effect} />
+	<ModifiersPanel
+		bind:shapeSource={component.shapeSource}
+		bind:effect={component.effect}
+		bind:animation={component.animation}
+		bind:blendMode={component.blendMode}
+		bind:border={component.border}
+		bind:holographic={component.holographic}
+	/>
 </ComponentPanel>

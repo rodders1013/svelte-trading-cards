@@ -133,6 +133,47 @@
 					/>
 				</div>
 
+			<!-- Stroke Glow Effect Controls -->
+			{:else if effect.type === 'strokeGlow'}
+				<div>
+					<span class="text-sm text-muted-foreground">Color (optional)</span>
+					<input
+						type="color"
+						class="mt-1 h-8 w-full cursor-pointer rounded border border-input"
+						value={effect.color ?? '#ffffff'}
+						oninput={(e) => updateEffect('color', (e.target as HTMLInputElement).value)}
+					/>
+					<button
+						type="button"
+						class="mt-1 text-xs text-muted-foreground hover:text-foreground"
+						onclick={() => updateEffect('color', undefined)}
+					>
+						Clear (use stroke color)
+					</button>
+				</div>
+				<div>
+					<span class="text-sm text-muted-foreground">Blur: {effect.blur}px</span>
+					<input
+						type="range"
+						class="mt-1 w-full"
+						min="1"
+						max="50"
+						value={effect.blur}
+						oninput={(e) => updateEffect('blur', parseInt((e.target as HTMLInputElement).value))}
+					/>
+				</div>
+				<div>
+					<span class="text-sm text-muted-foreground">Intensity: {Math.round(effect.intensity * 100)}%</span>
+					<input
+						type="range"
+						class="mt-1 w-full"
+						min="0"
+						max="100"
+						value={effect.intensity * 100}
+						oninput={(e) => updateEffect('intensity', parseInt((e.target as HTMLInputElement).value) / 100)}
+					/>
+				</div>
+
 			<!-- Shadow Effect Controls -->
 			{:else if effect.type === 'shadow'}
 				<div>

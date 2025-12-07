@@ -9,7 +9,7 @@
 		FormCheckbox,
 		FormGrid
 	} from '../form';
-	import PanelEffects from './PanelEffects.svelte';
+	import ModifiersPanel from './ModifiersPanel.svelte';
 	import type { IconComponent } from '../../types';
 
 	let {
@@ -96,7 +96,14 @@
 				/>
 			</div>
 
-			<PanelEffects bind:effect={component.effect} />
+			<ModifiersPanel
+				bind:shapeSource={component.shapeSource}
+				bind:effect={component.effect}
+				bind:animation={component.animation}
+				bind:blendMode={component.blendMode}
+				bind:border={component.border}
+				bind:holographic={component.holographic}
+			/>
 		</div>
 	{/if}
 </ComponentPanel>

@@ -844,46 +844,6 @@ import { extractFontsFromCard, loadGoogleFonts } from '$lib/fonts';
 		});
 	}
 
-	function updateBorderGlow(key: string, value: unknown) {
-		if (!selectedContainerId) return;
-		const container = containers.find((c) => c.id === selectedContainerId);
-		if (!container) return;
-		const border = getComponentByType(container, 'border');
-		if (!border?.glow) return;
-		pushHistory();
-		containers = containers.map((c) =>
-			c.id === selectedContainerId
-				? {
-						...c,
-						components: c.components.map((comp) =>
-							comp.type === 'border' && comp.glow ? { ...comp, glow: { ...comp.glow, [key]: value } } : comp
-						)
-					}
-				: c
-		);
-	}
-
-	function updateBorderHolographic(key: string, value: unknown) {
-		if (!selectedContainerId) return;
-		const container = containers.find((c) => c.id === selectedContainerId);
-		if (!container) return;
-		const border = getComponentByType(container, 'border');
-		if (!border?.holographic) return;
-		pushHistory();
-		containers = containers.map((c) =>
-			c.id === selectedContainerId
-				? {
-						...c,
-						components: c.components.map((comp) =>
-							comp.type === 'border' && comp.holographic
-								? { ...comp, holographic: { ...comp.holographic, [key]: value } }
-								: comp
-						)
-					}
-				: c
-		);
-	}
-
 	function moveComponentUp(componentId: string) {
 		if (!selectedContainerId) return;
 		const container = containers.find((c) => c.id === selectedContainerId);
@@ -1363,8 +1323,6 @@ import { extractFontsFromCard, loadGoogleFonts } from '$lib/fonts';
 						onUpdateImageComponent={updateImageComponent}
 						onUpdateBackgroundComponent={updateBackgroundComponent}
 						onUpdateBorderComponent={updateBorderComponent}
-						onUpdateBorderGlow={updateBorderGlow}
-						onUpdateBorderHolographic={updateBorderHolographic}
 						onUpdateIconComponent={updateIconComponent}
 						onUpdateIconSelection={updateIconSelection}
 						onUpdateBadgeComponent={updateBadgeComponent}
@@ -1544,8 +1502,6 @@ import { extractFontsFromCard, loadGoogleFonts } from '$lib/fonts';
 						onUpdateImageComponent={updateImageComponent}
 						onUpdateBackgroundComponent={updateBackgroundComponent}
 						onUpdateBorderComponent={updateBorderComponent}
-						onUpdateBorderGlow={updateBorderGlow}
-						onUpdateBorderHolographic={updateBorderHolographic}
 						onUpdateIconComponent={updateIconComponent}
 						onUpdateIconSelection={updateIconSelection}
 						onUpdateBadgeComponent={updateBadgeComponent}
@@ -1689,8 +1645,6 @@ import { extractFontsFromCard, loadGoogleFonts } from '$lib/fonts';
 						onUpdateImageComponent={updateImageComponent}
 						onUpdateBackgroundComponent={updateBackgroundComponent}
 						onUpdateBorderComponent={updateBorderComponent}
-						onUpdateBorderGlow={updateBorderGlow}
-						onUpdateBorderHolographic={updateBorderHolographic}
 						onUpdateIconComponent={updateIconComponent}
 						onUpdateIconSelection={updateIconSelection}
 						onUpdateBadgeComponent={updateBadgeComponent}

@@ -13,6 +13,12 @@ export const EFFECT_PRESETS: Record<Exclude<EffectType, 'none'>, EffectPreset> =
 		description: 'Soft outer glow effect',
 		icon: 'lucide--sparkles'
 	},
+	strokeGlow: {
+		type: 'strokeGlow',
+		label: 'Stroke Glow',
+		description: 'Blur glow on strokes and borders',
+		icon: 'lucide--circle-dot'
+	},
 	shadow: {
 		type: 'shadow',
 		label: 'Drop Shadow',
@@ -70,6 +76,15 @@ export function getDefaultEffectConfig(type: EffectType) {
 				color: '#3b82f6',
 				blur: 10,
 				intensity: 0.7,
+				animated: false,
+				speed: 'normal' as const
+			};
+		case 'strokeGlow':
+			return {
+				type: 'strokeGlow' as const,
+				color: undefined, // Uses stroke color by default
+				blur: 10,
+				intensity: 0.5,
 				animated: false,
 				speed: 'normal' as const
 			};

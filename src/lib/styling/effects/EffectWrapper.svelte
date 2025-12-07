@@ -96,6 +96,23 @@
 						<feMergeNode in="SourceGraphic" />
 					</feMerge>
 				</filter>
+			{:else if effect.type === 'strokeGlow'}
+				<!-- Stroke glow: Gaussian blur applied to the entire element, great for borders/strokes -->
+				<filter id={filterId} x="-50%" y="-50%" width="200%" height="200%">
+					<feGaussianBlur in="SourceGraphic" stdDeviation={effect.blur} result="blur" />
+					{#if effect.color}
+						<!-- If custom color specified, colorize the blur -->
+						<feFlood flood-color={effect.color} flood-opacity={effect.intensity} result="color" />
+						<feComposite in="color" in2="blur" operator="in" result="coloredBlur" />
+						<feComposite in="coloredBlur" in2="SourceGraphic" operator="over" />
+					{:else}
+						<!-- No color: just blur with intensity via opacity -->
+						<feComposite in="blur" in2="SourceGraphic" operator="over" result="combined" />
+						<feComponentTransfer in="combined">
+							<feFuncA type="linear" slope={1 + effect.intensity} />
+						</feComponentTransfer>
+					{/if}
+				</filter>
 			{:else if effect.type === 'shadow'}
 				<filter id={filterId} x="-50%" y="-50%" width="200%" height="200%">
 					<feDropShadow

@@ -331,7 +331,7 @@
 											<span class="flex-1 truncate capitalize">{comp.type}</span>
 
 											<!-- Effect indicator -->
-											{#if comp.effect && comp.effect.type !== 'none'}
+											{#if comp.effect}
 												<Sparkles class="h-2.5 w-2.5 shrink-0 text-purple-400" />
 											{/if}
 

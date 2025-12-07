@@ -13,7 +13,7 @@
 		FormCheckbox,
 		FormGrid
 	} from '../form';
-	import PanelEffects from './PanelEffects.svelte';
+	import ModifiersPanel from './ModifiersPanel.svelte';
 	import type { IconRatingComponent, DataFieldOption } from '../../types';
 	import type { FontDropdownOption } from '$lib/fonts';
 	import Link from '@lucide/svelte/icons/link';
@@ -305,5 +305,12 @@
 		percent
 	/>
 
-	<PanelEffects bind:effect={component.effect} />
+	<ModifiersPanel
+		bind:shapeSource={component.shapeSource}
+		bind:effect={component.effect}
+		bind:animation={component.animation}
+		bind:blendMode={component.blendMode}
+		bind:border={component.border}
+		bind:holographic={component.holographic}
+	/>
 </ComponentPanel>

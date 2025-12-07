@@ -147,14 +147,19 @@ src/lib/creator/
 ├── types.ts            # Type definitions
 ├── state.svelte.ts     # Factory functions & helpers
 └── components/         # Modular UI components
-    ├── HierarchyPanel.svelte
-    ├── CanvasPreview.svelte
-    ├── PropertiesPanel.svelte
-    ├── AnimationControls.svelte  # Reusable (shared by all panels)
-    ├── EffectsControls.svelte    # Reusable (shared by all panels)
-    ├── BlendControls.svelte      # Blend mode dropdown (shared)
+    ├── layout/
+    │   ├── HierarchyPanel.svelte   # Zone hierarchy (left sidebar)
+    │   └── PropertiesPanel.svelte  # Properties (right sidebar)
+    ├── controls/
+    │   ├── AnimationControls.svelte    # Animation settings
+    │   ├── EffectsControls.svelte      # Effect settings (includes strokeGlow)
+    │   ├── BlendControls.svelte        # Blend mode dropdown
+    │   ├── BorderModifierControls.svelte
+    │   └── HolographicControls.svelte
     ├── form/*.svelte             # Reusable form components
-    └── panels/*.svelte           # Component property panels
+    └── panels/
+        ├── ModifiersPanel.svelte  # Unified modifiers (all panels use this)
+        └── *Panel.svelte          # Component property panels
 ```
 
 ### Key Concepts
@@ -248,8 +253,18 @@ Located in `src/lib/creator/components/form/`:
 | `FormColorPicker` | Labeled color picker |
 | `FormFontSelect` | Font dropdown with live preview and on-demand loading |
 | `FormGrid` | 2/3/4 column grid layout |
-| `PanelEffects` | Shared effects section footer |
-| `PanelBlend` | Shared blend mode section |
+
+### Unified ModifiersPanel
+
+All component panels use a single `ModifiersPanel` component that provides:
+- **Clip Shape** - Mask component to any shape (universal)
+- **Effect** - glow, strokeGlow, shadow, neon, innerGlow, lift, outline
+- **Animation** - spin, pulse, bounce, shake, float, glow, ping, trace
+- **Border** - Color, width, opacity, style modifier
+- **Holographic** - Animated color-shift effect
+- **Blend Mode** - multiply, screen, overlay, etc.
+
+Use `showClipShape={false}`, `showBorder={false}`, etc. to hide specific sections.
 
 ---
 

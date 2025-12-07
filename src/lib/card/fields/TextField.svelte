@@ -45,9 +45,9 @@
 
 <script lang="ts">
 	import FitText from '$lib/utils/FitText.svelte';
-	import type { ContainerContext, CardData } from '$lib/types';
-	import { AnimationWrapper } from '$lib/styling/animations/index.js';
-	import { EffectWrapper } from '$lib/styling/effects/index.js';
+	import { resolveTextContent } from '$lib/utils/data.js';
+	import type { ContainerContext, CardData, UniversalModifiers } from '$lib/types';
+	import ComponentWrapper from '$lib/styling/ComponentWrapper.svelte';
 
 	let {
 		textPreset = 'none',
@@ -74,46 +74,36 @@
 		data?: CardData;
 	} = $props();
 
-	// Text from data field (priority) or preset - no free text allowed
-	const resolvedText = $derived.by(() => {
-		// Data field takes priority (trusted source)
-		if (dataField && data && data[dataField] !== undefined) {
-			return String(data[dataField]);
-		}
-		// Otherwise use preset text
-		return textPreset === 'none' ? '' : textPreset;
-	});
+	// Text from data field (priority) or preset - uses shared utility
+	const resolvedText = $derived(resolveTextContent(dataField, data, textPreset, 'none', ''));
 
 	// Calculate inset from container radius (to avoid rounded corners) plus user padding
 	// For rounded corners, safe inset ≈ radius * 0.3 keeps text out of corner curves
 	const radiusInset = $derived((container.radius ?? 0) * 0.3);
 	const totalInset = $derived(radiusInset + padding);
 
-	// Calculate center point for animation transform-origin
-	const centerX = $derived(container.width / 2);
-	const centerY = $derived(container.height / 2);
+	// Collect modifiers for unified wrapper
+	const modifiers: UniversalModifiers = $derived({ effect, animation, blendMode });
 </script>
 
-<EffectWrapper {effect} {blendMode} transformOrigin="{centerX}px {centerY}px">
-	<AnimationWrapper {animation} transformOrigin="{centerX}px {centerY}px">
-		<FitText
-			text={resolvedText}
-			x={0}
-			y={0}
-			width={container.width}
-			height={container.height}
-			minSize={minFontSize}
-			maxSize={maxFontSize}
-			inset={totalInset}
-			{fontFamily}
-			{fontWeight}
-			{fontStyle}
-			{textDecoration}
-			{textTransform}
-			horizontalAlign={alignment}
-			{verticalAlign}
-			fill={color}
-			{opacity}
-		/>
-	</AnimationWrapper>
-</EffectWrapper>
+<ComponentWrapper {container} {modifiers}>
+	<FitText
+		text={resolvedText}
+		x={0}
+		y={0}
+		width={container.width}
+		height={container.height}
+		minSize={minFontSize}
+		maxSize={maxFontSize}
+		inset={totalInset}
+		{fontFamily}
+		{fontWeight}
+		{fontStyle}
+		{textDecoration}
+		{textTransform}
+		horizontalAlign={alignment}
+		{verticalAlign}
+		fill={color}
+		{opacity}
+	/>
+</ComponentWrapper>

@@ -58,9 +58,8 @@
 </script>
 
 <script lang="ts">
-	import type { ContainerContext, CardData } from '$lib/types';
-	import { AnimationWrapper } from '$lib/styling/animations/index.js';
-	import { EffectWrapper } from '$lib/styling/effects/index.js';
+	import type { ContainerContext, CardData, UniversalModifiers } from '$lib/types';
+	import ComponentWrapper from '$lib/styling/ComponentWrapper.svelte';
 
 	let {
 		iconData,
@@ -95,24 +94,20 @@
 	const x = $derived((container.width - iconSize) / 2);
 	const y = $derived((container.height - iconSize) / 2);
 
-	// Calculate the center point for animation transform-origin
-	const centerX = $derived(x + iconSize / 2);
-	const centerY = $derived(y + iconSize / 2);
-
-	// Build transform string
+	// Build transform string for rotation/flip
 	const transform = $derived.by(() => {
 		const transforms: string[] = [];
-		const centerX = x + iconSize / 2;
-		const centerY = y + iconSize / 2;
+		const cx = x + iconSize / 2;
+		const cy = y + iconSize / 2;
 
 		if (rotation !== 0) {
-			transforms.push(`rotate(${rotation} ${centerX} ${centerY})`);
+			transforms.push(`rotate(${rotation} ${cx} ${cy})`);
 		}
 
 		if (flipHorizontal || flipVertical) {
 			const scaleX = flipHorizontal ? -1 : 1;
 			const scaleY = flipVertical ? -1 : 1;
-			transforms.push(`translate(${centerX} ${centerY}) scale(${scaleX} ${scaleY}) translate(${-centerX} ${-centerY})`);
+			transforms.push(`translate(${cx} ${cy}) scale(${scaleX} ${scaleY}) translate(${-cx} ${-cy})`);
 		}
 
 		return transforms.join(' ');
@@ -123,28 +118,29 @@
 
 	// Sanitize icon body to prevent XSS
 	const sanitizedBody = $derived(iconData?.body ? sanitizeSvgBody(iconData.body) : '');
+
+	// Collect modifiers for unified wrapper
+	const modifiers: UniversalModifiers = $derived({ effect, animation, blendMode });
 </script>
 
 {#if iconData?.body}
-	<EffectWrapper {effect} {blendMode} transformOrigin="{centerX}px {centerY}px">
-		<AnimationWrapper {animation} transformOrigin="{centerX}px {centerY}px">
-			<g transform={transform} opacity={opacity}>
-				<svg
-					x={x}
-					y={y}
-					width={iconSize}
-					height={iconSize}
-					viewBox={viewBox}
-					fill="none"
-					xmlns="http://www.w3.org/2000/svg"
-				>
-					<g fill={color} style="color: {color}">
-						{@html sanitizedBody}
-					</g>
-				</svg>
-			</g>
-		</AnimationWrapper>
-	</EffectWrapper>
+	<ComponentWrapper {container} {modifiers}>
+		<g transform={transform} opacity={opacity}>
+			<svg
+				x={x}
+				y={y}
+				width={iconSize}
+				height={iconSize}
+				viewBox={viewBox}
+				fill="none"
+				xmlns="http://www.w3.org/2000/svg"
+			>
+				<g fill={color} style="color: {color}">
+					{@html sanitizedBody}
+				</g>
+			</svg>
+		</g>
+	</ComponentWrapper>
 {:else}
 	<!-- Placeholder when no icon selected -->
 	<g opacity={0.3}>

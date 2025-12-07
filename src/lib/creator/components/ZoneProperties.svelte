@@ -4,6 +4,7 @@
 	import { Label } from '$lib/creator/ui/label';
 	import { Checkbox } from '$lib/creator/ui/checkbox';
 	import ChevronDown from '@lucide/svelte/icons/chevron-down';
+	import X from '@lucide/svelte/icons/x';
 	import AnimationControls from './controls/AnimationControls.svelte';
 	import BlendControls from './controls/BlendControls.svelte';
 	import HelpTooltip from './HelpTooltip.svelte';
@@ -180,6 +181,15 @@
 						</span>
 					{/if}
 				</Collapsible.Trigger>
+				{#if !isSimpleRect}
+					<button
+						class="rounded p-0.5 text-purple-400 hover:bg-purple-500/20"
+						onclick={() => onUpdate('shapeSource', undefined)}
+						title="Remove clip shape"
+					>
+						<X class="h-3 w-3" />
+					</button>
+				{/if}
 				<HelpTooltip text="Shape used to clip/mask this layer's content." />
 			</div>
 			<Collapsible.Content>
@@ -203,6 +213,15 @@
 					<span class="ml-auto rounded bg-blue-500/20 px-1.5 py-0.5 text-xs text-blue-400 capitalize">{localAnimation.type}</span>
 				{/if}
 			</Collapsible.Trigger>
+			{#if localAnimation?.type && localAnimation.type !== 'none'}
+				<button
+					class="rounded p-0.5 text-blue-400 hover:bg-blue-500/20"
+					onclick={() => { localAnimation = undefined; }}
+					title="Remove animation"
+				>
+					<X class="h-3 w-3" />
+				</button>
+			{/if}
 			<HelpTooltip text="Animation applies to this entire layer and all components within it." />
 		</div>
 		<Collapsible.Content>
@@ -222,6 +241,15 @@
 					<span class="ml-auto rounded bg-amber-500/20 px-1.5 py-0.5 text-xs text-amber-400 capitalize">{container.blendMode}</span>
 				{/if}
 			</Collapsible.Trigger>
+			{#if container.blendMode && container.blendMode !== 'normal'}
+				<button
+					class="rounded p-0.5 text-amber-400 hover:bg-amber-500/20"
+					onclick={() => onUpdate('blendMode', undefined)}
+					title="Remove blend mode"
+				>
+					<X class="h-3 w-3" />
+				</button>
+			{/if}
 			<HelpTooltip text="Blend mode affects how this layer composites with layers below it." />
 		</div>
 		<Collapsible.Content>

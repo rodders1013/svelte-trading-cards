@@ -1,6 +1,6 @@
 # svelte-trading-cards Project Tracker
 
-**Last Updated:** 2025-12-06
+**Last Updated:** 2025-12-07
 **Current Progress:** ~97% (Beta ready)
 
 ---
@@ -36,9 +36,9 @@
 - [x] Border (unified, container-aware, shape-aware)
   - Base: color, width, opacity
   - Shape-aware: uses container.shapeSource for shape (icon-based system)
-  - Glow effect: color, intensity, blur, animated pulse
-  - Holographic effect: dual-color animation with speed control
   - Multi-layer (mythic) effect: up to 5 layers with custom colors and spacing
+  - Uses standard Effect system for glow (strokeGlow effect type)
+  - Uses standard HolographicConfig for holographic effects
 
 ### Data Model
 - [x] Generic CardData type (Record<string, unknown>)
@@ -220,7 +220,9 @@
 
 ### Effects System - COMPLETE
 - [x] Reusable SVG filter effects utility (EffectWrapper component)
-- [x] Effect types: glow, shadow, neon, innerGlow, lift, outline
+- [x] Effect types: glow, strokeGlow, shadow, neon, innerGlow, lift, outline
+  - glow: Drop shadow style outer glow
+  - strokeGlow: Blur glow on strokes/borders (unified from Border custom glow)
 - [x] All effects support animation (pulsing) via existing animation system
 - [x] Speed control for animated effects: slow, normal, fast
 - [x] Effect-specific controls (color, blur, intensity, spread, offset, elevation, width)
@@ -274,7 +276,7 @@
   - Contrast: overlay, soft-light, hard-light
   - Inversion: difference, exclusion
 - [x] BlendControls component (dropdown with categories)
-- [x] PanelBlend collapsible panel (used in component panels)
+- [x] Blend mode integrated into unified ModifiersPanel
 - [x] Blend mode types and Zod schema
 - [x] BLEND_MODE_OPTIONS constant with descriptions
 
@@ -438,22 +440,26 @@ src/lib/creator/               # Embeddable CardCreator component
 ├── CardCreator.svelte         # Main creator component (~1300 lines)
 └── components/
     ├── TopBar.svelte               # Top bar (template name, save/load, export, dataset)
-    ├── HierarchyPanel.svelte       # Left sidebar (zone list, drag-reorder)
+    ├── layout/
+    │   ├── HierarchyPanel.svelte   # Left sidebar (zone list, drag-reorder)
+    │   └── PropertiesPanel.svelte  # Right sidebar wrapper
     ├── CanvasControls.svelte       # Zoom, grid, bleed toggle
     ├── CanvasPreview.svelte        # Live canvas with selection overlays + bleed preview
-    ├── PropertiesPanel.svelte      # Right sidebar wrapper
     ├── ComponentPanel.svelte       # Component panel with visibility toggle
     ├── ZoneProperties.svelte       # Zone position/size/shape settings
     ├── AddLayerPopover.svelte      # Add layer popover with templates
     ├── AddComponentPopover.svelte  # Add component popover
-    ├── AnimationControls.svelte    # Reusable animation panel
-    ├── EffectsControls.svelte      # Reusable effects panel
-    ├── BlendControls.svelte        # Blend mode dropdown with categories
     ├── HelpModal.svelte            # Keyboard shortcuts modal
-    ├── HelpTooltip.svelte          # Help text tooltips
+    ├── HelpTooltip.svelte          # Help text tooltips (1s delay, click to toggle)
     ├── FieldRemapDialog.svelte     # Dataset field remapping
     ├── RestoreDraftDialog.svelte   # Draft restoration dialog
     ├── ExportDialog.svelte         # Export dialog with bleed options
+    ├── controls/                   # Reusable control components
+    │   ├── AnimationControls.svelte    # Animation settings (type, speed, direction)
+    │   ├── EffectsControls.svelte      # Effect settings (includes strokeGlow)
+    │   ├── BlendControls.svelte        # Blend mode dropdown with categories
+    │   ├── BorderModifierControls.svelte # Border modifier settings
+    │   └── HolographicControls.svelte  # Holographic effect settings
     ├── form/                       # Reusable form components (shadcn-based)
     │   ├── index.ts               # Form component exports
     │   ├── FormSlider.svelte      # Label + Slider with value display
@@ -463,12 +469,11 @@ src/lib/creator/               # Embeddable CardCreator component
     │   ├── FormInput.svelte       # Label + Input (text/number)
     │   ├── FormColorPicker.svelte # Label + color input
     │   ├── FormFontSelect.svelte  # Font dropdown with live preview
-    │   ├── FormGrid.svelte        # Grid layout (2/3/4 columns)
-    │   ├── PanelEffects.svelte    # Shared effects section footer
-    │   └── PanelBlend.svelte      # Shared blend mode section
+    │   └── FormGrid.svelte        # Grid layout (2/3/4 columns)
     └── panels/
+        ├── ModifiersPanel.svelte   # Unified modifiers (ClipShape, Effect, Animation, Border, Holo, Blend)
         ├── TextPanel.svelte        # Text component properties
-        ├── ImagePanel.svelte       # Image component properties
+        ├── ImagePanel.svelte       # Image component properties (+ Transform, Adjustments)
         ├── BackgroundPanel.svelte  # Background component properties
         ├── BorderPanel.svelte      # Border component properties
         ├── IconPanel.svelte        # Icon component properties
@@ -520,7 +525,7 @@ The creator uses shadcn-svelte components for consistent UI. Reference: https://
 - `Drawer` - Mobile/tablet side panels
 - `Resizable` (PaneForge) - Resizable panel layout with dynamic sizing
 
-**Custom form wrapper components** in `src/routes/creator/components/form/`:
+**Custom form wrapper components** in `src/lib/creator/components/form/`:
 - `FormSlider` - Labeled slider with value display (percent or suffix)
 - `FormSelect` - Labeled select using shadcn Select component
 - `FormCheckbox` - Labeled checkbox
@@ -528,4 +533,11 @@ The creator uses shadcn-svelte components for consistent UI. Reference: https://
 - `FormInput` - Labeled text/number input
 - `FormColorPicker` - Labeled color picker
 - `FormGrid` - 2/3/4 column grid layout
-- `PanelEffects` - Shared effects section footer (eliminates 12x duplication)
+
+**Unified ModifiersPanel** - All component panels use a single `ModifiersPanel` for:
+- Clip Shape (universal - can mask any component to a shape)
+- Effect (glow, strokeGlow, shadow, neon, innerGlow, lift, outline)
+- Animation (spin, pulse, bounce, shake, float, glow, ping, trace)
+- Border (color, width, opacity, style)
+- Holographic (animated color-shift effect)
+- Blend Mode (multiply, screen, overlay, etc.)

@@ -20,6 +20,31 @@
 		})
 	]);
 
+	// Border modifier schema (simplified for props)
+	const BorderModifierSchema = z.object({
+		color: z.string(),
+		width: z.number(),
+		opacity: z.number().optional(),
+		style: z.enum(['solid', 'dashed', 'dotted']).optional(),
+		glow: z.object({
+			color: z.string(),
+			intensity: z.number(),
+			blur: z.number(),
+			animated: z.boolean().optional(),
+			speed: z.number().optional()
+		}).optional()
+	});
+
+	// Holographic config schema
+	const HolographicConfigSchema = z.object({
+		color: z.string().optional(),
+		secondaryColor: z.string().optional(),
+		tertiaryColor: z.string().optional(),
+		speed: z.number().optional(),
+		angle: z.number().optional(),
+		apply: z.enum(['fill', 'stroke', 'both']).optional()
+	});
+
 	export const ImagePropsSchema = z.object({
 		imageUrl: z.string().optional(),
 		dataField: z.string().optional(),
@@ -31,7 +56,10 @@
 		blendMode: BlendMode.optional(),
 		// New filter and transform props
 		filter: FilterConfigSchema.optional(),
-		transform: ImageTransformConfigSchema.optional()
+		transform: ImageTransformConfigSchema.optional(),
+		// New modifiers
+		border: BorderModifierSchema.optional(),
+		holographic: HolographicConfigSchema.optional()
 	});
 
 	export type ImageProps = z.infer<typeof ImagePropsSchema>;
@@ -40,9 +68,12 @@
 <script lang="ts">
 	import type { ContainerContext, CardData } from '$lib/types';
 	import type { ShapeSource } from '$lib/styling/shapes';
+	import type { BorderModifier, HolographicConfig } from '$lib/types/modifiers';
 	import { AnimationWrapper } from '$lib/styling/animations/index.js';
 	import { EffectWrapper } from '$lib/styling/effects/index.js';
 	import { FilterWrapper } from '$lib/styling/filters/index.js';
+	import BorderRenderer from '$lib/styling/BorderRenderer.svelte';
+	import HolographicWrapper from '$lib/styling/HolographicWrapper.svelte';
 	import { getShapeRenderData } from '$lib/styling/shapes/shapeUtils.js';
 	import { hasActiveFilters } from '$lib/styling/filters/types.js';
 
@@ -57,6 +88,8 @@
 		blendMode,
 		filter,
 		transform,
+		border,
+		holographic,
 		container,
 		data
 	}: ImageProps & {
@@ -167,12 +200,55 @@
 	<EffectWrapper {effect} {blendMode} transformOrigin="{centerX}px {centerY}px">
 		<AnimationWrapper {animation} transformOrigin="{centerX}px {centerY}px">
 			<FilterWrapper {filter}>
-				<g
-					clip-path={!useMask ? `url(#${clipId})` : undefined}
-					mask={useMask ? `url(#${maskId})` : undefined}
-				>
-					{#if imgData.transform}
-						<g transform={imgData.transform}>
+				{#if holographic}
+					<HolographicWrapper {...holographic}>
+						<g
+							clip-path={!useMask ? `url(#${clipId})` : undefined}
+							mask={useMask ? `url(#${maskId})` : undefined}
+						>
+							{#if imgData.transform}
+								<g transform={imgData.transform}>
+									<image
+										href={resolvedImageUrl}
+										x={imgData.x}
+										y={imgData.y}
+										width={imgData.w}
+										height={imgData.h}
+										{preserveAspectRatio}
+										{opacity}
+									/>
+								</g>
+							{:else}
+								<image
+									href={resolvedImageUrl}
+									x={imgData.x}
+									y={imgData.y}
+									width={imgData.w}
+									height={imgData.h}
+									{preserveAspectRatio}
+									{opacity}
+								/>
+							{/if}
+						</g>
+					</HolographicWrapper>
+				{:else}
+					<g
+						clip-path={!useMask ? `url(#${clipId})` : undefined}
+						mask={useMask ? `url(#${maskId})` : undefined}
+					>
+						{#if imgData.transform}
+							<g transform={imgData.transform}>
+								<image
+									href={resolvedImageUrl}
+									x={imgData.x}
+									y={imgData.y}
+									width={imgData.w}
+									height={imgData.h}
+									{preserveAspectRatio}
+									{opacity}
+								/>
+							</g>
+						{:else}
 							<image
 								href={resolvedImageUrl}
 								x={imgData.x}
@@ -182,19 +258,19 @@
 								{preserveAspectRatio}
 								{opacity}
 							/>
-						</g>
-					{:else}
-						<image
-							href={resolvedImageUrl}
-							x={imgData.x}
-							y={imgData.y}
-							width={imgData.w}
-							height={imgData.h}
-							{preserveAspectRatio}
-							{opacity}
-						/>
-					{/if}
-				</g>
+						{/if}
+					</g>
+				{/if}
+				<!-- Border follows clip shape -->
+				{#if border}
+					<BorderRenderer
+						{border}
+						shape={shapeSource as ShapeSource | undefined}
+						width={container.width}
+						height={container.height}
+						radius={container.radius}
+					/>
+				{/if}
 			</FilterWrapper>
 		</AnimationWrapper>
 	</EffectWrapper>

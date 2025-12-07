@@ -91,8 +91,6 @@ export function createInitialCardBackground(): ContainerState {
 				color: '#3b82f6',
 				width: 8 + MAX_BLEED_PX, // 8px visible + 35px bleed = 43px total
 				opacity: 1,
-				glow: { enabled: false, color: '#3b82f6', intensity: 0.5, blur: 10, animated: false, speed: 2 },
-				holographic: { enabled: false, secondaryColor: '#ec4899', speed: 3 },
 				layers: 1,
 				layerColors: [],
 				layerSpacing: 4
@@ -250,6 +248,16 @@ function buildPropsFromConfig(
 	if (comp.blendMode && comp.blendMode !== 'normal') {
 		props.blendMode = comp.blendMode;
 	}
+	if (comp.animation && comp.animation.type !== 'none') {
+		props.animation = comp.animation;
+	}
+	// Use compRecord for optional properties not on all union members
+	if (compRecord.border) {
+		props.border = compRecord.border;
+	}
+	if (compRecord.holographic) {
+		props.holographic = compRecord.holographic;
+	}
 	return props;
 }
 
@@ -266,6 +274,7 @@ function buildBackgroundChildren(comp: BackgroundComponent): ComponentDefinition
 		};
 		if (comp.effect) props.effect = comp.effect;
 		if (comp.blendMode && comp.blendMode !== 'normal') props.blendMode = comp.blendMode;
+		if (comp.animation && comp.animation.type !== 'none') props.animation = comp.animation;
 		children.push({ id: `${comp.id}-fill`, type: 'SolidBackground', props });
 	} else if (comp.fillType === 'gradient') {
 		const props: Record<string, unknown> = {
@@ -275,6 +284,7 @@ function buildBackgroundChildren(comp: BackgroundComponent): ComponentDefinition
 		};
 		if (comp.effect) props.effect = comp.effect;
 		if (comp.blendMode && comp.blendMode !== 'normal') props.blendMode = comp.blendMode;
+		if (comp.animation && comp.animation.type !== 'none') props.animation = comp.animation;
 		children.push({ id: `${comp.id}-fill`, type: 'GradientBackground', props });
 	}
 
@@ -307,6 +317,7 @@ function buildBackgroundChildren(comp: BackgroundComponent): ComponentDefinition
 
 		if (comp.effect) props.effect = comp.effect;
 		if (comp.blendMode && comp.blendMode !== 'normal') props.blendMode = comp.blendMode;
+		if (comp.animation && comp.animation.type !== 'none') props.animation = comp.animation;
 		children.push({ id: `${comp.id}-pattern`, type: 'PatternBackground', props });
 	}
 
@@ -314,7 +325,7 @@ function buildBackgroundChildren(comp: BackgroundComponent): ComponentDefinition
 }
 
 /**
- * Builds border component props (special case: conditional nested objects).
+ * Builds border component props.
  */
 function buildBorderProps(comp: BorderComponent): Record<string, unknown> {
 	const props: Record<string, unknown> = {
@@ -322,23 +333,6 @@ function buildBorderProps(comp: BorderComponent): Record<string, unknown> {
 		width: comp.width,
 		opacity: comp.opacity
 	};
-
-	if (comp.glow?.enabled) {
-		props.glow = {
-			color: comp.glow.color,
-			intensity: comp.glow.intensity,
-			blur: comp.glow.blur,
-			animated: comp.glow.animated,
-			speed: comp.glow.speed
-		};
-	}
-
-	if (comp.holographic?.enabled) {
-		props.holographic = {
-			secondaryColor: comp.holographic.secondaryColor,
-			speed: comp.holographic.speed
-		};
-	}
 
 	if (comp.layers && comp.layers > 1) {
 		props.layers = comp.layers;
@@ -348,8 +342,13 @@ function buildBorderProps(comp: BorderComponent): Record<string, unknown> {
 		props.layerSpacing = comp.layerSpacing;
 	}
 
+	// Use standard effect system (includes strokeGlow)
 	if (comp.effect) props.effect = comp.effect;
 	if (comp.blendMode && comp.blendMode !== 'normal') props.blendMode = comp.blendMode;
+	if (comp.animation && comp.animation.type !== 'none') props.animation = comp.animation;
+	// Standard holographic config
+	if (comp.holographic) props.holographic = comp.holographic;
+
 	return props;
 }
 
@@ -533,8 +532,6 @@ export function createBorderComponent(): BorderComponent {
 		color: '#3b82f6',
 		width: 2,
 		opacity: 1,
-		glow: { enabled: false, color: '#3b82f6', intensity: 0.5, blur: 10, animated: false, speed: 2 },
-		holographic: { enabled: false, secondaryColor: '#ec4899', speed: 3 },
 		layers: 1,
 		layerColors: [],
 		layerSpacing: 4

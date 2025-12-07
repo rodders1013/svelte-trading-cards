@@ -10,6 +10,7 @@ import type { FrameStyle, FrameSize } from '$lib/card/decorations';
 import type { RatingIconPreset, ValueFormat } from '$lib/card/decorations';
 import type { ShapeSource } from '$lib/styling/shapes';
 import type { FilterConfig, ImageTransformConfig } from '$lib/styling/filters';
+import type { BorderModifier, HolographicConfig } from '$lib/types/modifiers';
 
 // Component type definitions for the visual creator
 
@@ -31,8 +32,12 @@ export interface TextComponent {
 	alignment: 'left' | 'center' | 'right';
 	verticalAlign: 'top' | 'center' | 'bottom';
 	padding: number;
+	shapeSource?: ShapeSource;
 	effect?: EffectConfig;
 	blendMode?: BlendMode;
+	animation?: AnimationConfig;
+	border?: BorderModifier;
+	holographic?: HolographicConfig;
 }
 
 export interface ImageComponent {
@@ -50,6 +55,11 @@ export interface ImageComponent {
 	transform?: ImageTransformConfig;
 	effect?: EffectConfig;
 	blendMode?: BlendMode;
+	animation?: AnimationConfig;
+	/** Border that follows clip shape */
+	border?: BorderModifier;
+	/** Holographic color-shifting effect */
+	holographic?: HolographicConfig;
 }
 
 export interface BackgroundComponent {
@@ -78,6 +88,9 @@ export interface BackgroundComponent {
 	patternRowOffset?: number;
 	effect?: EffectConfig;
 	blendMode?: BlendMode;
+	animation?: AnimationConfig;
+	border?: BorderModifier;
+	holographic?: HolographicConfig;
 }
 
 export interface BorderComponent {
@@ -87,24 +100,15 @@ export interface BorderComponent {
 	color: string;
 	width: number;
 	opacity: number;
-	glow?: {
-		enabled: boolean;
-		color: string;
-		intensity: number;
-		blur: number;
-		animated: boolean;
-		speed: number;
-	};
-	holographic?: {
-		enabled: boolean;
-		secondaryColor: string;
-		speed: number;
-	};
 	layers?: number;
 	layerColors?: string[];
 	layerSpacing?: number;
+	/** Use effect→strokeGlow for glow effects on borders */
 	effect?: EffectConfig;
 	blendMode?: BlendMode;
+	animation?: AnimationConfig;
+	/** Standard holographic config (same as other components) */
+	holographic?: HolographicConfig;
 }
 
 export interface IconComponent {
@@ -119,8 +123,12 @@ export interface IconComponent {
 	rotation: number;
 	flipHorizontal: boolean;
 	flipVertical: boolean;
+	shapeSource?: ShapeSource;
 	effect?: EffectConfig;
 	blendMode?: BlendMode;
+	animation?: AnimationConfig;
+	border?: BorderModifier;
+	holographic?: HolographicConfig;
 }
 
 export interface BadgeComponent {
@@ -138,6 +146,9 @@ export interface BadgeComponent {
 	opacity: number;
 	effect?: EffectConfig;
 	blendMode?: BlendMode;
+	animation?: AnimationConfig;
+	border?: BorderModifier;
+	holographic?: HolographicConfig;
 }
 
 export interface StatPanelComponent {
@@ -157,8 +168,12 @@ export interface StatPanelComponent {
 	barBackgroundColor: string;
 	barBorderRadius: number;
 	opacity: number;
+	shapeSource?: ShapeSource;
 	effect?: EffectConfig;
 	blendMode?: BlendMode;
+	animation?: AnimationConfig;
+	border?: BorderModifier;
+	holographic?: HolographicConfig;
 }
 
 export interface DividerComponent {
@@ -176,8 +191,12 @@ export interface DividerComponent {
 	dashLength: number;
 	gapLength: number;
 	opacity: number;
+	shapeSource?: ShapeSource;
 	effect?: EffectConfig;
 	blendMode?: BlendMode;
+	animation?: AnimationConfig;
+	border?: BorderModifier;
+	holographic?: HolographicConfig;
 }
 
 export interface ProgressBarComponent {
@@ -201,8 +220,12 @@ export interface ProgressBarComponent {
 	segments: number;
 	segmentGap: number;
 	opacity: number;
+	shapeSource?: ShapeSource;
 	effect?: EffectConfig;
 	blendMode?: BlendMode;
+	animation?: AnimationConfig;
+	border?: BorderModifier;
+	holographic?: HolographicConfig;
 }
 
 export interface RibbonComponent {
@@ -222,8 +245,12 @@ export interface RibbonComponent {
 	angle: number;
 	ribbonWidth?: number;
 	opacity: number;
+	shapeSource?: ShapeSource;
 	effect?: EffectConfig;
 	blendMode?: BlendMode;
+	animation?: AnimationConfig;
+	border?: BorderModifier;
+	holographic?: HolographicConfig;
 }
 
 export interface FrameComponent {
@@ -238,8 +265,12 @@ export interface FrameComponent {
 	size: FrameSize;
 	strokeWidth: number;
 	opacity: number;
+	shapeSource?: ShapeSource;
 	effect?: EffectConfig;
 	blendMode?: BlendMode;
+	animation?: AnimationConfig;
+	border?: BorderModifier;
+	holographic?: HolographicConfig;
 }
 
 export interface ListComponent {
@@ -265,8 +296,12 @@ export interface ListComponent {
 	overflowText: string;
 	overflowColor?: string;
 	opacity: number;
+	shapeSource?: ShapeSource;
 	effect?: EffectConfig;
 	blendMode?: BlendMode;
+	animation?: AnimationConfig;
+	border?: BorderModifier;
+	holographic?: HolographicConfig;
 }
 
 export interface IconRatingComponent {
@@ -296,8 +331,12 @@ export interface IconRatingComponent {
 	valueColor: string;
 	valueGap: number;
 	opacity: number;
+	shapeSource?: ShapeSource;
 	effect?: EffectConfig;
 	blendMode?: BlendMode;
+	animation?: AnimationConfig;
+	border?: BorderModifier;
+	holographic?: HolographicConfig;
 }
 
 export type ComponentItem =
