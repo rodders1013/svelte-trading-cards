@@ -63,6 +63,10 @@
 			onUpdate('shapeSource', undefined);
 		} else {
 			onUpdate('shapeSource', source);
+			// Shapes always clip - ensure clipContent is enabled
+			if (!container.clipContent) {
+				onUpdate('clipContent', true);
+			}
 		}
 	}
 
@@ -131,7 +135,7 @@
 			</div>
 		</div>
 
-		<!-- Corner Radius (only for rect) -->
+		<!-- Corner Radius & Clip Content (only for default rect - no shapeSource) -->
 		{#if isSimpleRect}
 			<div class="grid grid-cols-2 gap-2">
 				<div>
@@ -155,19 +159,8 @@
 					</div>
 				</div>
 			</div>
-		{:else}
-			<div>
-				<Label class="mb-1 block text-xs text-muted-foreground">Clip Content</Label>
-				<div class="flex h-8 items-center gap-2">
-					<Checkbox
-						id="clip-content"
-						checked={container.clipContent}
-						onCheckedChange={(checked) => onUpdate('clipContent', checked === true)}
-					/>
-					<Label for="clip-content" class="text-sm">Enabled</Label>
-				</div>
-			</div>
 		{/if}
+		<!-- Note: When a clip shape is selected, it always clips (shape IS the mask) -->
 
 		<!-- Shape Section -->
 		<Collapsible.Root bind:open={showShape}>
