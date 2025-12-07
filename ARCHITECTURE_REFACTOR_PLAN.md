@@ -2,11 +2,22 @@
 
 ## Executive Summary
 
-This document outlines the findings from a comprehensive architecture review of the svelte-trading-cards library and provides a detailed implementation plan to address identified issues. The primary goals are:
+This document outlines the findings from a comprehensive architecture review of the svelte-trading-cards library and provides a detailed implementation plan to address identified issues.
+
+### Guiding Principles
+
+- **Breaking changes are allowed** - No backwards compatibility required
+- **DRY (Don't Repeat Yourself)** - Eliminate all code duplication
+- **Modular** - Single-responsibility components and utilities
+- **Reusable** - Shared utilities and wrappers used by all components
+- **Testing done separately** - Focus on implementation, testing handled independently
+
+### Primary Goals
 
 1. Enable consistent modifier support (effects, animations, borders, clipping) across all components
-2. Eliminate code duplication
-3. Improve user experience by making features work intuitively at both component and layer levels
+2. Eliminate code duplication through shared utilities and wrappers
+3. Make features work intuitively at both component and layer levels
+4. Create a clean, maintainable codebase
 
 ---
 
@@ -292,9 +303,14 @@ interface BorderModifier {
 
 ## Part 3: Implementation Plan
 
-### Phase 1: Fix Critical Issues (No Breaking Changes)
+### Phase 1: Core Utilities & Animation Fix
 
 **Estimated Effort:** 2-4 hours
+
+**Goals:**
+- Fix broken component-level animations
+- Create shared utilities to eliminate duplication
+- Establish patterns for remaining phases
 
 #### Task 1.1: Enable Component-Level Animations
 
@@ -948,17 +964,26 @@ Add the ModifiersPanel to each component's property panel, replacing the individ
 
 ---
 
-### Phase 5: Deprecate Border Component
+### Phase 5: Remove Border Component
 
 **Estimated Effort:** 2-4 hours
 
-#### Task 5.1: Mark Border Component as Deprecated
+**Goals:**
+- Remove Border as a standalone component
+- Border functionality now exists only as a modifier on other components
+- Clean up creator UI to remove Border from component palette
 
-Add deprecation notice to Border component and creator panel.
+#### Task 5.1: Delete Border Component
 
-#### Task 5.2: Migration Guide
+Remove the following:
+- `src/lib/card/borders/Border.svelte`
+- `src/lib/card/borders/index.ts`
+- `src/lib/creator/components/panels/BorderPanel.svelte`
+- Border option from AddComponentPopover
 
-Document how to migrate from Border component to border modifier:
+#### Task 5.2: Update Documentation
+
+Document the new border modifier approach:
 
 ```typescript
 // OLD: Border as separate component
@@ -986,35 +1011,50 @@ Document how to migrate from Border component to border modifier:
 
 ---
 
-## Part 4: Migration Strategy
+## Part 4: Implementation Approach
 
-### 4.1 Backwards Compatibility
+### 4.1 Breaking Changes Allowed
 
-All changes should be **additive** where possible:
+This refactor will introduce breaking changes. This is intentional to achieve a clean, DRY codebase:
 
-1. **Phase 1** - No breaking changes
-2. **Phase 2** - New `modifiers` prop is optional
-3. **Phase 3** - TextRenderer is new, existing components unchanged
-4. **Phase 4** - UI additions, not removals
-5. **Phase 5** - Border component deprecated but still works
+| Phase | Breaking Changes |
+|-------|------------------|
+| **Phase 1** | None (utilities are additive) |
+| **Phase 2** | Component prop interfaces change (modifiers system) |
+| **Phase 3** | Text components refactored to use TextRenderer |
+| **Phase 4** | Creator UI panels restructured |
+| **Phase 5** | Border component removed entirely |
 
-### 4.2 Testing Checklist
+### 4.2 Code Quality Standards
 
-For each phase:
+All new code must follow these principles:
 
-- [ ] All existing templates still render correctly
-- [ ] Creator UI works without errors
-- [ ] Server-side rendering produces identical output
-- [ ] No TypeScript errors
-- [ ] Unit tests pass
+1. **No Duplication** - If code appears twice, extract to utility
+2. **Single Responsibility** - Each component/utility does one thing
+3. **Composition over Inheritance** - Use wrappers and utilities, not complex hierarchies
+4. **Type Safety** - Full TypeScript types, no `any`
+5. **Consistent Naming** - Follow existing conventions
 
-### 4.3 Rollback Plan
+### 4.3 Phase Dependencies
 
-Each phase is independent. If issues arise:
+```
+Phase 1 (Utilities)
+    ↓
+Phase 2 (ComponentWrapper) ← Depends on Phase 1 utilities
+    ↓
+Phase 3 (TextRenderer) ← Can run parallel to Phase 2
+    ↓
+Phase 4 (Creator UI) ← Depends on Phase 2
+    ↓
+Phase 5 (Remove Border) ← Depends on Phase 2
+```
 
-1. Revert the specific phase's commits
-2. Previous phases remain functional
-3. No data migration required
+### 4.4 Testing
+
+Testing will be handled separately after implementation. Focus during implementation should be on:
+- TypeScript compilation passes
+- No runtime errors in dev mode
+- Visual inspection of rendered output
 
 ---
 
@@ -1051,6 +1091,8 @@ Each phase is independent. If issues arise:
 
 After full implementation:
 
+### Functionality
+
 1. **Any component can have any modifier**
    - Add glow effect to text ✓
    - Animate individual icons ✓
@@ -1065,14 +1107,32 @@ After full implementation:
    - Pulse a single badge ✓
    - Float a single text field ✓
 
-4. **Code is DRY**
-   - No duplicate center calculations
-   - No duplicate data resolution
-   - Single wrapper component
-
-5. **Consistent text rendering**
+4. **Consistent text rendering**
    - Same alignment behavior everywhere
    - Same baseline handling
+
+### Code Quality
+
+5. **Zero Duplication**
+   - Center calculations: 1 utility, not 13 copies
+   - Data resolution: 1 utility, not 5 copies
+   - Wrapper stack: 1 ComponentWrapper, not 13 manual nestings
+   - Text alignment: 1 TextRenderer, not 6 different approaches
+
+6. **Modular Architecture**
+   - Each utility has single responsibility
+   - Components compose utilities, not inherit
+   - Easy to add new modifiers in future
+
+7. **Reusable Components**
+   - ComponentWrapper used by all card components
+   - TextRenderer used by all text-rendering components
+   - Shared utilities imported where needed
+
+8. **Clean File Structure**
+   - No orphaned/unused files
+   - Border component completely removed
+   - Clear separation: card/ (rendering), styling/ (modifiers), utils/ (shared)
 
 ---
 
