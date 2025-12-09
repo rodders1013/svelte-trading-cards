@@ -56,6 +56,7 @@ import { extractFontsFromCard, loadGoogleFonts } from '$lib/fonts';
 		getComponentByType,
 		hasComponentType,
 		buildTemplate,
+		buildTemplateWithDisplay,
 		buildPreviewData
 	} from './state.svelte.js';
 
@@ -130,6 +131,11 @@ import { extractFontsFromCard, loadGoogleFonts } from '$lib/fonts';
 	let containers = $state<ContainerState[]>(initialTemplate ?? [createInitialCardBackground()]);
 	let selectedContainerId = $state<string | null>(containers[0]?.id ?? null);
 	let previewMode = $state<'fields' | 'data'>('fields');
+
+	// Display settings (for Card component when viewing)
+	import type { Rarity } from '$lib/display';
+	let displayRarity = $state<Rarity | undefined>(undefined);
+	let displayCustomGradient = $state<string | undefined>(undefined);
 
 	// Undo/Redo history
 	let history = $state<ContainerState[][]>([]);
@@ -443,7 +449,10 @@ import { extractFontsFromCard, loadGoogleFonts } from '$lib/fonts';
 	}
 
 	// Build template and preview data
-	const template = $derived(buildTemplate(templateName, containers));
+	const template = $derived(buildTemplateWithDisplay(templateName, containers, {
+		rarity: displayRarity,
+		customGradient: displayCustomGradient
+	}));
 	const previewData = $derived(buildPreviewData(previewMode, currentCard ?? {}, currentDataFields));
 
 	// Notify onChange when template changes
@@ -1264,6 +1273,8 @@ import { extractFontsFromCard, loadGoogleFonts } from '$lib/fonts';
 		bind:selectedDataset
 		bind:selectedCardIndex
 		cards={cardOptions}
+		bind:displayRarity
+		bind:displayCustomGradient
 		onDatasetChange={handleDatasetChange}
 		onSaveTemplate={saveTemplate}
 		onLoadTemplate={loadTemplate}

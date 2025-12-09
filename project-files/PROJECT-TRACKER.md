@@ -1,7 +1,7 @@
 # svelte-trading-cards Project Tracker
 
-**Last Updated:** 2025-12-07
-**Current Progress:** ~97% (Beta ready)
+**Last Updated:** 2025-12-09
+**Current Progress:** ~98% (Beta ready)
 
 ---
 
@@ -305,7 +305,38 @@
 
 ---
 
-## PHASE 4: TESTING & DOCS
+## PHASE 4: DISPLAY & GALLERY - COMPLETE
+
+### Display System (`src/lib/display/`)
+- [x] Card.svelte - Interactive card with hover-tilt effects
+- [x] Rarity presets (common, uncommon, rare, epic, legendary, mythic)
+- [x] Tilt effect (mouse-following rotation)
+- [x] Scale effect (1.02x on hover)
+- [x] Glare effect (gradient overlay following mouse)
+- [x] Shadow effect (colored glow, works on dark backgrounds)
+- [x] Glare masks (foil, holo, sparkle, prism, rainbow) - CSS gradients
+- [x] Flip animation support (front/back templates)
+- [x] Glare hidden during flip animation
+- [x] hover-tilt integration with Tailwind v4 CSS layers
+
+### Gallery Components (`src/lib/gallery/`)
+- [x] CardGrid - Responsive CSS Grid layout
+- [x] CardCarousel - Horizontal scroll with navigation
+- [x] CardModal - Full-size lightbox
+- [x] Keyboard navigation utilities
+
+### CardTemplate Display Settings
+- [x] `display.rarity` property in template schema
+- [x] `display.customGradient` for custom glare gradients
+- [x] Rarity dropdown in Creator TopBar
+
+### Test Pages
+- [x] `/test/display` - Display effects demo
+- [x] `/gallery` - Template + data source + rarity selection
+
+---
+
+## PHASE 5: TESTING & DOCS
 
 - [ ] Unit tests for components
 - [ ] Integration tests for CardCanvas
@@ -314,7 +345,7 @@
 
 ---
 
-## PHASE 5: PUBLISH
+## PHASE 6: PUBLISH
 
 - [ ] Package build verification (npm run package)
 - [x] README.md with usage examples
@@ -329,9 +360,10 @@
 | Phase 1: Core Package | Complete | 28/28 |
 | Phase 2: Visual Creator | Complete | 68/68 |
 | Phase 3: Additional Components | Complete | 57/57 |
-| Phase 4: Testing & Docs | Not Started | 0/4 |
-| Phase 5: Publish | In Progress | 1/3 |
-| **Total** | | **154/160 (~97%)** |
+| Phase 4: Display & Gallery | Complete | 14/14 |
+| Phase 5: Testing & Docs | Not Started | 0/4 |
+| Phase 6: Publish | In Progress | 1/3 |
+| **Total** | | **168/174 (~97%)** |
 
 ### Phase 3 Component Priority
 
@@ -486,13 +518,33 @@ src/lib/creator/               # Embeddable CardCreator component
         ├── ListPanel.svelte        # List component properties
         └── StatPanelPanel.svelte   # Stat panel component properties
 
+src/lib/display/                 # Interactive card display system
+├── index.ts                   # Display exports
+├── types.ts                   # Rarity, DisplaySettings types
+├── presets.ts                 # Rarity presets (hover-tilt settings)
+└── Card.svelte                # Main display card with hover-tilt
+
+src/lib/gallery/                 # Gallery layout components
+├── index.ts                   # Gallery exports
+├── types.ts                   # Gallery component types
+├── CardGrid.svelte            # Responsive CSS Grid
+├── CardCarousel.svelte        # Horizontal scroll carousel
+├── CardModal.svelte           # Full-size lightbox
+└── utils/
+    ├── index.ts
+    └── keyboard.ts            # Keyboard navigation helper
+
 src/routes/
 ├── +page.svelte               # Demo/gallery page
 ├── creator/
 │   └── +page.svelte           # Simple wrapper that uses CardCreator
+├── gallery/
+│   └── +page.svelte           # Gallery with template/data/rarity selection
 └── test/
-    └── text-fitting/
-        └── +page.svelte       # Text fitting test page (FitText, StatPanel, List, Badge, Ribbon)
+    ├── text-fitting/
+    │   └── +page.svelte       # Text fitting test page
+    └── display/
+        └── +page.svelte       # Display effects test page
 ```
 
 ---

@@ -8,6 +8,8 @@
 	import Download from '@lucide/svelte/icons/download';
 	import CloudOff from '@lucide/svelte/icons/cloud-off';
 	import Cloud from '@lucide/svelte/icons/cloud';
+	import Sparkles from '@lucide/svelte/icons/sparkles';
+	import { getRarityOptions, type Rarity } from '$lib/display';
 
 	interface DatasetInfo {
 		id: string;
@@ -19,6 +21,9 @@
 		name: string;
 	}
 
+	// Rarity options for dropdown
+	const rarityOptions = getRarityOptions();
+
 	let {
 		templateName = $bindable(''),
 		hasDraft = false,
@@ -28,6 +33,8 @@
 		selectedDataset = $bindable(''),
 		selectedCardIndex = $bindable(0),
 		cards = [],
+		displayRarity = $bindable<Rarity | undefined>(undefined),
+		displayCustomGradient = $bindable<string | undefined>(undefined),
 		onDatasetChange,
 		onSaveTemplate,
 		onLoadTemplate,
@@ -41,6 +48,8 @@
 		selectedDataset?: string;
 		selectedCardIndex?: number;
 		cards?: CardInfo[];
+		displayRarity?: Rarity;
+		displayCustomGradient?: string;
 		onDatasetChange?: (datasetId: string) => void;
 		onSaveTemplate: () => void;
 		onLoadTemplate: (event: Event) => void;
@@ -160,6 +169,25 @@
 				</Select.Root>
 			</div>
 		{/if}
+
+		<Separator orientation="vertical" class="hidden h-6 sm:block" />
+
+		<!-- Display Settings -->
+		<div class="flex items-center gap-1.5 sm:gap-2">
+			<Sparkles class="h-4 w-4 text-amber-500" />
+			<span class="hidden text-xs text-muted-foreground lg:inline">Rarity:</span>
+			<Select.Root type="single" value={displayRarity ?? ''} onValueChange={(v) => displayRarity = v as Rarity || undefined}>
+				<Select.Trigger class="h-8 w-24 truncate text-sm sm:w-28">
+					<span class="truncate">{displayRarity ? rarityOptions.find(r => r.value === displayRarity)?.label : 'None'}</span>
+				</Select.Trigger>
+				<Select.Content>
+					<Select.Item value="" label="None" />
+					{#each rarityOptions as option (option.value)}
+						<Select.Item value={option.value} label={option.label} />
+					{/each}
+				</Select.Content>
+			</Select.Root>
+		</div>
 
 	</Card.Content>
 </Card.Root>

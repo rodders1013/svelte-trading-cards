@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import type { ShapeSource } from '$lib/styling/shapes';
+import { DisplaySettingsSchema } from '$lib/display/types.js';
 
 // Standard card dimensions (2.5" x 3.5" at 300 DPI)
 export const CARD_WIDTH = 750;
@@ -37,7 +38,9 @@ export interface ComponentDefinition {
 // Complete card template
 export const CardTemplateSchema = z.object({
 	name: z.string(),
-	components: z.array(ComponentDefinitionSchema)
+	components: z.array(ComponentDefinitionSchema),
+	/** Display settings for interactive Card component (rarity, custom gradient) */
+	display: DisplaySettingsSchema.optional()
 });
 
 export type CardTemplate = z.infer<typeof CardTemplateSchema>;
