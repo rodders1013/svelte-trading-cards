@@ -1,6 +1,7 @@
 <script lang="ts">
 	import * as Card from '$lib/creator/ui/card';
 	import * as Select from '$lib/creator/ui/select';
+	import * as Popover from '$lib/creator/ui/popover';
 	import { Button } from '$lib/creator/ui/button';
 	import { Separator } from '$lib/creator/ui/separator';
 	import Save from '@lucide/svelte/icons/save';
@@ -9,7 +10,11 @@
 	import CloudOff from '@lucide/svelte/icons/cloud-off';
 	import Cloud from '@lucide/svelte/icons/cloud';
 	import Sparkles from '@lucide/svelte/icons/sparkles';
+	import Eye from '@lucide/svelte/icons/eye';
+	import EyeOff from '@lucide/svelte/icons/eye-off';
+	import Palette from '@lucide/svelte/icons/palette';
 	import { getRarityOptions, type Rarity } from '$lib/display';
+	import GlareGradientEditor from '../controls/GlareGradientEditor.svelte';
 
 	interface DatasetInfo {
 		id: string;
@@ -35,6 +40,7 @@
 		cards = [],
 		displayRarity = $bindable<Rarity | undefined>(undefined),
 		displayCustomGradient = $bindable<string | undefined>(undefined),
+		showPreviewEffects = $bindable(false),
 		onDatasetChange,
 		onSaveTemplate,
 		onLoadTemplate,
@@ -50,6 +56,7 @@
 		cards?: CardInfo[];
 		displayRarity?: Rarity;
 		displayCustomGradient?: string;
+		showPreviewEffects?: boolean;
 		onDatasetChange?: (datasetId: string) => void;
 		onSaveTemplate: () => void;
 		onLoadTemplate: (event: Event) => void;
@@ -187,6 +194,46 @@
 					{/each}
 				</Select.Content>
 			</Select.Root>
+
+			<!-- Preview Effects Toggle -->
+			<Button
+				variant={showPreviewEffects ? 'default' : 'outline'}
+				size="sm"
+				class="h-8 px-2"
+				onclick={() => showPreviewEffects = !showPreviewEffects}
+				title={showPreviewEffects ? 'Hide hover effects' : 'Show hover effects'}
+				disabled={!displayRarity}
+			>
+				{#if showPreviewEffects}
+					<Eye class="h-4 w-4" />
+				{:else}
+					<EyeOff class="h-4 w-4" />
+				{/if}
+				<span class="ml-1 hidden sm:inline">Effects</span>
+			</Button>
+
+			<!-- Glare Gradient Editor -->
+			<Popover.Root>
+				<Popover.Trigger>
+					<Button
+						variant={displayCustomGradient ? 'default' : 'outline'}
+						size="sm"
+						class="h-8 px-2"
+						title="Customize glare gradient"
+						disabled={!displayRarity}
+					>
+						<Palette class="h-4 w-4" />
+						<span class="ml-1 hidden lg:inline">Glare</span>
+					</Button>
+				</Popover.Trigger>
+				<Popover.Content class="w-72" align="end">
+					<div class="space-y-2">
+						<h4 class="font-medium text-sm">Glare Gradient</h4>
+						<p class="text-xs text-muted-foreground">Customize the glare effect colors</p>
+						<GlareGradientEditor bind:value={displayCustomGradient} disabled={!displayRarity} />
+					</div>
+				</Popover.Content>
+			</Popover.Root>
 		</div>
 
 	</Card.Content>

@@ -136,6 +136,7 @@ import { extractFontsFromCard, loadGoogleFonts } from '$lib/fonts';
 	import type { Rarity } from '$lib/display';
 	let displayRarity = $state<Rarity | undefined>(undefined);
 	let displayCustomGradient = $state<string | undefined>(undefined);
+	let showPreviewEffects = $state(false);
 
 	// Undo/Redo history
 	let history = $state<ContainerState[][]>([]);
@@ -1275,6 +1276,7 @@ import { extractFontsFromCard, loadGoogleFonts } from '$lib/fonts';
 		cards={cardOptions}
 		bind:displayRarity
 		bind:displayCustomGradient
+		bind:showPreviewEffects
 		onDatasetChange={handleDatasetChange}
 		onSaveTemplate={saveTemplate}
 		onLoadTemplate={loadTemplate}
@@ -1371,7 +1373,7 @@ import { extractFontsFromCard, loadGoogleFonts } from '$lib/fonts';
 						bind:svgElement={canvasSvgElement}
 						{zoomLevel}
 						{showGrid}
-							{gridSize}
+						{gridSize}
 						{canvasInteraction}
 						{interactionContainerId}
 						{activeResizeHandle}
@@ -1379,6 +1381,9 @@ import { extractFontsFromCard, loadGoogleFonts } from '$lib/fonts';
 						canvasScale={CANVAS_SCALE}
 						onStartDrag={startDrag}
 						onStartResize={startResize}
+						showEffects={showPreviewEffects}
+						rarity={displayRarity ?? 'common'}
+						customGradient={displayCustomGradient}
 					/>
 					</div>
 				</div>
@@ -1458,6 +1463,9 @@ import { extractFontsFromCard, loadGoogleFonts } from '$lib/fonts';
 					canvasScale={CANVAS_SCALE}
 					onStartDrag={startDrag}
 					onStartResize={startResize}
+					showEffects={showPreviewEffects}
+					rarity={displayRarity ?? 'common'}
+					customGradient={displayCustomGradient}
 				/>
 			</div>
 		</div>
@@ -1587,6 +1595,9 @@ import { extractFontsFromCard, loadGoogleFonts } from '$lib/fonts';
 					canvasScale={CANVAS_SCALE}
 					onStartDrag={startDrag}
 					onStartResize={startResize}
+					showEffects={showPreviewEffects}
+					rarity={displayRarity ?? 'common'}
+					customGradient={displayCustomGradient}
 				/>
 			</div>
 
