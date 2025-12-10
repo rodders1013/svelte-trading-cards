@@ -287,6 +287,57 @@ npm run test             # Run tests
 | `/` | Demo gallery |
 | `/creator` | Visual template creator |
 | `/test/text-fitting` | Text fitting test page (FitText, components) |
+| `/test/display` | Display component test page (hover-tilt effects) |
+
+---
+
+## Display & Gallery Components
+
+### Display Card (`src/lib/display/Card.svelte`)
+
+Interactive card with hover-tilt effects and rarity presets:
+
+```svelte
+<script lang="ts">
+  import { Card } from '$lib/display';
+</script>
+
+<Card template={template} data={data} rarity="legendary" />
+```
+
+**Key Features:**
+- 3D tilt with `hover-tilt` package
+- Rarity presets: common, uncommon, rare, epic, legendary
+- Flip animation with backTemplate support
+- Custom glare gradients via `template.display.customGradient`
+
+### CardRow (`src/lib/gallery/CardRow.svelte`)
+
+Overlapping card row with hover-to-expand:
+
+```svelte
+<CardRow cardWidth={280} visibleWidth={80}>
+  {#snippet children(ctx)}
+    {#each cards as card, i}
+      <div
+        class="card-row-item"
+        style:transform={ctx.getTransform(i)}
+        style:z-index={ctx.getZIndex(i)}
+        onmouseenter={() => ctx.onHover(i)}
+        onmouseleave={ctx.onLeave}
+      >
+        <Card template={template} data={card} width={280} />
+      </div>
+    {/each}
+  {/snippet}
+</CardRow>
+```
+
+### Creator Integration
+
+- **CanvasPreview**: Hide overlays when effects enabled for proper hover-tilt display
+- **TopBar**: Rarity dropdown and custom gradient editor
+- **DisplayCard**: Used in preview when effects toggled on
 
 ---
 

@@ -1,6 +1,7 @@
 <script lang="ts">
 	import * as Card from '$lib/creator/ui/card';
 	import * as Select from '$lib/creator/ui/select';
+	import * as Popover from '$lib/creator/ui/popover';
 	import { Button } from '$lib/creator/ui/button';
 	import { Separator } from '$lib/creator/ui/separator';
 	import Save from '@lucide/svelte/icons/save';
@@ -8,6 +9,12 @@
 	import Download from '@lucide/svelte/icons/download';
 	import CloudOff from '@lucide/svelte/icons/cloud-off';
 	import Cloud from '@lucide/svelte/icons/cloud';
+	import Sparkles from '@lucide/svelte/icons/sparkles';
+	import Eye from '@lucide/svelte/icons/eye';
+	import EyeOff from '@lucide/svelte/icons/eye-off';
+	import Palette from '@lucide/svelte/icons/palette';
+	import { getRarityOptions, type Rarity } from '$lib/display';
+	import GlareGradientEditor from '../controls/GlareGradientEditor.svelte';
 
 	interface DatasetInfo {
 		id: string;
@@ -19,6 +26,9 @@
 		name: string;
 	}
 
+	// Rarity options for dropdown
+	const rarityOptions = getRarityOptions();
+
 	let {
 		templateName = $bindable(''),
 		hasDraft = false,
@@ -28,6 +38,9 @@
 		selectedDataset = $bindable(''),
 		selectedCardIndex = $bindable(0),
 		cards = [],
+		displayRarity = $bindable<Rarity | undefined>(undefined),
+		displayCustomGradient = $bindable<string | undefined>(undefined),
+		showPreviewEffects = $bindable(false),
 		onDatasetChange,
 		onSaveTemplate,
 		onLoadTemplate,
@@ -41,6 +54,9 @@
 		selectedDataset?: string;
 		selectedCardIndex?: number;
 		cards?: CardInfo[];
+		displayRarity?: Rarity;
+		displayCustomGradient?: string;
+		showPreviewEffects?: boolean;
 		onDatasetChange?: (datasetId: string) => void;
 		onSaveTemplate: () => void;
 		onLoadTemplate: (event: Event) => void;
@@ -160,6 +176,61 @@
 				</Select.Root>
 			</div>
 		{/if}
+
+		<Separator orientation="vertical" class="hidden h-6 sm:block" />
+
+		<!-- Display Settings -->
+		<div class="flex items-center gap-1.5 sm:gap-2">
+			<Sparkles class="h-4 w-4 text-amber-500" />
+			<span class="hidden text-xs text-muted-foreground lg:inline">Rarity:</span>
+			<Select.Root type="single" value={displayRarity ?? ''} onValueChange={(v) => displayRarity = v as Rarity || undefined}>
+				<Select.Trigger class="h-8 w-24 truncate text-sm sm:w-28">
+					<span class="truncate">{displayRarity ? rarityOptions.find(r => r.value === displayRarity)?.label : 'None'}</span>
+				</Select.Trigger>
+				<Select.Content>
+					<Select.Item value="" label="None" />
+					{#each rarityOptions as option (option.value)}
+						<Select.Item value={option.value} label={option.label} />
+					{/each}
+				</Select.Content>
+			</Select.Root>
+
+			<!-- Preview Effects Toggle -->
+			<Button
+				variant={showPreviewEffects ? 'default' : 'outline'}
+				size="sm"
+				class="h-8 px-2"
+				onclick={() => showPreviewEffects = !showPreviewEffects}
+				title={showPreviewEffects ? 'Hide hover effects' : 'Show hover effects'}
+				disabled={!displayRarity}
+			>
+				{#if showPreviewEffects}
+					<Eye class="h-4 w-4" />
+				{:else}
+					<EyeOff class="h-4 w-4" />
+				{/if}
+				<span class="ml-1 hidden sm:inline">Effects</span>
+			</Button>
+
+			<!-- Glare Gradient Editor -->
+			<Popover.Root>
+				<Popover.Trigger
+					class="inline-flex h-8 items-center justify-center gap-1 rounded-md px-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 {displayCustomGradient ? 'bg-primary text-primary-foreground shadow hover:bg-primary/90' : 'border border-input bg-background shadow-xs hover:bg-accent hover:text-accent-foreground'}"
+					disabled={!displayRarity}
+					title="Customize glare gradient"
+				>
+					<Palette class="h-4 w-4" />
+					<span class="hidden lg:inline">Glare</span>
+				</Popover.Trigger>
+				<Popover.Content class="w-72" align="end">
+					<div class="space-y-2">
+						<h4 class="font-medium text-sm">Glare Gradient</h4>
+						<p class="text-xs text-muted-foreground">Customize the glare effect colors</p>
+						<GlareGradientEditor bind:value={displayCustomGradient} disabled={!displayRarity} />
+					</div>
+				</Popover.Content>
+			</Popover.Root>
+		</div>
 
 	</Card.Content>
 </Card.Root>

@@ -17,12 +17,14 @@ This document describes the complete data flow for the `svelte-trading-cards` li
 
 ## Package Entry Points
 
-The library exposes three entry points:
+The library exposes five entry points:
 
 | Entry Point | Purpose | Environment |
 |-------------|---------|-------------|
 | `svelte-trading-cards` | Main rendering, components, types, export utilities | Client |
 | `svelte-trading-cards/creator` | Visual card designer component | Client |
+| `svelte-trading-cards/display` | Interactive card with hover-tilt effects | Client |
+| `svelte-trading-cards/gallery` | Gallery layouts (CardRow, etc.) | Client |
 | `svelte-trading-cards/server` | Server-side SVG rendering and PNG conversion | Server |
 
 ---
@@ -385,6 +387,21 @@ import {
   type PNGOptions,
   type PNGResult,
 } from 'svelte-trading-cards/server';
+
+// Display exports (interactive cards with effects)
+import {
+  Card,
+  type CardProps,
+  type FlippableCardProps,
+  type Rarity,
+} from 'svelte-trading-cards/display';
+
+// Gallery exports (card layouts)
+import {
+  CardRow,
+  type CardRowProps,
+  type CardRowContext,
+} from 'svelte-trading-cards/gallery';
 ```
 
 ### Key Interfaces
@@ -452,6 +469,50 @@ type BuiltInShape =
   | 'hexagon' | 'octagon' | 'pentagon' | 'ellipse'
   | 'star' | 'heart' | 'shield' | 'bookmark' | 'label' | 'cloud' | 'message'
   | 'crown' | 'trophy' | 'medal' | 'seal' | 'certificate' | 'card';
+
+// Display Card props
+interface CardProps {
+  template: CardTemplate;
+  data?: CardData;
+  backTemplate?: CardTemplate;
+  backData?: CardData;
+  flipped?: boolean;          // Bindable
+  flipOnClick?: boolean;
+  flipOnHover?: boolean;
+  flipDuration?: number;      // ms
+  rarity?: Rarity;
+  disabled?: boolean;
+  width?: number;
+  height?: number;
+  class?: string;
+  onclick?: (e: MouseEvent) => void;
+  onkeydown?: (e: KeyboardEvent) => void;
+}
+
+// Rarity levels
+type Rarity = 'common' | 'uncommon' | 'rare' | 'epic' | 'legendary';
+
+// CardRow props
+interface CardRowProps {
+  class?: string;
+  cardWidth?: number;
+  visibleWidth?: number;
+  hoverScale?: number;
+  transitionDuration?: number;
+  'aria-label'?: string;
+  children: Snippet<[CardRowContext]>;
+  onCardHover?: (index: number) => void;
+  onCardLeave?: () => void;
+}
+
+// CardRow context (passed to children snippet)
+interface CardRowContext {
+  getTransform: (index: number) => string;
+  getZIndex: (index: number) => number;
+  onHover: (index: number) => void;
+  onLeave: () => void;
+  hoveredIndex: number | null;
+}
 ```
 
 ---
@@ -472,6 +533,63 @@ type BuiltInShape =
 </script>
 
 <CardCanvas bind:svgElement {template} {data} />
+```
+
+### Display Card with Effects
+
+For interactive cards with hover-tilt and rarity-based effects:
+
+```svelte
+<script lang="ts">
+  import { Card } from 'svelte-trading-cards/display';
+  import type { CardTemplate, CardData } from 'svelte-trading-cards';
+
+  export let template: CardTemplate;
+  export let data: CardData;
+  export let backTemplate: CardTemplate | undefined = undefined;
+
+  let flipped = $state(false);
+</script>
+
+<Card
+  {template}
+  {data}
+  rarity="legendary"
+  bind:flipped
+  flipOnClick
+  {backTemplate}
+/>
+```
+
+### Card Gallery with CardRow
+
+For displaying a collection of cards in an overlapping row:
+
+```svelte
+<script lang="ts">
+  import { CardRow } from 'svelte-trading-cards/gallery';
+  import { Card } from 'svelte-trading-cards/display';
+  import type { CardTemplate, CardData } from 'svelte-trading-cards';
+
+  export let template: CardTemplate;
+  export let cards: CardData[];
+</script>
+
+<CardRow cardWidth={280} visibleWidth={80}>
+  {#snippet children(ctx)}
+    {#each cards as card, i}
+      <div
+        class="card-row-item"
+        style:transform={ctx.getTransform(i)}
+        style:z-index={ctx.getZIndex(i)}
+        onmouseenter={() => ctx.onHover(i)}
+        onmouseleave={ctx.onLeave}
+      >
+        <Card {template} data={card} width={280} rarity="rare" />
+      </div>
+    {/each}
+  {/snippet}
+</CardRow>
 ```
 
 ### Using the Creator
@@ -706,6 +824,8 @@ interface DownloadOptions {
 | SVG Element | `SVGSVGElement` | `bind:svgElement` |
 | PNG Buffer | `Uint8Array` | Server-side `svgToPNG()` |
 | File Download | `.svg` / `.png` | Client-side export functions |
+| Flip State | `boolean` | Display Card `bind:flipped` |
+| Hover Index | `number \| null` | CardRow context `hoveredIndex` |
 
 ### Integration Checklist
 

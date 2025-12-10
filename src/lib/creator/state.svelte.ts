@@ -425,6 +425,28 @@ export function buildTemplate(templateName: string, containers: ContainerState[]
 	return { name: templateName, components };
 }
 
+// Build CardTemplate with display settings
+export function buildTemplateWithDisplay(
+	templateName: string,
+	containers: ContainerState[],
+	display?: { rarity?: string; customGradient?: string }
+): CardTemplate {
+	const template = buildTemplate(templateName, containers);
+
+	// Add display settings if provided
+	if (display && (display.rarity || display.customGradient)) {
+		return {
+			...template,
+			display: {
+				...(display.rarity && { rarity: display.rarity as 'common' | 'uncommon' | 'rare' | 'epic' | 'legendary' | 'mythic' }),
+				...(display.customGradient && { customGradient: display.customGradient })
+			}
+		};
+	}
+
+	return template;
+}
+
 // Build preview data (field names or actual data)
 export function buildPreviewData(
 	previewMode: 'fields' | 'data',

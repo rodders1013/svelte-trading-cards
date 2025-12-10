@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { CardCanvas } from '$lib';
+	import { Card as DisplayCard, type Rarity } from '$lib/display';
 	import type { CardTemplate } from '$lib/types';
 	import type { ContainerState, ResizeHandle } from '../types';
 	import { getResizeCursor } from '../state.svelte';
@@ -19,7 +20,11 @@
 		isTransitioning,
 		canvasScale,
 		onStartDrag,
-		onStartResize
+		onStartResize,
+		// Display effects props
+		showEffects = false,
+		rarity = 'common' as Rarity,
+		customGradient
 	}: {
 		template: CardTemplate;
 		previewData: Record<string, unknown>;
@@ -36,7 +41,23 @@
 		canvasScale: number;
 		onStartDrag: (e: PointerEvent, containerId: string) => void;
 		onStartResize: (e: PointerEvent, containerId: string, handle: ResizeHandle) => void;
+		// Display effects
+		showEffects?: boolean;
+		rarity?: Rarity;
+		customGradient?: string;
 	} = $props();
+
+	// Disable effects during interactions for better performance
+	const effectsEnabled = $derived(showEffects && canvasInteraction === 'idle' && !isTransitioning);
+
+	// Build template with custom gradient if provided
+	const displayTemplate = $derived<CardTemplate>({
+		...template,
+		display: {
+			...template.display,
+			customGradient: customGradient
+		}
+	});
 
 	// Grid sizes: small grid = gridSize, large grid = gridSize * 3
 	const largeGridSize = $derived(gridSize * 3);
@@ -46,17 +67,33 @@
 </script>
 
 <!-- Canvas Container -->
-<div class="rounded-lg border border-border bg-white p-1">
+<div
+	class="canvas-preview-wrapper rounded-lg p-1"
+	class:border={!effectsEnabled}
+	class:border-border={!effectsEnabled}
+	class:bg-white={!effectsEnabled}
+>
 	<div
-		class="relative overflow-hidden rounded-xl"
+		class="relative rounded-xl"
+		class:overflow-hidden={!effectsEnabled}
+		class:overflow-visible={effectsEnabled}
 		style="width: {canvasWidth}px; cursor: {canvasInteraction === 'dragging' ? 'grabbing' : canvasInteraction === 'resizing' && activeResizeHandle ? getResizeCursor(activeResizeHandle) : 'default'};"
 	>
-		<div class="aspect-[750/1050] w-full">
-			<CardCanvas {template} data={previewData} bind:svgElement />
+		<div class="aspect-[750/1050] w-full" class:p-2={effectsEnabled}>
+			{#if effectsEnabled}
+				<DisplayCard
+					template={displayTemplate}
+					data={previewData}
+					{rarity}
+					disabled={false}
+				/>
+			{:else}
+				<CardCanvas {template} data={previewData} bind:svgElement />
+			{/if}
 		</div>
 
-		<!-- Grid Overlay -->
-		{#if showGrid}
+		<!-- Grid Overlay (hidden when effects preview is active) -->
+		{#if showGrid && !effectsEnabled}
 			<div class="pointer-events-none absolute inset-0">
 				<svg class="h-full w-full" viewBox="0 0 750 1050" preserveAspectRatio="none">
 					<defs>
@@ -78,7 +115,8 @@
 			</div>
 		{/if}
 
-		<!-- Selection overlay with drag/resize support -->
+		<!-- Selection overlay with drag/resize support (hidden when effects preview is active) -->
+		{#if !effectsEnabled}
 		<div class="pointer-events-none absolute inset-0">
 			{#each containers as container, index (container.id)}
 				{@const scale = canvasScale}
@@ -263,6 +301,7 @@
 				{/if}
 			{/each}
 		</div>
+		{/if}
 	</div>
 </div>
 
@@ -274,5 +313,16 @@
 		display: block;
 		width: 100%;
 		height: 100%;
+	}
+
+	/* Ensure canvas preview can show overflow for hover effects */
+	.canvas-preview-wrapper {
+		overflow: visible;
+		position: relative;
+		z-index: 1;
+	}
+
+	.canvas-preview-wrapper:hover {
+		z-index: 10;
 	}
 </style>

@@ -9,14 +9,15 @@
 	} from '$lib';
 	import { GradientBackground, Image, PatternBackground, SolidBackground } from '$lib/card/backgrounds';
 	import { Border } from '$lib/card/borders';
-	import { TextField } from '$lib/card/fields';
+	import { TextField, StatPanel, List } from '$lib/card/fields';
 	import type { CardTemplate } from '$lib/types';
 	import { datasets, type AnyCard } from '$lib/demo';
-	import * as Card from '$lib/creator/ui/card';
+	import * as UICard from '$lib/creator/ui/card';
 	import { Button } from '$lib/creator/ui/button';
 	import * as Select from '$lib/creator/ui/select';
 	import * as Tabs from '$lib/creator/ui/tabs';
 	import { Separator } from '$lib/creator/ui/separator';
+	import { Card as DisplayCard, getRarityOptions, type Rarity } from '$lib/display';
 
 	// Register all components
 	registerComponent('Group', Group);
@@ -26,9 +27,39 @@
 	registerComponent('PatternBackground', PatternBackground);
 	registerComponent('Border', Border);
 	registerComponent('TextField', TextField);
+	registerComponent('StatPanel', StatPanel);
+	registerComponent('List', List);
+
+	// Register all exports from modules dynamically
+	import * as backgrounds from '$lib/card/backgrounds';
+	import * as borders from '$lib/card/borders';
+	import * as fields from '$lib/card/fields';
+
+	Object.entries(backgrounds).forEach(([name, component]) => {
+		if (typeof component === 'function' || (component && typeof component === 'object')) {
+			registerComponent(name, component as any);
+		}
+	});
+	Object.entries(borders).forEach(([name, component]) => {
+		if (typeof component === 'function' || (component && typeof component === 'object')) {
+			registerComponent(name, component as any);
+		}
+	});
+	Object.entries(fields).forEach(([name, component]) => {
+		if (typeof component === 'function' || (component && typeof component === 'object')) {
+			registerComponent(name, component as any);
+		}
+	});
 
 	// Data selection
 	let selectedDataset = $state<'xbox' | 'playstation' | 'steam'>('playstation');
+
+	// Rarity selection
+	let selectedRarity = $state<Rarity>('rare');
+	const rarityOptions = getRarityOptions();
+
+	// Display mode
+	let useDisplayEffects = $state(true);
 
 	const currentDataset = $derived(datasets[selectedDataset]);
 	const cards = $derived(currentDataset.cards as AnyCard[]);
@@ -175,8 +206,8 @@
 	</div>
 
 	<!-- Template & Data Selection -->
-	<Card.Root>
-		<Card.Content class="space-y-4 pt-6">
+	<UICard.Root>
+		<UICard.Content class="space-y-4 pt-6">
 			<!-- Template Selection -->
 			<div class="flex items-center gap-4">
 				<span class="text-sm font-medium">Template:</span>
@@ -215,21 +246,60 @@
 					{cards.length} cards
 				</span>
 			</div>
+
+			<Separator />
+
+			<!-- Rarity & Effects Selection -->
+			<div class="flex items-center gap-6">
+				<div class="flex items-center gap-4">
+					<span class="text-sm font-medium">Rarity:</span>
+					<Select.Root type="single" bind:value={selectedRarity}>
+						<Select.Trigger class="w-48">
+							{rarityOptions.find((r) => r.value === selectedRarity)?.label ?? 'Select'}
+						</Select.Trigger>
+						<Select.Content>
+							{#each rarityOptions as option}
+								<Select.Item value={option.value}>
+									{option.label} - {option.description}
+								</Select.Item>
+							{/each}
+						</Select.Content>
+					</Select.Root>
+				</div>
+
+				<label class="flex items-center gap-2 cursor-pointer">
+					<input type="checkbox" bind:checked={useDisplayEffects} class="rounded" />
+					<span class="text-sm">Enable hover effects</span>
+				</label>
+			</div>
+
 			<p class="text-xs text-muted-foreground">
 				{currentDataset.description}
 			</p>
-		</Card.Content>
-	</Card.Root>
+		</UICard.Content>
+	</UICard.Root>
 
 	{#if template}
 		<!-- Cards Grid -->
-		<div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+		<div class="grid gap-8 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
 			{#each cards as card (card.id)}
-				<Card.Root class="overflow-hidden">
-					<div class="aspect-[750/1050] bg-black/50" data-card-id={card.id}>
-						<CardCanvas {template} data={card} />
+				<UICard.Root class="card-wrapper overflow-visible">
+					<!-- Extra padding to allow room for scale/tilt effects -->
+					<div class="p-4" data-card-id={card.id}>
+						<div class="aspect-[750/1050]">
+							{#if useDisplayEffects}
+								<DisplayCard
+									{template}
+									data={card}
+									rarity={selectedRarity}
+									disabled={false}
+								/>
+							{:else}
+								<CardCanvas {template} data={card} />
+							{/if}
+						</div>
 					</div>
-					<Card.Content class="space-y-3 pt-4">
+					<UICard.Content class="space-y-3 pt-4">
 						<div>
 							<h3 class="font-semibold">{getCardTitle(card)}</h3>
 							<p class="text-xs text-muted-foreground">{getCardPlayerId(card)}</p>
@@ -285,28 +355,28 @@
 								</p>
 							</Tabs.Content>
 						</Tabs.Root>
-					</Card.Content>
-				</Card.Root>
+					</UICard.Content>
+				</UICard.Root>
 			{/each}
 		</div>
 
 		<!-- Template Debug -->
-		<Card.Root>
-			<Card.Header>
-				<Card.Title class="text-sm">Loaded Template: {templateName}</Card.Title>
-			</Card.Header>
-			<Card.Content>
+		<UICard.Root>
+			<UICard.Header>
+				<UICard.Title class="text-sm">Loaded Template: {templateName}</UICard.Title>
+			</UICard.Header>
+			<UICard.Content>
 				<pre class="max-h-40 overflow-auto rounded bg-muted p-3 text-xs">{JSON.stringify(
 						template,
 						null,
 						2
 					)}</pre>
-			</Card.Content>
-		</Card.Root>
+			</UICard.Content>
+		</UICard.Root>
 	{:else}
 		<!-- No template loaded state -->
-		<Card.Root class="py-16">
-			<Card.Content class="flex flex-col items-center justify-center text-center">
+		<UICard.Root class="py-16">
+			<UICard.Content class="flex flex-col items-center justify-center text-center">
 				<div class="rounded-full bg-muted p-4">
 					<svg
 						xmlns="http://www.w3.org/2000/svg"
@@ -334,8 +404,8 @@
 						Load Template JSON
 					</label>
 				</div>
-			</Card.Content>
-		</Card.Root>
+			</UICard.Content>
+		</UICard.Root>
 	{/if}
 </div>
 
@@ -343,5 +413,17 @@
 	:global(.aspect-\[750\/1050\] svg) {
 		width: 100%;
 		height: 100%;
+	}
+
+	/* Ensure hovered cards appear above neighbors */
+	.card-wrapper {
+		position: relative;
+		z-index: 1;
+		transition: z-index 0s 0.2s; /* Delay z-index drop */
+	}
+
+	.card-wrapper:hover {
+		z-index: 10;
+		transition: z-index 0s 0s; /* Immediate z-index raise */
 	}
 </style>

@@ -16,6 +16,12 @@ Build professional trading cards by composing pre-built SVG components. Think of
 - Client-side SVG/PNG download (no server required)
 - Server-side PNG rendering (pixel-perfect, trusted source)
 - Generic data model - works for any domain (games, employees, products)
+- Gallery components (Grid, Carousel, Row, Modal) for displaying card collections
+- Interactive card display with hover-tilt effects and rarity presets
+
+## Getting Started
+
+For a comprehensive step-by-step integration guide, see **[GETTING-STARTED.md](project-files/GETTING-STARTED.md)**.
 
 ## Tech Stack
 
@@ -26,6 +32,7 @@ Build professional trading cards by composing pre-built SVG components. Think of
 | Tailwind CSS | 4.x | Styling |
 | Zod | 4.x | Runtime validation |
 | shadcn-svelte | - | Creator UI components |
+| hover-tilt | - | 3D tilt effects for card display |
 | sharp | - | Image processing (WebP→PNG for server export) |
 | @resvg/resvg-js | 2.x | Server-side SVG→PNG rendering |
 
@@ -636,6 +643,8 @@ const safe = sanitizeFilename(userInput); // "My Card!" → "My Card"
 |-------------|----------|
 | `svelte-trading-cards` | All components, CardCreator, types, client utilities |
 | `svelte-trading-cards/creator` | CardCreator component and creator types only |
+| `svelte-trading-cards/display` | Interactive Card with hover-tilt effects and rarity presets |
+| `svelte-trading-cards/gallery` | CardRow and gallery layout components |
 | `svelte-trading-cards/server` | Server-side rendering, image embedding, PNG conversion |
 
 ## License
