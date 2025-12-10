@@ -16,6 +16,8 @@ Build professional trading cards by composing pre-built SVG components. Think of
 - Client-side SVG/PNG download (no server required)
 - Server-side PNG rendering (pixel-perfect, trusted source)
 - Generic data model - works for any domain (games, employees, products)
+- Gallery components (Grid, Carousel, Row, Modal) for displaying card collections
+- Interactive card display with hover-tilt effects and rarity presets
 
 ## Tech Stack
 

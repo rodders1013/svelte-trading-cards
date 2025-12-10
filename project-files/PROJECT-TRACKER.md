@@ -1,6 +1,6 @@
 # svelte-trading-cards Project Tracker
 
-**Last Updated:** 2025-12-09
+**Last Updated:** 2025-12-10
 **Current Progress:** ~98% (Beta ready)
 
 ---
@@ -322,6 +322,7 @@
 ### Gallery Components (`src/lib/gallery/`)
 - [x] CardGrid - Responsive CSS Grid layout
 - [x] CardCarousel - Horizontal scroll with navigation
+- [x] CardRow - Overlapping card row with hover-to-expand effect
 - [x] CardModal - Full-size lightbox
 - [x] Keyboard navigation utilities
 
@@ -329,6 +330,8 @@
 - [x] `display.rarity` property in template schema
 - [x] `display.customGradient` for custom glare gradients
 - [x] Rarity dropdown in Creator TopBar
+- [x] Effects preview toggle in Creator (shows hover-tilt effects on canvas)
+- [x] GlareGradientEditor component (8 presets + custom colors)
 
 ### Test Pages
 - [x] `/test/display` - Display effects demo
@@ -360,10 +363,10 @@
 | Phase 1: Core Package | Complete | 28/28 |
 | Phase 2: Visual Creator | Complete | 68/68 |
 | Phase 3: Additional Components | Complete | 57/57 |
-| Phase 4: Display & Gallery | Complete | 14/14 |
+| Phase 4: Display & Gallery | Complete | 17/17 |
 | Phase 5: Testing & Docs | Not Started | 0/4 |
 | Phase 6: Publish | In Progress | 1/3 |
-| **Total** | | **168/174 (~97%)** |
+| **Total** | | **171/177 (~97%)** |
 
 ### Phase 3 Component Priority
 
@@ -529,6 +532,7 @@ src/lib/gallery/                 # Gallery layout components
 ├── types.ts                   # Gallery component types
 ├── CardGrid.svelte            # Responsive CSS Grid
 ├── CardCarousel.svelte        # Horizontal scroll carousel
+├── CardRow.svelte             # Overlapping card row with hover-to-expand
 ├── CardModal.svelte           # Full-size lightbox
 └── utils/
     ├── index.ts

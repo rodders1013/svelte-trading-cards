@@ -2,8 +2,8 @@
 
 **Package:** `svelte-trading-cards`
 **Version:** 0.1.0
-**Last Updated:** 2025-12-07
-**Status:** In Development (~97% complete)
+**Last Updated:** 2025-12-10
+**Status:** In Development (~98% complete)
 
 ---
 
@@ -18,9 +18,11 @@
 7. [Blend Modes System](#blend-modes-system)
 8. [Fonts System](#fonts-system)
 9. [Visual Creator](#visual-creator)
-10. [Type System](#type-system)
-11. [Export System](#export-system)
-12. [Extensibility](#extensibility)
+10. [Display System](#display-system)
+11. [Gallery System](#gallery-system)
+12. [Type System](#type-system)
+13. [Export System](#export-system)
+14. [Extensibility](#extensibility)
 
 ---
 
@@ -81,6 +83,7 @@ The Card Base layer automatically covers the bleed area. When exporting with ble
 | shadcn-svelte | - | UI components for creator interface (https://www.shadcn-svelte.com/llms.txt) |
 | sharp | - | Image processing (WebP→PNG conversion for server export) |
 | @resvg/resvg-js | 2.x | Server-side SVG→PNG rendering |
+| hover-tilt | - | 3D tilt effects with glare for card display |
 
 ---
 
@@ -104,6 +107,13 @@ src/lib/
 │   ├── fields/              # TextField, StatPanel, List
 │   └── icons/               # Icon, IconPicker (Iconify integration)
 ├── presets/                 # Dataset-based label presets
+├── display/                 # Card display components with effects
+│   ├── Card.svelte          # Display card with hover-tilt and rarity presets
+│   ├── presets.ts           # Rarity presets (common, uncommon, rare, epic, legendary)
+│   └── types.ts             # Display component types
+├── gallery/                 # Gallery layouts for card collections
+│   ├── CardRow.svelte       # Overlapping card row with hover expand
+│   └── types.ts             # Gallery component types
 ├── export/                  # Client-side export utilities
 ├── server/                  # Server-side utilities (separate entry point)
 ├── utils/                   # FitText, text measurement
@@ -996,6 +1006,217 @@ Each component has a dedicated property panel. All components include an **Anima
 **Border:** Color, width, opacity, glow effect, holographic effect, multi-layer, animation, effects
 
 **Icon:** Icon picker with search, icon set filter, color, size, rotation, flip (H/V), opacity, animation, effects
+
+---
+
+## Display System
+
+The display system provides interactive card components with 3D tilt effects and rarity-based visual presets using the `hover-tilt` package.
+
+### Architecture
+
+```
+src/lib/display/
+├── Card.svelte       # Main display component
+├── presets.ts        # Rarity presets and glare masks
+└── types.ts          # TypeScript types
+```
+
+### Card Component
+
+The display `Card` component wraps `CardCanvas` with hover-tilt effects:
+
+```svelte
+<script lang="ts">
+  import { Card } from 'svelte-trading-cards/display';
+</script>
+
+<Card
+  template={myTemplate}
+  data={myData}
+  rarity="legendary"
+  flipOnClick
+  backTemplate={backTemplate}
+/>
+```
+
+### Props
+
+```typescript
+interface CardProps {
+  // Content
+  template: CardTemplate;
+  data?: CardData;
+  backTemplate?: CardTemplate;  // For flip support
+  backData?: CardData;
+
+  // Flip behavior
+  flipped?: boolean;            // Bindable
+  flipOnClick?: boolean;
+  flipOnHover?: boolean;
+  flipDuration?: number;        // ms (default: 600)
+
+  // Rarity
+  rarity?: Rarity;              // Overrides template.display.rarity
+
+  // Disable effects
+  disabled?: boolean;           // Static card without hover-tilt
+
+  // Layout
+  width?: number;
+  height?: number;
+  class?: string;
+
+  // Events
+  onclick?: (e: MouseEvent) => void;
+  onkeydown?: (e: KeyboardEvent) => void;
+}
+```
+
+### Rarity Presets
+
+Each rarity level has a unique visual treatment:
+
+| Rarity | Glare | Mask | Blend Mode | Shadow |
+|--------|-------|------|------------|--------|
+| `common` | 0.15 | none | normal | subtle |
+| `uncommon` | 0.25 | none | normal | medium |
+| `rare` | 0.4 | foil | screen | strong |
+| `epic` | 0.6 | holo | screen | intense |
+| `legendary` | 0.8 | prism | screen | maximum |
+
+### Glare Masks
+
+CSS gradient-based masks create different visual effects:
+
+- **foil**: Diagonal stripes pattern
+- **holo**: Horizontal rainbow bands
+- **sparkle**: Radial dots pattern
+- **prism**: Angular conic gradient
+- **rainbow**: Full coverage (no mask)
+
+### Custom Gradient
+
+Templates can define a custom glare gradient via `template.display.customGradient`:
+
+```typescript
+const template: CardTemplate = {
+  name: 'Custom Card',
+  display: {
+    rarity: 'rare',
+    customGradient: 'radial-gradient(circle at 50% 50%, #ff0000, #00ff00, #0000ff)'
+  },
+  components: [...]
+};
+```
+
+The custom gradient is passed to hover-tilt via CSS variable `--hover-tilt-custom-gradient`.
+
+### Creator Integration
+
+The visual creator includes rarity and glare customization:
+- **Rarity dropdown** in TopBar for quick selection
+- **GlareGradientEditor** for custom gradient creation
+- **Effects preview toggle** to see hover-tilt effects in canvas
+
+---
+
+## Gallery System
+
+The gallery system provides layout components for displaying card collections.
+
+### Architecture
+
+```
+src/lib/gallery/
+├── CardRow.svelte    # Overlapping row with hover expand
+├── types.ts          # TypeScript types
+└── index.ts          # Exports
+```
+
+### CardRow Component
+
+Displays cards in an overlapping row where cards fan out on hover:
+
+```svelte
+<script lang="ts">
+  import { CardRow } from 'svelte-trading-cards/gallery';
+  import { Card } from 'svelte-trading-cards/display';
+</script>
+
+<CardRow cardWidth={280} visibleWidth={80}>
+  {#snippet children(ctx)}
+    {#each cards as card, i}
+      <div
+        class="card-row-item"
+        style:transform={ctx.getTransform(i)}
+        style:z-index={ctx.getZIndex(i)}
+        onmouseenter={() => ctx.onHover(i)}
+        onmouseleave={ctx.onLeave}
+      >
+        <Card template={template} data={card} width={280} />
+      </div>
+    {/each}
+  {/snippet}
+</CardRow>
+```
+
+### CardRow Props
+
+```typescript
+interface CardRowProps {
+  class?: string;
+  cardWidth?: number;          // Full card width (default: 280)
+  visibleWidth?: number;       // Visible portion when stacked (default: 80)
+  hoverScale?: number;         // Scale on hover (default: 1.08)
+  transitionDuration?: number; // Animation duration in seconds (default: 0.5)
+  'aria-label'?: string;
+  children: Snippet<[CardRowContext]>;
+  onCardHover?: (index: number) => void;
+  onCardLeave?: () => void;
+}
+```
+
+### CardRow Context
+
+The snippet receives context for positioning:
+
+```typescript
+interface CardRowContext {
+  getTransform: (index: number) => string;  // CSS transform value
+  getZIndex: (index: number) => number;     // z-index value
+  onHover: (index: number) => void;         // Call on mouseenter
+  onLeave: () => void;                      // Call on mouseleave
+  hoveredIndex: number | null;              // Currently hovered card
+}
+```
+
+### CSS Requirements
+
+Cards must have the `card-row-item` class for proper styling:
+
+```css
+.card-row :global(.card-row-item) {
+  position: absolute;
+  left: 0;
+  top: 60px;
+  transition: transform 0.5s cubic-bezier(0.25, 0.1, 0.25, 1);
+  cursor: pointer;
+}
+```
+
+### Overflow Handling
+
+CardRow overrides hover-tilt's overflow to prevent clipping neighboring cards:
+
+```css
+.card-row :global(.hover-tilt) {
+  overflow: visible !important;
+}
+.card-row :global(.tc-card-face svg) {
+  border-radius: 3%;  /* Rounded corners at SVG level */
+}
+```
 
 ---
 
