@@ -67,14 +67,19 @@
 </script>
 
 <!-- Canvas Container -->
-<div class="canvas-preview-wrapper rounded-lg border border-border bg-white p-1">
+<div
+	class="canvas-preview-wrapper rounded-lg p-1"
+	class:border={!effectsEnabled}
+	class:border-border={!effectsEnabled}
+	class:bg-white={!effectsEnabled}
+>
 	<div
 		class="relative rounded-xl"
 		class:overflow-hidden={!effectsEnabled}
 		class:overflow-visible={effectsEnabled}
 		style="width: {canvasWidth}px; cursor: {canvasInteraction === 'dragging' ? 'grabbing' : canvasInteraction === 'resizing' && activeResizeHandle ? getResizeCursor(activeResizeHandle) : 'default'};"
 	>
-		<div class="aspect-[750/1050] w-full" class:p-1={effectsEnabled}>
+		<div class="aspect-[750/1050] w-full" class:p-2={effectsEnabled}>
 			{#if effectsEnabled}
 				<DisplayCard
 					template={displayTemplate}
@@ -87,8 +92,8 @@
 			{/if}
 		</div>
 
-		<!-- Grid Overlay -->
-		{#if showGrid}
+		<!-- Grid Overlay (hidden when effects preview is active) -->
+		{#if showGrid && !effectsEnabled}
 			<div class="pointer-events-none absolute inset-0">
 				<svg class="h-full w-full" viewBox="0 0 750 1050" preserveAspectRatio="none">
 					<defs>
@@ -110,7 +115,8 @@
 			</div>
 		{/if}
 
-		<!-- Selection overlay with drag/resize support -->
+		<!-- Selection overlay with drag/resize support (hidden when effects preview is active) -->
+		{#if !effectsEnabled}
 		<div class="pointer-events-none absolute inset-0">
 			{#each containers as container, index (container.id)}
 				{@const scale = canvasScale}
@@ -295,6 +301,7 @@
 				{/if}
 			{/each}
 		</div>
+		{/if}
 	</div>
 </div>
 

@@ -44,12 +44,23 @@ FIXED_TILT_SETTINGS = {
 ### 2. Gallery Components (`src/lib/gallery/`)
 
 **Files Created:**
-- `types.ts` - CardGrid, CardCarousel, CardModal prop types
+- `types.ts` - CardGrid, CardCarousel, CardRow, CardModal prop types
 - `CardGrid.svelte` - CSS Grid layout with responsive columns
 - `CardCarousel.svelte` - Horizontal scroll carousel with navigation
+- `CardRow.svelte` - Overlapping card row with hover-to-expand effect
 - `CardModal.svelte` - Full-size card modal/lightbox
 - `utils/keyboard.ts` - Keyboard navigation helper
 - `index.ts` - Exports
+
+**CardRow Props:**
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| cardWidth | number | 280 | Width of each card in pixels |
+| visibleWidth | number | 80 | Visible width of overlapped cards |
+| hoverScale | number | 1.08 | Scale factor on hover |
+| transitionDuration | number | 0.5 | Animation duration in seconds |
+| onCardHover | function | - | Callback when card is hovered |
+| onCardLeave | function | - | Callback when mouse leaves |
 
 ### 3. CardTemplate Schema Update
 
@@ -71,11 +82,22 @@ interface CardTemplate {
 
 **Modified:**
 - `src/lib/creator/state.svelte.ts` - Added `buildTemplateWithDisplay()` function
-- `src/lib/creator/components/layout/TopBar.svelte` - Added Rarity dropdown
+- `src/lib/creator/components/layout/TopBar.svelte` - Added Rarity dropdown, Effects toggle, Glare editor
 - `src/lib/creator/CardCreator.svelte` - Added display settings state, passes to TopBar
+- `src/lib/creator/components/CanvasPreview.svelte` - Added DisplayCard rendering for effects preview
+- `src/lib/creator/components/controls/GlareGradientEditor.svelte` - **NEW** Custom gradient editor
 
 **TopBar now has:**
 - Rarity dropdown (sparkles icon) that saves to template JSON
+- Effects toggle (eye icon) to preview hover effects in Creator canvas
+- Glare Gradient editor (palette icon) with presets and custom color pickers
+
+**GlareGradientEditor Features:**
+- 8 presets: Default, Gold, Silver, Rainbow, Emerald, Ruby, Sapphire, Amethyst
+- Custom color pickers for Highlight, Mid, and Shadow colors
+- Intensity slider (10% - 100%)
+- Live preview of the gradient
+- Reset to default button
 
 ### 5. Package.json Updates
 
@@ -152,6 +174,18 @@ Added hover-tilt styles in `@layer components`:
 **Cause:** Container had `overflow-hidden` and no padding for scale effect.
 **Fix:** Changed to `overflow-visible`, added padding, hover z-index for stacking.
 
+### Issue 6: Creator Preview Effects Not Working
+**Cause:** Selection overlay and grid rendering on top of DisplayCard, blocking hover interactions.
+**Fix:** Hide grid and selection overlay when effects preview is enabled.
+
+### Issue 7: Card Corners Square When Effects Enabled
+**Cause:** Card content not clipped to border-radius.
+**Fix:** Added `overflow: hidden` to `.hover-tilt` class.
+
+### Issue 8: Custom Gradient Not Applying
+**Cause:** CSS variable `--hover-tilt-custom-gradient` not reaching the HoverTilt component.
+**Fix:** Pass the CSS variable via HoverTilt's `style` prop to set it on the container.
+
 ---
 
 ## Files Changed
@@ -167,12 +201,15 @@ Added hover-tilt styles in `@layer components`:
 | `src/lib/gallery/CardCarousel.svelte` | CREATE |
 | `src/lib/gallery/CardModal.svelte` | CREATE |
 | `src/lib/gallery/utils/keyboard.ts` | CREATE |
+| `src/lib/gallery/CardRow.svelte` | CREATE - overlapping card row component |
 | `src/lib/gallery/utils/index.ts` | CREATE |
 | `src/lib/gallery/index.ts` | CREATE |
 | `src/lib/types/CardTemplate.ts` | MODIFY - added display settings |
 | `src/lib/creator/state.svelte.ts` | MODIFY - added buildTemplateWithDisplay |
-| `src/lib/creator/components/layout/TopBar.svelte` | MODIFY - added rarity dropdown |
-| `src/lib/creator/CardCreator.svelte` | MODIFY - added display state |
+| `src/lib/creator/components/layout/TopBar.svelte` | MODIFY - added rarity dropdown, effects toggle, glare editor |
+| `src/lib/creator/components/controls/GlareGradientEditor.svelte` | CREATE - custom gradient editor with presets |
+| `src/lib/creator/components/CanvasPreview.svelte` | MODIFY - added DisplayCard for effects preview |
+| `src/lib/creator/CardCreator.svelte` | MODIFY - added display state, effects preview |
 | `src/routes/test/display/+page.svelte` | CREATE |
 | `src/routes/gallery/+page.svelte` | MODIFY - added display effects |
 | `src/routes/layout.css` | MODIFY - added hover-tilt CSS |
@@ -206,6 +243,39 @@ Added hover-tilt styles in `@layer components`:
     <Card {template} data={card} />
   {/each}
 </CardGrid>
+
+<!-- Overlapping card row -->
+<CardRow cardWidth={250} visibleWidth={70}>
+  {#snippet children(ctx)}
+    {#each cards as card, i}
+      <div
+        class="card-row-item"
+        style:transform={ctx.getTransform(i)}
+        style:z-index={ctx.getZIndex(i)}
+        onmouseenter={() => ctx.onHover(i)}
+        onmouseleave={ctx.onLeave}
+      >
+        <div class="w-[250px]">
+          <Card {template} data={card} />
+        </div>
+      </div>
+    {/each}
+  {/snippet}
+</CardRow>
+
+<!-- With custom gradient (set in template.display.customGradient) -->
+<!-- The gradient follows hover-tilt's CSS variable format -->
+```
+Template JSON example with custom gradient:
+```json
+{
+  "name": "My Card",
+  "components": [...],
+  "display": {
+    "rarity": "legendary",
+    "customGradient": "radial-gradient(farthest-corner circle at var(--gradient-x) var(--gradient-y), #fff9e6b3 8%, #ffd70086 28%, #8b691447 90%)"
+  }
+}
 ```
 
 ---

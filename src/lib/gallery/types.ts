@@ -1,6 +1,47 @@
 import type { Snippet } from 'svelte';
 
 /**
+ * Context provided to CardRow children via snippet
+ */
+export interface CardRowContext {
+	/** Get transform style for a card at given index */
+	getTransform: (index: number) => string;
+	/** Get z-index for a card at given index */
+	getZIndex: (index: number) => number;
+	/** Call when hovering a card */
+	onHover: (index: number) => void;
+	/** Call when leaving a card */
+	onLeave: () => void;
+	/** Currently hovered card index (null if none) */
+	hoveredIndex: number | null;
+}
+
+/**
+ * Props for CardRow component
+ * Overlapping card row with hover-to-expand effect
+ */
+export interface CardRowProps {
+	/** CSS class for custom styling */
+	class?: string;
+	/** Width of each card in pixels (default: 280) */
+	cardWidth?: number;
+	/** Visible width of overlapped cards in pixels (default: 80) */
+	visibleWidth?: number;
+	/** Scale factor on hover (default: 1.08) */
+	hoverScale?: number;
+	/** Transition duration in seconds (default: 0.5) */
+	transitionDuration?: number;
+	/** ARIA label for the row */
+	'aria-label'?: string;
+	/** Children snippet - receives CardRowContext */
+	children: Snippet<[CardRowContext]>;
+	/** Callback when a card is hovered */
+	onCardHover?: (index: number) => void;
+	/** Callback when mouse leaves a card */
+	onCardLeave?: () => void;
+}
+
+/**
  * Props for CardGrid component
  * CSS Grid container for responsive card layouts
  */

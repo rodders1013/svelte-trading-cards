@@ -214,17 +214,13 @@
 
 			<!-- Glare Gradient Editor -->
 			<Popover.Root>
-				<Popover.Trigger>
-					<Button
-						variant={displayCustomGradient ? 'default' : 'outline'}
-						size="sm"
-						class="h-8 px-2"
-						title="Customize glare gradient"
-						disabled={!displayRarity}
-					>
-						<Palette class="h-4 w-4" />
-						<span class="ml-1 hidden lg:inline">Glare</span>
-					</Button>
+				<Popover.Trigger
+					class="inline-flex h-8 items-center justify-center gap-1 rounded-md px-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 {displayCustomGradient ? 'bg-primary text-primary-foreground shadow hover:bg-primary/90' : 'border border-input bg-background shadow-xs hover:bg-accent hover:text-accent-foreground'}"
+					disabled={!displayRarity}
+					title="Customize glare gradient"
+				>
+					<Palette class="h-4 w-4" />
+					<span class="hidden lg:inline">Glare</span>
 				</Popover.Trigger>
 				<Popover.Content class="w-72" align="end">
 					<div class="space-y-2">

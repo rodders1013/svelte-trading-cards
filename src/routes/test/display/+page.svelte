@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { Card, getRarityOptions, type Rarity } from '$lib/display';
-	import { CardGrid, CardCarousel, CardModal } from '$lib/gallery';
+	import { CardGrid, CardCarousel, CardRow, CardModal } from '$lib/gallery';
 	import { datasets } from '$lib/demo';
 	import type { CardTemplate, CardData } from '$lib/types';
 
@@ -353,8 +353,36 @@
 			</CardGrid>
 		</section>
 
-		<!-- Section: Carousel (only show if using default template) -->
+		<!-- Section: Card Row (overlapping) -->
 		{#if !customTemplate}
+			<section class="mb-12">
+				<h2 class="text-2xl font-semibold mb-4">Card Row (Overlapping)</h2>
+				<p class="text-gray-400 mb-4">Hover to reveal cards</p>
+
+				<CardRow cardWidth={250} visibleWidth={70}>
+					{#snippet children(ctx)}
+						{#each cards.slice(0, 6) as card, i}
+							<div
+								class="card-row-item"
+								style:transform={ctx.getTransform(i)}
+								style:z-index={ctx.getZIndex(i)}
+								onmouseenter={() => ctx.onHover(i)}
+								onmouseleave={ctx.onLeave}
+							>
+								<div class="w-[250px]">
+									<Card
+										template={template}
+										data={card}
+										rarity={rarityOptions[i % rarityOptions.length].value}
+									/>
+								</div>
+							</div>
+						{/each}
+					{/snippet}
+				</CardRow>
+			</section>
+
+			<!-- Section: Carousel -->
 			<section class="mb-12">
 				<h2 class="text-2xl font-semibold mb-4">Card Carousel</h2>
 

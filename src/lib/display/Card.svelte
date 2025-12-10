@@ -165,6 +165,7 @@
 
 	// Back data defaults to main data if not provided
 	const effectiveBackData = $derived(backData ?? data);
+
 </script>
 
 <div
@@ -175,7 +176,6 @@
 	class:is-animating={isAnimating}
 	style:aspect-ratio={aspectRatio}
 	style:--flip-duration="{flipDuration}ms"
-	style:--hover-tilt-custom-gradient={customGradient}
 	onclick={handleClick}
 	onkeydown={handleKeydown}
 	onmouseenter={handleMouseEnter}
@@ -206,18 +206,19 @@
 			blendMode={preset.blendMode}
 			shadow={preset.shadow}
 			shadowBlur={preset.shadowBlur}
+			style={customGradient ? `--hover-tilt-custom-gradient: ${customGradient}` : ''}
 		>
-			<div class="tc-card-inner" class:flipped>
-				<div class="tc-card-face tc-card-front">
-					<CardCanvas {template} {data} {width} {height} />
-				</div>
-				{#if backTemplate}
-					<div class="tc-card-face tc-card-back">
-						<CardCanvas template={backTemplate} data={effectiveBackData} {width} {height} />
+				<div class="tc-card-inner" class:flipped>
+					<div class="tc-card-face tc-card-front">
+						<CardCanvas {template} {data} {width} {height} />
 					</div>
-				{/if}
-			</div>
-		</HoverTilt>
+					{#if backTemplate}
+						<div class="tc-card-face tc-card-back">
+							<CardCanvas template={backTemplate} data={effectiveBackData} {width} {height} />
+						</div>
+					{/if}
+				</div>
+			</HoverTilt>
 	{/if}
 </div>
 
@@ -288,7 +289,9 @@
 	.tc-card :global(.hover-tilt) {
 		width: 100%;
 		height: 100%;
-		border-radius: 26px;
+		/* Match the card's natural border radius */
+		border-radius: 3%;
+		overflow: hidden;
 	}
 
 	/* Hide hover-tilt glare only during flip animation */
