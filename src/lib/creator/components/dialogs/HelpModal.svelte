@@ -1,6 +1,5 @@
 <script lang="ts">
 	import * as Dialog from '$lib/creator/ui/dialog';
-	import { browser } from '$app/environment';
 
 	let {
 		show = $bindable(false)
@@ -9,6 +8,8 @@
 	} = $props();
 
 	// Detect macOS vs Windows/Linux for modifier key display
+	// Use typeof window check for cross-bundler compatibility (avoids $app/environment)
+	const browser = typeof window !== 'undefined';
 	const isMac = browser ? /Mac|iPod|iPhone|iPad/.test(navigator.platform) : true;
 	const mod = isMac ? 'Cmd' : 'Ctrl';
 </script>

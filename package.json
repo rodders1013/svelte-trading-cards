@@ -1,6 +1,13 @@
 {
 	"name": "svelte-trading-cards",
-	"version": "0.0.1",
+	"version": "0.1.0",
+	"license": "MIT",
+	"description": "A Svelte 5 component library for building animated trading cards with a visual creator interface",
+	"author": "rodders1013",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/rodders1013/svelte-trading-cards.git"
+	},
 	"scripts": {
 		"dev": "vite dev",
 		"build": "vite build && npm run prepack",
@@ -48,7 +55,8 @@
 		}
 	},
 	"peerDependencies": {
-		"svelte": "^5.0.0"
+		"svelte": "^5.0.0",
+		"@sveltejs/kit": "^2.0.0"
 	},
 	"devDependencies": {
 		"@eslint/compat": "^1.4.0",
