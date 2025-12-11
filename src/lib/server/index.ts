@@ -36,6 +36,18 @@ export type { EmbedOptions } from './embedImages.js';
 export { svgToPNG, svgToPNGDataURL, SVGValidationError } from './svgToPNG.js';
 export type { PNGOptions, PNGResult } from './svgToPNG.js';
 
+// OG Image generation
+export { renderOGImage, OG_IMAGE_PRESETS, getOGImageSize } from './og/index.js';
+export type {
+	OGImagePreset,
+	OGImageOptions,
+	BrandingConfig,
+	LogoConfig,
+	WatermarkConfig,
+	CaptionConfig,
+	Position
+} from './og/index.js';
+
 // Re-export types and constants for convenience
 export type { CardTemplate, CardData, ContainerContext } from '../types/index.js';
 export { CARD_WIDTH, CARD_HEIGHT, CARD_RADIUS } from '../types/CardTemplate.js';

@@ -18,6 +18,7 @@ Build professional trading cards by composing pre-built SVG components. Think of
 - Generic data model - works for any domain (games, employees, products)
 - Gallery components (Grid, Carousel, Row, Modal) for displaying card collections
 - Interactive card display with hover-tilt effects and rarity presets
+- **Flip cards** - Front/back templates with 3D flip animation
 
 ## Getting Started
 
@@ -637,6 +638,395 @@ downloadSVG(svg, { filename: '../../../etc/passwd' }); // Downloads as "etcpassw
 const safe = sanitizeFilename(userInput); // "My Card!" → "My Card"
 ```
 
+## Interactive Display Cards
+
+The display module provides interactive cards with 3D tilt effects, rarity-based visual presets, and **flip animation** support.
+
+### Basic Display Card
+
+```svelte
+<script lang="ts">
+  import { Card } from 'svelte-trading-cards/display';
+  import type { CardTemplate, CardData } from 'svelte-trading-cards';
+
+  const template: CardTemplate = { /* your template */ };
+  const data: CardData = { /* your data */ };
+</script>
+
+<Card {template} {data} rarity="rare" />
+```
+
+### Flip Cards (Front/Back)
+
+Create two-sided cards with smooth 3D flip animations:
+
+```svelte
+<script lang="ts">
+  import { Card } from 'svelte-trading-cards/display';
+
+  // Front and back templates
+  const frontTemplate: CardTemplate = { /* front design */ };
+  const backTemplate: CardTemplate = { /* back design */ };
+  const cardData: CardData = { /* shared or separate data */ };
+
+  // Track flip state (bindable)
+  let flipped = $state(false);
+</script>
+
+<!-- Click to flip -->
+<Card
+  template={frontTemplate}
+  backTemplate={backTemplate}
+  data={cardData}
+  bind:flipped
+  flipOnClick
+  flipDuration={600}
+  rarity="legendary"
+/>
+
+<!-- Or flip on hover -->
+<Card
+  template={frontTemplate}
+  backTemplate={backTemplate}
+  data={cardData}
+  flipOnHover
+/>
+
+<!-- Programmatic flip control -->
+<button onclick={() => flipped = !flipped}>Flip Card</button>
+```
+
+### Flip Card Props
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `template` | `CardTemplate` | required | Front face template |
+| `backTemplate` | `CardTemplate` | - | Back face template (enables flip) |
+| `data` | `CardData` | `{}` | Data for front template |
+| `backData` | `CardData` | - | Data for back (defaults to `data`) |
+| `flipped` | `boolean` | `false` | Current flip state (bindable) |
+| `flipOnClick` | `boolean` | `false` | Flip when clicked |
+| `flipOnHover` | `boolean` | `false` | Flip on mouse enter/leave |
+| `flipDuration` | `number` | `600` | Animation duration in ms |
+| `rarity` | `Rarity` | `'common'` | Visual effect preset |
+| `disabled` | `boolean` | `false` | Disable tilt effects (static) |
+
+### Rarity Presets
+
+Each rarity level has unique visual effects:
+
+| Rarity | Glare | Effect | Shadow |
+|--------|-------|--------|--------|
+| `common` | 15% | none | subtle |
+| `uncommon` | 25% | none | medium |
+| `rare` | 40% | foil stripes | strong |
+| `epic` | 60% | holo bands | intense |
+| `legendary` | 80% | prism angular | maximum |
+| `mythic` | 90% | rainbow | maximum |
+
+### Custom Glare Gradient
+
+Define custom glare effects in your template:
+
+```typescript
+const template: CardTemplate = {
+  name: 'Custom Card',
+  display: {
+    rarity: 'rare',
+    customGradient: 'linear-gradient(135deg, #ff6b6b, #4ecdc4, #45b7d1)'
+  },
+  components: [...]
+};
+```
+
+### Use Cases for Flip Cards
+
+| Domain | Front | Back |
+|--------|-------|------|
+| Trading cards | Character art, stats | Lore, abilities, flavor text |
+| Employee badges | Photo, name, title | Emergency contacts, QR code |
+| Product cards | Product image, price | Specifications, barcode |
+| Event tickets | Event details, seat | QR code, terms |
+| Business cards | Name, contact info | Services, social links |
+| Achievement cards | Trophy icon, game | Description, unlock date |
+
+## Data Adapters
+
+Data adapters provide a structured way to transform domain-specific data into the `CardData` format used by templates. They document available fields and provide sample data for previews.
+
+### Using Built-in Adapters
+
+```typescript
+import {
+  PlayStationAdapter,
+  XboxAdapter,
+  SteamAdapter,
+  adapterRegistry
+} from 'svelte-trading-cards/adapters';
+
+// Transform PlayStation trophy data
+const psnTrophy = {
+  gameTitle: 'Elden Ring',
+  trophyName: 'Elden Lord',
+  trophyDescription: 'Achieved all endings',
+  trophyIconUrl: 'https://example.com/trophy.png',
+  trophyType: 'platinum',
+  psnTrophyRarity: 'Ultra Rare',
+  earnedDate: '2024-01-15'
+};
+
+const cardData = PlayStationAdapter.transform(psnTrophy);
+// { title: 'Elden Ring', subtitle: 'Elden Lord', ... }
+
+// Get available fields for the creator
+const fields = PlayStationAdapter.getFields();
+// [{ key: 'title', label: 'Game Title', type: 'string' }, ...]
+
+// Get sample data for previews
+const sample = PlayStationAdapter.getSampleData();
+```
+
+### Creating Custom Adapters
+
+```typescript
+import type { DataAdapter } from 'svelte-trading-cards/adapters';
+
+interface Employee {
+  firstName: string;
+  lastName: string;
+  title: string;
+  department: string;
+  photoUrl: string;
+  employeeId: string;
+}
+
+const EmployeeAdapter: DataAdapter<Employee> = {
+  id: 'employee',
+  name: 'Employee Badge',
+  description: 'Transform HR employee data into badge format',
+
+  transform(employee) {
+    return {
+      title: `${employee.firstName} ${employee.lastName}`,
+      subtitle: employee.title,
+      description: employee.department,
+      imageUrl: employee.photoUrl,
+      employeeId: employee.employeeId
+    };
+  },
+
+  getFields() {
+    return [
+      { key: 'title', label: 'Full Name', type: 'string', required: true },
+      { key: 'subtitle', label: 'Job Title', type: 'string', required: true },
+      { key: 'description', label: 'Department', type: 'string' },
+      { key: 'imageUrl', label: 'Photo', type: 'image', required: true },
+      { key: 'employeeId', label: 'Employee ID', type: 'string' }
+    ];
+  },
+
+  getSampleData() {
+    return {
+      title: 'Jane Smith',
+      subtitle: 'Senior Engineer',
+      description: 'Engineering',
+      imageUrl: 'https://example.com/photo.jpg',
+      employeeId: 'EMP-12345'
+    };
+  }
+};
+
+// Register the adapter
+import { adapterRegistry } from 'svelte-trading-cards/adapters';
+adapterRegistry.register(EmployeeAdapter);
+```
+
+### Adapter Registry
+
+```typescript
+import { adapterRegistry } from 'svelte-trading-cards/adapters';
+
+// Get all registered adapters
+const allAdapters = adapterRegistry.getAll();
+
+// Get a specific adapter by ID
+const psAdapter = adapterRegistry.get('playstation');
+
+// Get fields for an adapter
+const fields = adapterRegistry.getFieldsForAdapter('playstation');
+
+// Check if an adapter exists
+if (adapterRegistry.has('custom')) {
+  // ...
+}
+```
+
+### DataAdapter Interface
+
+```typescript
+interface DataAdapter<TSource = unknown> {
+  /** Unique identifier for this adapter */
+  id: string;
+
+  /** Human-readable name */
+  name: string;
+
+  /** Description of what data this adapter handles */
+  description?: string;
+
+  /** Transform source data to CardData */
+  transform(source: TSource): CardData;
+
+  /** Available fields this adapter provides */
+  getFields(): DataFieldDefinition[];
+
+  /** Generate sample data for preview */
+  getSampleData(): CardData;
+
+  /** Optional: Validate source data before transform */
+  validate?(source: unknown): source is TSource;
+
+  /** Optional: Suggested template IDs for this data type */
+  suggestedTemplates?: string[];
+}
+
+interface DataFieldDefinition {
+  /** Field key in CardData */
+  key: string;
+
+  /** Human-readable label */
+  label: string;
+
+  /** Data type */
+  type: 'string' | 'number' | 'date' | 'image' | 'array' | 'boolean';
+
+  /** Description for documentation */
+  description?: string;
+
+  /** Example value for preview/testing */
+  example?: unknown;
+
+  /** Whether this field is required */
+  required?: boolean;
+}
+```
+
+## Open Graph Images (Social Sharing)
+
+Generate optimized preview images for social media sharing (Twitter, Facebook, Discord, etc.).
+
+### Basic Usage
+
+```typescript
+import { renderOGImage } from 'svelte-trading-cards/server';
+
+const { buffer, width, height } = await renderOGImage(template, data, {
+  preset: 'twitter',
+  background: '#1a1a2e',
+  branding: {
+    logo: { url: 'https://yourapp.com/logo.png', position: 'top-left' },
+    watermark: { text: 'yourapp.com', position: 'bottom-right' }
+  }
+});
+```
+
+### Platform Presets
+
+| Preset | Dimensions | Platform |
+|--------|-----------|----------|
+| `twitter` | 1200x628 | Twitter/X |
+| `facebook` | 1200x630 | Facebook |
+| `discord` | 1200x675 | Discord |
+| `linkedin` | 1200x627 | LinkedIn |
+| `square` | 1200x1200 | Instagram |
+| `portrait` | 900x1200 | Taller layouts |
+
+### Full Options
+
+```typescript
+await renderOGImage(template, data, {
+  preset: 'twitter',           // or custom size: { width: 1200, height: 630 }
+  background: '#0f172a',       // solid color
+  backgroundGradient: {        // or gradient
+    from: '#1e1b4b',
+    to: '#0f172a',
+    direction: 'diagonal'      // vertical, horizontal, diagonal
+  },
+  cardScale: 0.85,             // how much of image height the card takes
+  cardPosition: 'center',      // left, center, right
+  scale: 2,                    // output resolution multiplier
+  branding: {
+    logo: {
+      url: 'https://yourapp.com/logo.png',
+      position: 'top-left',    // top-left, top-right, bottom-left, etc.
+      size: 48,
+      padding: 24,
+      opacity: 1
+    },
+    watermark: {
+      text: 'yourapp.com',
+      position: 'bottom-right',
+      color: '#ffffff',
+      opacity: 0.6,
+      fontSize: 18
+    },
+    caption: {
+      title: 'Card Title',
+      subtitle: 'by @username',
+      position: 'below'        // below or right
+    }
+  }
+});
+```
+
+### Integration with SvelteKit
+
+```typescript
+// src/routes/api/og/[id].png/+server.ts
+import { renderOGImage } from 'svelte-trading-cards/server';
+
+export async function GET({ params }) {
+  const card = await db.cards.findById(params.id);
+  const template = await db.templates.findById(card.templateId);
+
+  const { buffer } = await renderOGImage(template, card.data, {
+    preset: 'twitter',
+    background: '#0f172a',
+    branding: {
+      logo: { url: 'https://yourapp.com/logo.png' },
+      watermark: { text: 'yourapp.com' }
+    }
+  });
+
+  return new Response(buffer, {
+    headers: {
+      'Content-Type': 'image/png',
+      'Cache-Control': 'public, max-age=86400'
+    }
+  });
+}
+```
+
+Then add OG meta tags to your card page:
+
+```svelte
+<svelte:head>
+  <meta property="og:image" content="https://yourapp.com/api/og/{cardId}.png" />
+  <meta property="og:title" content={card.title} />
+  <meta name="twitter:card" content="summary_large_image" />
+</svelte:head>
+```
+
+### How Social Sharing Works
+
+1. User shares `yourapp.com/cards/abc123`
+2. Platform crawler reads your page's `og:image` meta tag
+3. Crawler fetches your OG image endpoint
+4. Image is cached on the platform's CDN
+5. Subsequent views served from cache (not your server)
+
+**Caching:** Facebook caches ~30 days, Twitter ~7 days, Discord ~24 hours. Your server only gets hit once per card per platform.
+
 ## Package Exports
 
 | Import Path | Contents |
@@ -645,7 +1035,8 @@ const safe = sanitizeFilename(userInput); // "My Card!" → "My Card"
 | `svelte-trading-cards/creator` | CardCreator component and creator types only |
 | `svelte-trading-cards/display` | Interactive Card with hover-tilt effects and rarity presets |
 | `svelte-trading-cards/gallery` | CardRow and gallery layout components |
-| `svelte-trading-cards/server` | Server-side rendering, image embedding, PNG conversion |
+| `svelte-trading-cards/server` | Server-side rendering, image embedding, PNG conversion, OG images |
+| `svelte-trading-cards/adapters` | Data adapters and adapter registry |
 
 ## License
 

@@ -203,3 +203,18 @@ export type {
 	FieldMapping,
 	SavedTemplate
 } from './demo/index.js';
+
+// Data Adapters (re-export key types for convenience)
+export type {
+	DataAdapter,
+	AnyDataAdapter,
+	DataFieldDefinition,
+	DataFieldType,
+	AdapterMetadata
+} from './adapters/index.js';
+
+export {
+	createAdapter,
+	adapterRegistry,
+	registerBuiltinAdapters
+} from './adapters/index.js';

@@ -15,8 +15,10 @@ This guide walks you through integrating the `svelte-trading-cards` library into
 7. [Gallery Layouts](#gallery-layouts)
 8. [Exporting Cards](#exporting-cards)
 9. [Server-Side Rendering](#server-side-rendering)
-10. [Database Integration](#database-integration)
-11. [Troubleshooting](#troubleshooting)
+10. [Data Adapters](#data-adapters)
+11. [Social Sharing (OG Images)](#social-sharing-og-images)
+12. [Database Integration](#database-integration)
+13. [Troubleshooting](#troubleshooting)
 
 ---
 
@@ -604,6 +606,236 @@ async function exportAllCards(template: CardTemplate, cards: CardData[]) {
   return results;
 }
 ```
+
+---
+
+## Data Adapters
+
+Data adapters transform domain-specific data into the CardData format used by templates.
+
+### Using Built-in Adapters
+
+```typescript
+import {
+  PlayStationAdapter,
+  XboxAdapter,
+  SteamAdapter,
+  adapterRegistry
+} from 'svelte-trading-cards/adapters';
+
+// Transform data from your source format
+const psnGame = {
+  id: '1',
+  title: 'God of War Ragnarök',
+  boxArt: 'https://example.com/gow.jpg',
+  trophies: 52,
+  platinumCount: 1,
+  completionPercent: 87
+};
+
+// Transform to CardData
+const cardData = PlayStationAdapter.transform(psnGame);
+// { title: 'God of War Ragnarök', imageUrl: '...', trophies: 52, ... }
+
+// Get available fields for the creator
+const fields = PlayStationAdapter.getFields();
+// [{ key: 'title', label: 'Game Title', type: 'string' }, ...]
+
+// Get sample data for previews
+const sample = PlayStationAdapter.getSampleData();
+```
+
+### Creating Custom Adapters
+
+```typescript
+import type { DataAdapter } from 'svelte-trading-cards/adapters';
+
+interface Employee {
+  firstName: string;
+  lastName: string;
+  title: string;
+  department: string;
+  photoUrl: string;
+}
+
+const EmployeeAdapter: DataAdapter<Employee> = {
+  id: 'employee',
+  name: 'Employee Badge',
+  description: 'Transform HR data into badge format',
+
+  transform(employee) {
+    return {
+      title: `${employee.firstName} ${employee.lastName}`,
+      subtitle: employee.title,
+      description: employee.department,
+      imageUrl: employee.photoUrl
+    };
+  },
+
+  getFields() {
+    return [
+      { key: 'title', label: 'Full Name', type: 'string', required: true },
+      { key: 'subtitle', label: 'Job Title', type: 'string' },
+      { key: 'description', label: 'Department', type: 'string' },
+      { key: 'imageUrl', label: 'Photo', type: 'image' }
+    ];
+  },
+
+  getSampleData() {
+    return {
+      title: 'Jane Smith',
+      subtitle: 'Senior Engineer',
+      description: 'Engineering',
+      imageUrl: 'https://example.com/photo.jpg'
+    };
+  }
+};
+
+// Register and use
+adapterRegistry.register(EmployeeAdapter);
+const cardData = adapterRegistry.transform('employee', employeeData);
+```
+
+---
+
+## Social Sharing (OG Images)
+
+Generate optimized preview images for social media platforms (Twitter, Facebook, Discord, etc.).
+
+### How Social Sharing Works
+
+When a user shares a link to your card:
+
+```
+1. User shares: yourapp.com/cards/abc123
+
+2. Platform crawler visits your page
+   → Reads <meta property="og:image" content="...">
+
+3. Crawler fetches your OG image endpoint
+   → Your server generates PNG with renderOGImage()
+
+4. Platform caches the image on their CDN
+   → Facebook ~30 days, Twitter ~7 days, Discord ~24 hours
+
+5. All subsequent views served from cache
+   → Your server only gets hit once per card per platform
+```
+
+### Generate OG Images
+
+```typescript
+// src/routes/api/og/[id].png/+server.ts
+import { renderOGImage } from 'svelte-trading-cards/server';
+import type { RequestHandler } from './$types';
+
+export const GET: RequestHandler = async ({ params }) => {
+  // Load card from your database
+  const card = await db.cards.findById(params.id);
+  const template = await db.templates.findById(card.templateId);
+
+  // Generate OG image
+  const { buffer } = await renderOGImage(template, card.data, {
+    preset: 'twitter',           // 1200x628
+    background: '#0f172a',
+    branding: {
+      logo: {
+        url: 'https://yourapp.com/logo.png',
+        position: 'top-left',
+        size: 48
+      },
+      watermark: {
+        text: 'yourapp.com',
+        position: 'bottom-right',
+        opacity: 0.6
+      }
+    }
+  });
+
+  return new Response(buffer, {
+    headers: {
+      'Content-Type': 'image/png',
+      'Cache-Control': 'public, max-age=86400' // 24 hour cache
+    }
+  });
+};
+```
+
+### Add Meta Tags to Card Page
+
+```svelte
+<!-- src/routes/cards/[id]/+page.svelte -->
+<script lang="ts">
+  import { Card } from 'svelte-trading-cards/display';
+  export let data;
+</script>
+
+<svelte:head>
+  <title>{data.card.title} | YourApp</title>
+  <meta property="og:title" content={data.card.title} />
+  <meta property="og:description" content="Created by {data.card.author}" />
+  <meta property="og:image" content="https://yourapp.com/api/og/{data.card.id}.png" />
+  <meta property="og:url" content="https://yourapp.com/cards/{data.card.id}" />
+  <meta name="twitter:card" content="summary_large_image" />
+</svelte:head>
+
+<Card
+  template={data.template}
+  data={data.cardData}
+  rarity={data.rarity}
+/>
+```
+
+### Platform Presets
+
+| Preset | Dimensions | Platform |
+|--------|-----------|----------|
+| `twitter` | 1200x628 | Twitter/X |
+| `facebook` | 1200x630 | Facebook |
+| `discord` | 1200x675 | Discord |
+| `linkedin` | 1200x627 | LinkedIn |
+| `square` | 1200x1200 | Instagram |
+
+### Full Branding Options
+
+```typescript
+await renderOGImage(template, data, {
+  preset: 'twitter',
+  background: '#0f172a',
+  backgroundGradient: {              // Or use gradient
+    from: '#1e1b4b',
+    to: '#0f172a',
+    direction: 'diagonal'
+  },
+  cardScale: 0.85,                   // How much of height card fills
+  cardPosition: 'center',            // left, center, right
+  branding: {
+    logo: {
+      url: 'https://yourapp.com/logo.png',
+      position: 'top-left',          // Any corner or center
+      size: 48,
+      padding: 24,
+      opacity: 1
+    },
+    watermark: {
+      text: 'yourapp.com',
+      position: 'bottom-right',
+      color: '#ffffff',
+      opacity: 0.6,
+      fontSize: 18
+    },
+    caption: {
+      title: 'Card Title',
+      subtitle: 'by @username',
+      position: 'below'              // below or right
+    }
+  }
+});
+```
+
+### Testing OG Images
+
+The library includes a test page at `/test/og-image` to preview OG image generation with different presets and branding options.
 
 ---
 

@@ -2,8 +2,8 @@
 
 **Package:** `svelte-trading-cards`
 **Version:** 0.1.0
-**Last Updated:** 2025-12-10
-**Status:** In Development (~98% complete)
+**Last Updated:** 2025-12-11
+**Status:** In Development (~99% complete)
 
 ---
 
@@ -22,7 +22,9 @@
 11. [Gallery System](#gallery-system)
 12. [Type System](#type-system)
 13. [Export System](#export-system)
-14. [Extensibility](#extensibility)
+14. [Data Adapters](#data-adapters)
+15. [OG Image Generation](#og-image-generation)
+16. [Extensibility](#extensibility)
 
 ---
 
@@ -41,6 +43,8 @@ A Svelte 5 component library for building animated trading cards with a visual c
 - **Generic Data Model:** Domain-agnostic - works for games, employees, products, anything
 - **Client-Side Export:** SVG/PNG download directly from browser
 - **Server-Side Export:** Trusted PNG rendering with resvg-js (pixel-perfect)
+- **Data Adapters:** Transform domain-specific data to CardData format
+- **OG Image Generation:** Social media preview images with branding
 - **Type-Safe:** Full TypeScript + Zod v4 validation
 
 ### Card Dimensions
@@ -1374,6 +1378,150 @@ import {
 - `sharp` - Image processing, required for WebP→PNG conversion (resvg-js doesn't support WebP)
 
 **WebP Handling:** The `embedImages()` function automatically detects WebP images and converts them to PNG using `sharp` before embedding as base64.
+
+---
+
+## Data Adapters
+
+Data adapters provide a structured way to transform domain-specific data into the `CardData` format used by templates.
+
+### Architecture
+
+```
+src/lib/adapters/
+├── index.ts                 # Main exports
+├── types.ts                 # DataAdapter interface, DataFieldDefinition
+├── registry.ts              # AdapterRegistry class
+└── builtin/
+    ├── index.ts             # Built-in adapter exports
+    ├── playstation.ts       # PlayStation adapter
+    ├── xbox.ts              # Xbox adapter
+    └── steam.ts             # Steam adapter
+```
+
+### DataAdapter Interface
+
+```typescript
+interface DataAdapter<TSource = unknown> {
+  id: string;                              // Unique identifier
+  name: string;                            // Human-readable name
+  description?: string;                    // What data this handles
+  category?: string;                       // e.g., 'gaming', 'hr'
+  icon?: string;                           // Iconify icon
+
+  transform(source: TSource): CardData;    // Transform source → CardData
+  getFields(): DataFieldDefinition[];      // Available fields
+  getSampleData(): CardData;               // Sample data for previews
+  validate?(source: unknown): source is TSource;  // Optional validation
+  suggestedTemplates?: string[];           // Recommended templates
+}
+```
+
+### Built-in Adapters
+
+| Adapter | ID | Fields |
+|---------|-----|--------|
+| `PlayStationAdapter` | `playstation` | title, imageUrl, trophies, platinumCount, goldCount, etc. |
+| `XboxAdapter` | `xbox` | title, imageUrl, achievements, gamerscore, hoursPlayed, etc. |
+| `SteamAdapter` | `steam` | title, imageUrl, achievementsUnlocked, playtimeForever, etc. |
+
+### Adapter Registry
+
+```typescript
+import { adapterRegistry, PlayStationAdapter } from 'svelte-trading-cards/adapters';
+
+// Register adapter
+adapterRegistry.register(PlayStationAdapter);
+
+// Transform data
+const cardData = adapterRegistry.transform('playstation', psnGameData);
+
+// Get fields for creator
+const fields = adapterRegistry.getFieldsForAdapter('playstation');
+
+// Get sample data
+const sample = adapterRegistry.getSampleDataForAdapter('playstation');
+```
+
+### Entry Point
+
+`svelte-trading-cards/adapters`
+
+---
+
+## OG Image Generation
+
+Generate optimized preview images for social media sharing.
+
+### Architecture
+
+```
+src/lib/server/og/
+├── index.ts                 # Module exports
+├── types.ts                 # OGImageOptions, BrandingConfig, presets
+└── render.ts                # renderOGImage function
+```
+
+### Platform Presets
+
+| Preset | Dimensions | Platform |
+|--------|-----------|----------|
+| `twitter` | 1200x628 | Twitter/X |
+| `facebook` | 1200x630 | Facebook |
+| `discord` | 1200x675 | Discord |
+| `linkedin` | 1200x627 | LinkedIn |
+| `square` | 1200x1200 | Instagram |
+| `portrait` | 900x1200 | Taller layouts |
+
+### OGImageOptions
+
+```typescript
+interface OGImageOptions {
+  preset?: OGImagePreset;              // twitter, facebook, discord, etc.
+  size?: { width: number; height: number };  // Custom size
+  background?: string;                 // Background color
+  backgroundGradient?: {               // Or gradient
+    from: string;
+    to: string;
+    direction: 'vertical' | 'horizontal' | 'diagonal';
+  };
+  cardScale?: number;                  // 0.3-1.0, how much of height card takes
+  cardPosition?: 'left' | 'center' | 'right';
+  scale?: number;                      // Output resolution multiplier
+  branding?: BrandingConfig;
+}
+
+interface BrandingConfig {
+  logo?: LogoConfig;                   // Logo in corner
+  watermark?: WatermarkConfig;         // Text watermark
+  caption?: CaptionConfig;             // Title/subtitle below card
+}
+```
+
+### Usage
+
+```typescript
+import { renderOGImage } from 'svelte-trading-cards/server';
+
+const { buffer, width, height } = await renderOGImage(template, data, {
+  preset: 'twitter',
+  background: '#1a1a2e',
+  branding: {
+    logo: { url: 'https://example.com/logo.png', position: 'top-left' },
+    watermark: { text: 'example.com', position: 'bottom-right' }
+  }
+});
+```
+
+### Test Route
+
+`/test/og-image` - Interactive test page for OG image generation with:
+- Platform preset selector
+- Background color picker
+- Gradient toggle
+- Logo/watermark/caption toggles
+- Live preview
+- Code example
 
 ---
 

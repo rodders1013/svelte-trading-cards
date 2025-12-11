@@ -288,6 +288,7 @@ npm run test             # Run tests
 | `/creator` | Visual template creator |
 | `/test/text-fitting` | Text fitting test page (FitText, components) |
 | `/test/display` | Display component test page (hover-tilt effects) |
+| `/test/og-image` | OG image generation test page |
 
 ---
 

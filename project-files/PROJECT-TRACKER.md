@@ -1,7 +1,7 @@
 # svelte-trading-cards Project Tracker
 
-**Last Updated:** 2025-12-10
-**Current Progress:** ~98% (Beta ready)
+**Last Updated:** 2025-12-11
+**Current Progress:** ~99% (Beta ready)
 
 ---
 
@@ -339,7 +339,33 @@
 
 ---
 
-## PHASE 5: TESTING & DOCS
+## PHASE 5: DATA & SOCIAL - COMPLETE
+
+### Data Adapters System
+- [x] DataAdapter interface (transform, getFields, getSampleData, validate)
+- [x] AdapterRegistry class (register, get, transform, getFields)
+- [x] Built-in PlayStation adapter
+- [x] Built-in Xbox adapter
+- [x] Built-in Steam adapter
+- [x] Zod schemas for validation
+- [x] Entry point: `svelte-trading-cards/adapters`
+- [x] createAdapter helper function
+- [x] registerBuiltinAdapters utility
+
+### OG Image Generation
+- [x] renderOGImage function
+- [x] Platform presets (twitter, facebook, discord, linkedin, square, portrait)
+- [x] Background color and gradient support
+- [x] Logo branding (position, size, opacity)
+- [x] Watermark text (position, color, opacity, font)
+- [x] Caption (title, subtitle, position)
+- [x] Card scaling and positioning
+- [x] Test route at `/test/og-image`
+- [x] OG image types and Zod schemas
+
+---
+
+## PHASE 6: TESTING & DOCS
 
 - [ ] Unit tests for components
 - [ ] Integration tests for CardCanvas
@@ -348,7 +374,7 @@
 
 ---
 
-## PHASE 6: PUBLISH
+## PHASE 7: PUBLISH
 
 - [ ] Package build verification (npm run package)
 - [x] README.md with usage examples
@@ -364,9 +390,10 @@
 | Phase 2: Visual Creator | Complete | 68/68 |
 | Phase 3: Additional Components | Complete | 57/57 |
 | Phase 4: Display & Gallery | Complete | 17/17 |
-| Phase 5: Testing & Docs | Not Started | 0/4 |
-| Phase 6: Publish | In Progress | 1/3 |
-| **Total** | | **171/177 (~97%)** |
+| Phase 5: Data & Social | Complete | 19/19 |
+| Phase 6: Testing & Docs | Not Started | 0/4 |
+| Phase 7: Publish | In Progress | 1/3 |
+| **Total** | | **190/196 (~97%)** |
 
 ### Phase 3 Component Priority
 
@@ -457,7 +484,20 @@ src/lib/
 │   ├── index.ts
 │   ├── render.ts
 │   ├── embedImages.ts
-│   └── svgToPNG.ts
+│   ├── svgToPNG.ts
+│   └── og/                  # OG image generation
+│       ├── index.ts
+│       ├── types.ts         # OGImageOptions, BrandingConfig, presets
+│       └── render.ts        # renderOGImage function
+├── adapters/
+│   ├── index.ts             # Main exports
+│   ├── types.ts             # DataAdapter interface, DataFieldDefinition
+│   ├── registry.ts          # AdapterRegistry class
+│   └── builtin/
+│       ├── index.ts         # Built-in adapter exports
+│       ├── playstation.ts   # PlayStation adapter
+│       ├── xbox.ts          # Xbox adapter
+│       └── steam.ts         # Steam adapter
 ├── types/
 │   ├── index.ts
 │   ├── CardData.ts
@@ -547,8 +587,11 @@ src/routes/
 └── test/
     ├── text-fitting/
     │   └── +page.svelte       # Text fitting test page
-    └── display/
-        └── +page.svelte       # Display effects test page
+    ├── display/
+    │   └── +page.svelte       # Display effects test page
+    └── og-image/
+        ├── +page.svelte       # OG image test page
+        └── +page.server.ts    # Server-side OG image generation
 ```
 
 ---

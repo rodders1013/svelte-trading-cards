@@ -25,7 +25,8 @@ The library exposes five entry points:
 | `svelte-trading-cards/creator` | Visual card designer component | Client |
 | `svelte-trading-cards/display` | Interactive card with hover-tilt effects | Client |
 | `svelte-trading-cards/gallery` | Gallery layouts (CardRow, etc.) | Client |
-| `svelte-trading-cards/server` | Server-side SVG rendering and PNG conversion | Server |
+| `svelte-trading-cards/server` | Server-side SVG rendering, PNG conversion, OG images | Server |
+| `svelte-trading-cards/adapters` | Data adapters for transforming domain data | Client/Server |
 
 ---
 
@@ -383,10 +384,26 @@ import {
   hasExternalImages,
   svgToPNG,
   svgToPNGDataURL,
+  renderOGImage,
+  OG_IMAGE_PRESETS,
   type RenderOptions,
   type PNGOptions,
   type PNGResult,
+  type OGImageOptions,
+  type BrandingConfig,
 } from 'svelte-trading-cards/server';
+
+// Data Adapters exports
+import {
+  adapterRegistry,
+  createAdapter,
+  PlayStationAdapter,
+  XboxAdapter,
+  SteamAdapter,
+  registerBuiltinAdapters,
+  type DataAdapter,
+  type DataFieldDefinition,
+} from 'svelte-trading-cards/adapters';
 
 // Display exports (interactive cards with effects)
 import {
@@ -823,9 +840,11 @@ interface DownloadOptions {
 | Editor State | `ContainerState[]` | `onSave` callback |
 | SVG Element | `SVGSVGElement` | `bind:svgElement` |
 | PNG Buffer | `Uint8Array` | Server-side `svgToPNG()` |
+| OG Image Buffer | `Buffer` | Server-side `renderOGImage()` |
 | File Download | `.svg` / `.png` | Client-side export functions |
 | Flip State | `boolean` | Display Card `bind:flipped` |
 | Hover Index | `number \| null` | CardRow context `hoveredIndex` |
+| CardData | `CardData` | Data adapter `transform()` |
 
 ### Integration Checklist
 
@@ -838,3 +857,6 @@ interface DownloadOptions {
 - [ ] Implement export endpoints (client or server)
 - [ ] Add bleed settings for print workflows
 - [ ] Load Google Fonts before rendering (use `getGoogleFontsUrlForCard`)
+- [ ] Set up OG image endpoint for social sharing
+- [ ] Add meta tags to card pages (`og:image`, `og:title`, etc.)
+- [ ] Create data adapter for your domain (optional)
