@@ -26,6 +26,7 @@
 	import FieldRemapDialog from './components/dialogs/FieldRemapDialog.svelte';
 	import RestoreDraftDialog from './components/dialogs/RestoreDraftDialog.svelte';
 	import ExportDialog from './components/dialogs/ExportDialog.svelte';
+	import SaveDialog from './components/dialogs/SaveDialog.svelte';
 	import { downloadSVG, downloadPNGClient } from '$lib/export/downloadSVG';
 import { extractFontsFromCard, loadGoogleFonts } from '$lib/fonts';
 
@@ -80,8 +81,10 @@ import { extractFontsFromCard, loadGoogleFonts } from '$lib/fonts';
 		initialTemplate?: ContainerState[];
 		/** Initial template name */
 		initialTemplateName?: string;
+		/** Whether we're editing an existing template (shows "Save as New" option) */
+		isEditing?: boolean;
 		/** Callback when template is saved */
-		onSave?: (data: { template: CardTemplate; editorState: ContainerState[]; name: string }) => void;
+		onSave?: (data: { template: CardTemplate; editorState: ContainerState[]; name: string; saveAsNew: boolean }) => void;
 		/** Callback when template changes */
 		onChange?: (data: { template: CardTemplate; editorState: ContainerState[] }) => void;
 		/** Custom load template handler - if provided, called instead of file picker */
@@ -97,6 +100,7 @@ import { extractFontsFromCard, loadGoogleFonts } from '$lib/fonts';
 		initialDataset,
 		initialTemplate,
 		initialTemplateName = 'New Template',
+		isEditing = false,
 		onSave,
 		onChange,
 		onLoadTemplate: customLoadTemplate,
@@ -340,6 +344,10 @@ import { extractFontsFromCard, loadGoogleFonts } from '$lib/fonts';
 	// Export dialog
 	let showExportDialog = $state(false);
 	let canvasSvgElement = $state<SVGSVGElement | null>(null);
+
+	// Save dialog
+	let showSaveDialog = $state(false);
+	let currentIsEditing = $state(isEditing);
 
 	// =============================================================================
 	// RESPONSIVE BREAKPOINTS
@@ -1088,33 +1096,59 @@ import { extractFontsFromCard, loadGoogleFonts } from '$lib/fonts';
 	// SAVE/LOAD
 	// =============================================================================
 
-	function saveTemplate() {
+	function openSaveDialog() {
+		showSaveDialog = true;
+	}
+
+	function handleSave(name: string) {
+		templateName = name;
 		if (onSave) {
 			onSave({
 				template,
 				editorState: containers,
-				name: templateName
+				name,
+				saveAsNew: false
 			});
 		} else {
-			// Default: download as JSON file
-			const savedTemplate = {
-				id: `template-${Date.now()}`,
-				name: templateName,
-				createdAt: new Date().toISOString(),
-				updatedAt: new Date().toISOString(),
-				template,
-				editorState: containers
-			};
-			const blob = new Blob([JSON.stringify(savedTemplate, null, '\t')], { type: 'application/json' });
-			const url = URL.createObjectURL(blob);
-			const a = document.createElement('a');
-			a.href = url;
-			a.download = `${templateName.toLowerCase().replace(/\s+/g, '-')}.json`;
-			a.click();
-			URL.revokeObjectURL(url);
+			downloadTemplate(name);
 		}
 		// Clear auto-save draft after explicit save
 		clearDraft();
+	}
+
+	function handleSaveAsNew(name: string) {
+		templateName = name;
+		currentIsEditing = false; // Now editing the new template
+		if (onSave) {
+			onSave({
+				template,
+				editorState: containers,
+				name,
+				saveAsNew: true
+			});
+		} else {
+			downloadTemplate(name);
+		}
+		// Clear auto-save draft after explicit save
+		clearDraft();
+	}
+
+	function downloadTemplate(name: string) {
+		const savedTemplate = {
+			id: `template-${Date.now()}`,
+			name,
+			createdAt: new Date().toISOString(),
+			updatedAt: new Date().toISOString(),
+			template,
+			editorState: containers
+		};
+		const blob = new Blob([JSON.stringify(savedTemplate, null, '\t')], { type: 'application/json' });
+		const url = URL.createObjectURL(blob);
+		const a = document.createElement('a');
+		a.href = url;
+		a.download = `${name.toLowerCase().replace(/\s+/g, '-')}.json`;
+		a.click();
+		URL.revokeObjectURL(url);
 	}
 
 	function loadTemplateFromFile(event: Event) {
@@ -1130,6 +1164,7 @@ import { extractFontsFromCard, loadGoogleFonts } from '$lib/fonts';
 					containers = data.editorState;
 					templateName = data.name || 'Loaded Template';
 					selectedContainerId = containers.length > 0 ? containers[0].id : null;
+					currentIsEditing = true; // Now editing the loaded template
 				}
 			} catch {
 				alert('Invalid template file');
@@ -1149,6 +1184,7 @@ import { extractFontsFromCard, loadGoogleFonts } from '$lib/fonts';
 					containers = result.editorState;
 					templateName = result.name || 'Loaded Template';
 					selectedContainerId = containers.length > 0 ? containers[0].id : null;
+					currentIsEditing = true; // Now editing the loaded template
 				}
 			} catch (err) {
 				console.error('Failed to load template:', err);
@@ -1306,7 +1342,7 @@ import { extractFontsFromCard, loadGoogleFonts } from '$lib/fonts';
 		bind:displayCustomGradient
 		bind:showPreviewEffects
 		onDatasetChange={handleDatasetChange}
-		onSaveTemplate={saveTemplate}
+		onSaveTemplate={openSaveDialog}
 		onLoadTemplate={handleLoadTemplate}
 		onExport={() => { showExportDialog = true; }}
 	/>
@@ -1757,4 +1793,12 @@ import { extractFontsFromCard, loadGoogleFonts } from '$lib/fonts';
 <ExportDialog
 	bind:show={showExportDialog}
 	onExport={handleExport}
+/>
+
+<SaveDialog
+	bind:open={showSaveDialog}
+	bind:templateName
+	isEditing={currentIsEditing}
+	onSave={handleSave}
+	onSaveAsNew={handleSaveAsNew}
 />

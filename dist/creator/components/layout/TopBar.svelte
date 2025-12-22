@@ -30,7 +30,7 @@
 	const rarityOptions = getRarityOptions();
 
 	let {
-		templateName = $bindable(''),
+		templateName = '',
 		hasDraft = false,
 		lastSaved = null as Date | null,
 		previewMode = $bindable<'fields' | 'data'>('fields'),
@@ -46,7 +46,7 @@
 		onLoadTemplate,
 		onExport
 	}: {
-		templateName: string;
+		templateName?: string;
 		hasDraft?: boolean;
 		lastSaved?: Date | null;
 		previewMode: 'fields' | 'data';
@@ -81,12 +81,9 @@
 	<Card.Content class="flex flex-wrap items-center gap-x-2 gap-y-1.5 px-2 py-1.5 sm:gap-x-3 sm:px-4">
 		<!-- Template Section -->
 		<div class="flex items-center gap-1.5 sm:gap-2">
-			<input
-				type="text"
-				bind:value={templateName}
-				class="h-8 w-24 min-w-0 truncate rounded border border-input bg-background px-2 text-sm font-medium sm:w-36 lg:w-44"
-				placeholder="Template name"
-			/>
+			<span class="max-w-32 truncate text-sm font-medium sm:max-w-44 lg:max-w-56" title={templateName || 'Untitled'}>
+				{templateName || 'Untitled'}
+			</span>
 			<Button variant="outline" size="sm" onclick={onLoadTemplate} class="gap-1.5 px-2 sm:px-3">
 				<Upload class="h-4 w-4" />
 				<span class="hidden sm:inline">Load</span>

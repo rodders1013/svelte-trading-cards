@@ -15,11 +15,14 @@ interface Props {
     initialTemplate?: ContainerState[];
     /** Initial template name */
     initialTemplateName?: string;
+    /** Whether we're editing an existing template (shows "Save as New" option) */
+    isEditing?: boolean;
     /** Callback when template is saved */
     onSave?: (data: {
         template: CardTemplate;
         editorState: ContainerState[];
         name: string;
+        saveAsNew: boolean;
     }) => void;
     /** Callback when template changes */
     onChange?: (data: {

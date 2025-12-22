@@ -8,7 +8,7 @@ interface CardInfo {
     name: string;
 }
 type $$ComponentProps = {
-    templateName: string;
+    templateName?: string;
     hasDraft?: boolean;
     lastSaved?: Date | null;
     previewMode: 'fields' | 'data';
@@ -24,6 +24,6 @@ type $$ComponentProps = {
     onLoadTemplate: () => void;
     onExport?: () => void;
 };
-declare const TopBar: import("svelte").Component<$$ComponentProps, {}, "templateName" | "previewMode" | "selectedDataset" | "selectedCardIndex" | "displayRarity" | "displayCustomGradient" | "showPreviewEffects">;
+declare const TopBar: import("svelte").Component<$$ComponentProps, {}, "previewMode" | "selectedDataset" | "selectedCardIndex" | "displayRarity" | "displayCustomGradient" | "showPreviewEffects">;
 type TopBar = ReturnType<typeof TopBar>;
 export default TopBar;
