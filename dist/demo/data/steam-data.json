@@ -1,0 +1,58 @@
+{
+	"name": "Steam Games",
+	"description": "Steam game data with Steam-specific field names",
+	"platform": "steam",
+	"cards": [
+		{
+			"id": "steam-1",
+			"appName": "Elden Ring",
+			"steamUsername": "TarnishedOne",
+			"headerImage": "https://picsum.photos/seed/eldenring/400/300",
+			"achievementsUnlocked": 42,
+			"achievementsTotal": 42,
+			"playtimeMinutes": 18420,
+			"playtimeForever": "307 hrs",
+			"userRating": 5,
+			"steamRating": 4.5,
+			"difficulty": 5,
+			"tags": ["RPG", "Souls-like", "Open World"],
+			"lastPlayedTimestamp": 1705334400,
+			"features": ["Steam Deck Verified", "Controller Support", "Cloud Saves"],
+			"highlights": ["All Achievements", "All Endings", "Level 200+"]
+		},
+		{
+			"id": "steam-2",
+			"appName": "Baldur's Gate 3",
+			"steamUsername": "DiceRoller",
+			"headerImage": "https://picsum.photos/seed/bg3/400/300",
+			"achievementsUnlocked": 28,
+			"achievementsTotal": 54,
+			"playtimeMinutes": 9600,
+			"playtimeForever": "160 hrs",
+			"userRating": 5,
+			"steamRating": 5,
+			"difficulty": 3,
+			"tags": ["RPG", "Turn-Based", "Story Rich"],
+			"lastPlayedTimestamp": 1708012800,
+			"features": ["Steam Deck Playable", "Controller Support", "Mods"],
+			"highlights": ["Act 3 Complete", "Dark Urge Run", "Honor Mode"]
+		},
+		{
+			"id": "steam-3",
+			"appName": "Counter-Strike 2",
+			"steamUsername": "HeadshotKing",
+			"headerImage": "https://picsum.photos/seed/cs2/400/300",
+			"achievementsUnlocked": 15,
+			"achievementsTotal": 67,
+			"playtimeMinutes": 42000,
+			"playtimeForever": "700 hrs",
+			"userRating": 4,
+			"steamRating": 4,
+			"difficulty": 4.5,
+			"tags": ["FPS", "Competitive", "Multiplayer"],
+			"lastPlayedTimestamp": 1709827200,
+			"features": ["VAC Secured", "Prime Status", "Workshop Maps"],
+			"highlights": ["Global Elite", "1000+ Wins", "5 Year Coin"]
+		}
+	]
+}

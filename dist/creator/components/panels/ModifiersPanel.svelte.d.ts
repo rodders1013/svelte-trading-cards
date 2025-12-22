@@ -1,0 +1,22 @@
+import type { ShapeSource } from '../../../styling/shapes';
+import type { EffectConfig } from '../../../styling/effects';
+import type { AnimationConfig } from '../../../styling/animations';
+import type { BlendMode } from '../../../styling/blend';
+import type { BorderModifier, HolographicConfig } from '../../../types/modifiers';
+type $$ComponentProps = {
+    shapeSource?: ShapeSource | undefined;
+    effect?: EffectConfig | undefined;
+    animation?: AnimationConfig | undefined;
+    blendMode?: BlendMode | undefined;
+    border?: BorderModifier | undefined;
+    holographic?: HolographicConfig | undefined;
+    showClipShape?: boolean;
+    showEffect?: boolean;
+    showAnimation?: boolean;
+    showBlend?: boolean;
+    showBorder?: boolean;
+    showHolographic?: boolean;
+};
+declare const ModifiersPanel: import("svelte").Component<$$ComponentProps, {}, "holographic" | "effect" | "blendMode" | "animation" | "border" | "shapeSource">;
+type ModifiersPanel = ReturnType<typeof ModifiersPanel>;
+export default ModifiersPanel;

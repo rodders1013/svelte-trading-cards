@@ -1,0 +1,58 @@
+{
+	"name": "Xbox Games",
+	"description": "Xbox game data with Xbox-specific field names",
+	"platform": "xbox",
+	"cards": [
+		{
+			"id": "xbox-1",
+			"gameName": "Halo Infinite",
+			"gamertag": "MasterChief117",
+			"coverArt": "https://picsum.photos/seed/halo/400/300",
+			"achievements": 47,
+			"gamerscore": 1250,
+			"hoursPlayed": 156,
+			"userRating": 4,
+			"criticScore": 4.5,
+			"difficulty": 3.5,
+			"genre": "FPS",
+			"lastPlayed": "2024-01-15",
+			"features": ["Game Pass", "Cross-Play", "Smart Delivery", "120fps"],
+			"modes": ["Campaign", "Multiplayer", "Forge", "Co-op"],
+			"platforms": ["Xbox Series X", "Xbox One", "PC"]
+		},
+		{
+			"id": "xbox-2",
+			"gameName": "Forza Horizon 5",
+			"gamertag": "SpeedDemon99",
+			"coverArt": "https://picsum.photos/seed/forza/400/300",
+			"achievements": 82,
+			"gamerscore": 2100,
+			"hoursPlayed": 230,
+			"userRating": 5,
+			"criticScore": 4.5,
+			"difficulty": 2,
+			"genre": "Racing",
+			"lastPlayed": "2024-02-20",
+			"features": ["Game Pass", "Cross-Play", "Ray Tracing", "4K 60fps"],
+			"modes": ["Free Roam", "Online", "Horizon Arcade", "EventLab"],
+			"platforms": ["Xbox Series X", "Xbox One", "PC"]
+		},
+		{
+			"id": "xbox-3",
+			"gameName": "Sea of Thieves",
+			"gamertag": "PirateLord",
+			"coverArt": "https://picsum.photos/seed/pirates/400/300",
+			"achievements": 35,
+			"gamerscore": 890,
+			"hoursPlayed": 98,
+			"userRating": 3.5,
+			"criticScore": 3.5,
+			"difficulty": 2.5,
+			"genre": "Adventure",
+			"lastPlayed": "2024-03-10",
+			"features": ["Game Pass", "Cross-Play", "Live Service", "Free Updates"],
+			"modes": ["Adventure", "Arena", "Tall Tales", "PvP"],
+			"platforms": ["Xbox Series X", "Xbox One", "PC", "PS5"]
+		}
+	]
+}

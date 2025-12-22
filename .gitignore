@@ -7,7 +7,7 @@ node_modules
 .wrangler
 /.svelte-kit
 /build
-/dist
+# Note: /dist is NOT ignored - it's committed for GitHub installs
 
 # OS
 .DS_Store

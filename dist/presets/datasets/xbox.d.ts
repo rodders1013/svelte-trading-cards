@@ -1,0 +1,6 @@
+/**
+ * Xbox Labels
+ * Labels specific to Xbox gaming context
+ */
+export declare const XBOX_LABELS: readonly ["GAMERTAG", "PLAYER", "GAMERSCORE", "ACHIEVEMENTS", "ACHIEVEMENT COUNT", "HOURS PLAYED", "PLAYTIME", "COMPLETION", "LAST PLAYED", "XBOX SERIES X", "XBOX SERIES S", "XBOX ONE", "XBOX 360", "GAME PASS", "GAME PASS ULTIMATE", "BACKWARDS COMPATIBLE", "EXCLUSIVE", "CONSOLE EXCLUSIVE", "DAY ONE", "OPTIMIZED"];
+export type XboxLabel = (typeof XBOX_LABELS)[number];

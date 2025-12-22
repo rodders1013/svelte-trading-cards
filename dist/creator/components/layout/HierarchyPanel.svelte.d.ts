@@ -1,0 +1,23 @@
+import type { ContainerState } from '../../types';
+import type { Component } from 'svelte';
+type $$ComponentProps = {
+    containers: ContainerState[];
+    selectedContainerId: string | null;
+    expandedPanels: Set<string>;
+    onTogglePanel: (panelId: string) => void;
+    onToggleVisibility: (id: string) => void;
+    onToggleComponentVisibility: (componentId: string) => void;
+    onMoveContainerUp: (id: string) => void;
+    onMoveContainerDown: (id: string) => void;
+    onMoveComponentUp: (componentId: string) => void;
+    onMoveComponentDown: (componentId: string) => void;
+    onRenameContainer: (id: string, name: string) => void;
+    onDragStart: (id: string) => void;
+    onDragOver: (e: DragEvent, id: string) => void;
+    onDrop: (e: DragEvent, targetId: string) => void;
+    onDragEnd: () => void;
+    dragOverContainerId: string | null;
+};
+declare const HierarchyPanel: Component<$$ComponentProps, {}, "selectedContainerId">;
+type HierarchyPanel = ReturnType<typeof HierarchyPanel>;
+export default HierarchyPanel;

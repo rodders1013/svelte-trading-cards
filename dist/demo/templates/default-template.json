@@ -1,0 +1,117 @@
+{
+	"id": "default-template",
+	"name": "Default Demo Template",
+	"createdAt": "2024-01-01T00:00:00.000Z",
+	"updatedAt": "2024-01-01T00:00:00.000Z",
+	"template": {
+		"name": "Default Demo Template",
+		"components": [
+			{
+				"id": "bg",
+				"type": "GradientBackground",
+				"props": {
+					"colors": ["#1a1a2e", "#16213e", "#0f3460"],
+					"direction": "to-bottom"
+				}
+			},
+			{
+				"id": "image",
+				"type": "Image",
+				"props": {
+					"dataField": "imageUrl",
+					"x": 50,
+					"y": 100,
+					"width": 650,
+					"height": 400,
+					"fit": "cover",
+					"clipRadius": 12
+				}
+			},
+			{
+				"id": "title",
+				"type": "TextField",
+				"props": {
+					"dataField": "title",
+					"x": 50,
+					"y": 540,
+					"width": 650,
+					"height": 60,
+					"fontSize": 48,
+					"fontWeight": "bold",
+					"fill": "#ffffff",
+					"textAnchor": "start"
+				}
+			},
+			{
+				"id": "subtitle",
+				"type": "TextField",
+				"props": {
+					"dataField": "subtitle",
+					"x": 50,
+					"y": 600,
+					"width": 650,
+					"height": 40,
+					"fontSize": 28,
+					"fontWeight": "normal",
+					"fill": "#94a3b8",
+					"textAnchor": "start"
+				}
+			},
+			{
+				"id": "description",
+				"type": "TextField",
+				"props": {
+					"dataField": "description",
+					"x": 50,
+					"y": 660,
+					"width": 650,
+					"height": 120,
+					"fontSize": 18,
+					"fontWeight": "normal",
+					"fill": "#cbd5e1",
+					"textAnchor": "start",
+					"multiline": true
+				}
+			},
+			{
+				"id": "category-label",
+				"type": "TextField",
+				"props": {
+					"dataField": "category",
+					"x": 50,
+					"y": 810,
+					"width": 200,
+					"height": 30,
+					"fontSize": 16,
+					"fontWeight": "bold",
+					"fill": "#60a5fa",
+					"textAnchor": "start"
+				}
+			},
+			{
+				"id": "rarity-label",
+				"type": "TextField",
+				"props": {
+					"dataField": "rarity",
+					"x": 550,
+					"y": 810,
+					"width": 150,
+					"height": 30,
+					"fontSize": 16,
+					"fontWeight": "bold",
+					"fill": "#fbbf24",
+					"textAnchor": "end"
+				}
+			},
+			{
+				"id": "border",
+				"type": "Border",
+				"props": {
+					"stroke": "#3b82f6",
+					"strokeWidth": 4,
+					"radius": 26
+				}
+			}
+		]
+	}
+}

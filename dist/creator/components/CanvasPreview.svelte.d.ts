@@ -1,0 +1,26 @@
+import { type Rarity } from '../../display';
+import type { CardTemplate } from '../../types';
+import type { ContainerState, ResizeHandle } from '../types';
+type $$ComponentProps = {
+    template: CardTemplate;
+    previewData: Record<string, unknown>;
+    containers: ContainerState[];
+    selectedContainerId: string | null;
+    svgElement?: SVGSVGElement | null;
+    zoomLevel: number;
+    showGrid: boolean;
+    gridSize?: number;
+    canvasInteraction: 'idle' | 'dragging' | 'resizing';
+    interactionContainerId: string | null;
+    activeResizeHandle: ResizeHandle | null;
+    isTransitioning: boolean;
+    canvasScale: number;
+    onStartDrag: (e: PointerEvent, containerId: string) => void;
+    onStartResize: (e: PointerEvent, containerId: string, handle: ResizeHandle) => void;
+    showEffects?: boolean;
+    rarity?: Rarity;
+    customGradient?: string;
+};
+declare const CanvasPreview: import("svelte").Component<$$ComponentProps, {}, "svgElement" | "selectedContainerId">;
+type CanvasPreview = ReturnType<typeof CanvasPreview>;
+export default CanvasPreview;

@@ -1,0 +1,40 @@
+export declare const MAX_BLEED_MM = 3;
+export declare const PX_PER_MM = 11.811;
+export declare const MAX_BLEED_PX: number;
+export declare const CARD_BASE_WIDTH: number;
+export declare const CARD_BASE_HEIGHT: number;
+import type { CardTemplate } from '../types';
+import type { ContainerState, ComponentItem, TextComponent, ImageComponent, BackgroundComponent, BorderComponent, IconComponent, StatPanelComponent, DividerComponent, ProgressBarComponent, RibbonComponent, FrameComponent, ListComponent, IconRatingComponent, ResizeHandle } from './types';
+export declare function generateComponentId(type: string): string;
+export declare function generateId(): string;
+export declare function createInitialCardBackground(): ContainerState;
+export declare function getComponentByType<T extends ComponentItem['type']>(container: ContainerState, type: T): Extract<ComponentItem, {
+    type: T;
+}> | undefined;
+export declare function hasComponentType(container: ContainerState, type: ComponentItem['type']): boolean;
+export declare function getComponentIcon(type: string): string;
+export declare function getResizeCursor(handle: ResizeHandle): string;
+export declare function buildTemplate(templateName: string, containers: ContainerState[]): CardTemplate;
+export declare function buildTemplateWithDisplay(templateName: string, containers: ContainerState[], display?: {
+    rarity?: string;
+    customGradient?: string;
+}): CardTemplate;
+export declare function buildPreviewData(previewMode: 'fields' | 'data', currentCard: Record<string, unknown>, dataFields?: Array<{
+    value: string;
+    label: string;
+    type?: string;
+}>): Record<string, unknown>;
+export declare function createTextComponent(): TextComponent;
+export declare function createImageComponent(): ImageComponent;
+export declare function createBackgroundComponent(): BackgroundComponent;
+export declare function createBorderComponent(): BorderComponent;
+export declare function createIconComponent(): IconComponent;
+export declare function createStatPanelComponent(): StatPanelComponent;
+export declare function createDividerComponent(): DividerComponent;
+export declare function createProgressBarComponent(): ProgressBarComponent;
+export declare function createRibbonComponent(): RibbonComponent;
+export declare function createFrameComponent(): FrameComponent;
+export declare function createListComponent(): ListComponent;
+export declare function createIconRatingComponent(): IconRatingComponent;
+export declare function createContainer(containerNumber: number): ContainerState;
+export declare const GRID_SIZE = 25;
