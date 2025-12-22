@@ -1263,7 +1263,7 @@ import { extractFontsFromCard, loadGoogleFonts } from '../fonts';
 
 <svelte:window onkeydown={handleKeydown} onpointermove={handleCanvasPointerMove} onpointerup={handleCanvasPointerUp} />
 
-<div class="flex h-screen flex-col {className}">
+<div class="flex h-full flex-col {className}">
 	<!-- Top Bar (full width) -->
 	<TopBar
 		bind:templateName
@@ -1293,7 +1293,7 @@ import { extractFontsFromCard, loadGoogleFonts } from '../fonts';
 				minSize={18}
 				maxSize={35}
 			>
-				<div class="h-full overflow-hidden">
+				<div class="h-full overflow-auto">
 					<PropertiesPanel
 						container={selectedContainer}
 						dataFields={currentDataFields}
@@ -1397,7 +1397,7 @@ import { extractFontsFromCard, loadGoogleFonts } from '../fonts';
 				minSize={15}
 				maxSize={40}
 			>
-				<div class="h-full overflow-hidden">
+				<div class="h-full overflow-auto">
 					<HierarchyPanel
 						{containers}
 						bind:selectedContainerId

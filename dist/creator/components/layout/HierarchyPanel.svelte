@@ -2,7 +2,6 @@
 	import * as Card from '../../ui/card';
 	import { Button } from '../../ui/button';
 	import * as Collapsible from '../../ui/collapsible';
-	import { ScrollArea } from '../../ui/scroll-area';
 	import ChevronDown from '@lucide/svelte/icons/chevron-down';
 	import ChevronRight from '@lucide/svelte/icons/chevron-right';
 	import Eye from '@lucide/svelte/icons/eye';
@@ -164,7 +163,6 @@
 			</Collapsible.Trigger>
 
 			<Collapsible.Content>
-				<ScrollArea class="max-h-[400px]">
 					<div class="border-t px-1 py-1">
 						{#each [...containers].reverse() as container, i (container.id)}
 							{@const realIndex = containers.length - 1 - i}
@@ -384,7 +382,6 @@
 							<p class="py-4 text-center text-sm text-muted-foreground">Click "+ Layer" to add a layer</p>
 						{/if}
 					</div>
-				</ScrollArea>
 			</Collapsible.Content>
 		</Collapsible.Root>
 	</Card.Root>

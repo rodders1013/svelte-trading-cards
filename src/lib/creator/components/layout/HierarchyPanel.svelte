@@ -2,7 +2,6 @@
 	import * as Card from '$lib/creator/ui/card';
 	import { Button } from '$lib/creator/ui/button';
 	import * as Collapsible from '$lib/creator/ui/collapsible';
-	import { ScrollArea } from '$lib/creator/ui/scroll-area';
 	import ChevronDown from '@lucide/svelte/icons/chevron-down';
 	import ChevronRight from '@lucide/svelte/icons/chevron-right';
 	import Eye from '@lucide/svelte/icons/eye';
@@ -148,11 +147,11 @@
 	}
 </script>
 
-<div class="flex h-full w-full flex-col gap-2">
+<div class="flex h-full w-full flex-col gap-2 overflow-hidden">
 	<!-- Layers -->
-	<Card.Root class="flex-1 overflow-hidden">
-		<Collapsible.Root open={expandedPanels.has('hierarchy')} onOpenChange={() => onTogglePanel('hierarchy')}>
-			<Collapsible.Trigger class="flex w-full items-center justify-between px-3 py-2 hover:bg-muted/50">
+	<Card.Root class="flex min-h-0 flex-1 flex-col overflow-hidden">
+		<Collapsible.Root open={expandedPanels.has('hierarchy')} onOpenChange={() => onTogglePanel('hierarchy')} class="flex min-h-0 flex-1 flex-col">
+			<Collapsible.Trigger class="flex w-full shrink-0 items-center justify-between px-3 py-2 hover:bg-muted/50">
 				<span class="flex items-center gap-2 text-sm font-medium">
 					<ChevronDown
 						class="h-3 w-3 shrink-0 transition-transform duration-200 {expandedPanels.has('hierarchy') ? '' : '-rotate-90'}"
@@ -163,8 +162,7 @@
 				<span class="rounded-full bg-muted px-1.5 py-0.5 text-xs text-muted-foreground">{containers.length}</span>
 			</Collapsible.Trigger>
 
-			<Collapsible.Content>
-				<ScrollArea class="max-h-[400px]">
+			<Collapsible.Content class="min-h-0 flex-1 overflow-auto">
 					<div class="border-t px-1 py-1">
 						{#each [...containers].reverse() as container, i (container.id)}
 							{@const realIndex = containers.length - 1 - i}
@@ -384,7 +382,6 @@
 							<p class="py-4 text-center text-sm text-muted-foreground">Click "+ Layer" to add a layer</p>
 						{/if}
 					</div>
-				</ScrollArea>
 			</Collapsible.Content>
 		</Collapsible.Root>
 	</Card.Root>

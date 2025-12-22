@@ -1263,7 +1263,7 @@ import { extractFontsFromCard, loadGoogleFonts } from '$lib/fonts';
 
 <svelte:window onkeydown={handleKeydown} onpointermove={handleCanvasPointerMove} onpointerup={handleCanvasPointerUp} />
 
-<div class="flex h-screen flex-col {className}">
+<div class="flex h-full flex-col {className}">
 	<!-- Top Bar (full width) -->
 	<TopBar
 		bind:templateName
@@ -1285,7 +1285,7 @@ import { extractFontsFromCard, loadGoogleFonts } from '$lib/fonts';
 
 	<!-- Main Content - Desktop: Resizable 3-column layout -->
 	{#if isDesktop.current}
-		<div bind:this={paneGroupElement} class="flex-1">
+		<div bind:this={paneGroupElement} class="min-h-0 flex-1 overflow-hidden">
 		<Resizable.PaneGroup direction="horizontal" class="h-full" autoSaveId="card-creator-panels" bind:this={paneGroupApi}>
 			<!-- Left: Properties Panel (editing) -->
 			<Resizable.Pane
