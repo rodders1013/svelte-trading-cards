@@ -21,7 +21,7 @@ type $$ComponentProps = {
     showPreviewEffects?: boolean;
     onDatasetChange?: (datasetId: string) => void;
     onSaveTemplate: () => void;
-    onLoadTemplate: (event: Event) => void;
+    onLoadTemplate: () => void;
     onExport?: () => void;
 };
 declare const TopBar: import("svelte").Component<$$ComponentProps, {}, "templateName" | "previewMode" | "selectedDataset" | "selectedCardIndex" | "displayRarity" | "displayCustomGradient" | "showPreviewEffects">;

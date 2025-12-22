@@ -84,6 +84,8 @@ import { extractFontsFromCard, loadGoogleFonts } from '$lib/fonts';
 		onSave?: (data: { template: CardTemplate; editorState: ContainerState[]; name: string }) => void;
 		/** Callback when template changes */
 		onChange?: (data: { template: CardTemplate; editorState: ContainerState[] }) => void;
+		/** Custom load template handler - if provided, called instead of file picker */
+		onLoadTemplate?: () => Promise<{ name: string; editorState: ContainerState[] } | null>;
 		/** Show help button */
 		showHelpButton?: boolean;
 		/** CSS class for the container */
@@ -97,6 +99,7 @@ import { extractFontsFromCard, loadGoogleFonts } from '$lib/fonts';
 		initialTemplateName = 'New Template',
 		onSave,
 		onChange,
+		onLoadTemplate: customLoadTemplate,
 		showHelpButton = true,
 		class: className = ''
 	}: Props = $props();
@@ -1114,7 +1117,7 @@ import { extractFontsFromCard, loadGoogleFonts } from '$lib/fonts';
 		clearDraft();
 	}
 
-	function loadTemplate(event: Event) {
+	function loadTemplateFromFile(event: Event) {
 		const input = event.target as HTMLInputElement;
 		const file = input.files?.[0];
 		if (!file) return;
@@ -1134,6 +1137,31 @@ import { extractFontsFromCard, loadGoogleFonts } from '$lib/fonts';
 		};
 		reader.readAsText(file);
 		input.value = '';
+	}
+
+	async function handleLoadTemplate() {
+		if (customLoadTemplate) {
+			// Use custom load handler (e.g., load from database)
+			try {
+				const result = await customLoadTemplate();
+				if (result) {
+					pushHistory();
+					containers = result.editorState;
+					templateName = result.name || 'Loaded Template';
+					selectedContainerId = containers.length > 0 ? containers[0].id : null;
+				}
+			} catch (err) {
+				console.error('Failed to load template:', err);
+				alert('Failed to load template');
+			}
+		} else {
+			// Trigger file input for default behavior
+			const input = document.createElement('input');
+			input.type = 'file';
+			input.accept = '.json';
+			input.onchange = loadTemplateFromFile;
+			input.click();
+		}
 	}
 
 	async function handleExport(options: { format: 'svg' | 'png'; bleedMm: number; scale: number }) {
@@ -1279,7 +1307,7 @@ import { extractFontsFromCard, loadGoogleFonts } from '$lib/fonts';
 		bind:showPreviewEffects
 		onDatasetChange={handleDatasetChange}
 		onSaveTemplate={saveTemplate}
-		onLoadTemplate={loadTemplate}
+		onLoadTemplate={handleLoadTemplate}
 		onExport={() => { showExportDialog = true; }}
 	/>
 

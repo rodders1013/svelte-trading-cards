@@ -13,28 +13,58 @@
 	];
 </script>
 
-<div class="min-h-screen bg-background">
-	<header class="border-b border-border">
-		<div class="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
-			<div class="flex items-center gap-6">
-				<h1 class="text-xl font-bold text-foreground">Trading Cards</h1>
-				<Separator orientation="vertical" class="h-6" />
-				<nav class="flex gap-2">
-					{#each navItems as item}
-						<Button
-							variant={page.url.pathname === item.href ? 'secondary' : 'ghost'}
-							href={item.href}
-							size="sm"
-						>
-							{item.label}
-						</Button>
-					{/each}
-				</nav>
+{#if page.url.pathname === '/creator'}
+	<!-- Creator page: fixed viewport height with internal scrolling panels -->
+	<div class="flex h-screen flex-col overflow-hidden bg-background">
+		<header class="shrink-0 border-b border-border">
+			<div class="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
+				<div class="flex items-center gap-6">
+					<h1 class="text-xl font-bold text-foreground">Trading Cards</h1>
+					<Separator orientation="vertical" class="h-6" />
+					<nav class="flex gap-2">
+						{#each navItems as item}
+							<Button
+								variant={page.url.pathname === item.href ? 'secondary' : 'ghost'}
+								href={item.href}
+								size="sm"
+							>
+								{item.label}
+							</Button>
+						{/each}
+					</nav>
+				</div>
 			</div>
-		</div>
-	</header>
+		</header>
 
-	<main class="{page.url.pathname === '/creator' ? 'px-4 py-4' : 'mx-auto max-w-7xl px-6 py-8'}">
-		{@render children()}
-	</main>
-</div>
+		<main class="min-h-0 flex-1 overflow-hidden px-4 py-4">
+			{@render children()}
+		</main>
+	</div>
+{:else}
+	<!-- Other pages: normal scrolling behavior -->
+	<div class="min-h-screen bg-background">
+		<header class="border-b border-border">
+			<div class="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
+				<div class="flex items-center gap-6">
+					<h1 class="text-xl font-bold text-foreground">Trading Cards</h1>
+					<Separator orientation="vertical" class="h-6" />
+					<nav class="flex gap-2">
+						{#each navItems as item}
+							<Button
+								variant={page.url.pathname === item.href ? 'secondary' : 'ghost'}
+								href={item.href}
+								size="sm"
+							>
+								{item.label}
+							</Button>
+						{/each}
+					</nav>
+				</div>
+			</div>
+		</header>
+
+		<main class="mx-auto max-w-7xl px-6 py-8">
+			{@render children()}
+		</main>
+	</div>
+{/if}

@@ -26,6 +26,11 @@ interface Props {
         template: CardTemplate;
         editorState: ContainerState[];
     }) => void;
+    /** Custom load template handler - if provided, called instead of file picker */
+    onLoadTemplate?: () => Promise<{
+        name: string;
+        editorState: ContainerState[];
+    } | null>;
     /** Show help button */
     showHelpButton?: boolean;
     /** CSS class for the container */

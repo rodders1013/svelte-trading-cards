@@ -59,7 +59,7 @@
 		showPreviewEffects?: boolean;
 		onDatasetChange?: (datasetId: string) => void;
 		onSaveTemplate: () => void;
-		onLoadTemplate: (event: Event) => void;
+		onLoadTemplate: () => void;
 		onExport?: () => void;
 	} = $props();
 
@@ -87,11 +87,10 @@
 				class="h-8 w-24 min-w-0 truncate rounded border border-input bg-background px-2 text-sm font-medium sm:w-36 lg:w-44"
 				placeholder="Template name"
 			/>
-			<label class="inline-flex h-8 cursor-pointer items-center justify-center rounded-md border border-input bg-background px-2 text-sm font-medium shadow-xs hover:bg-accent hover:text-accent-foreground sm:gap-1.5 sm:px-3">
+			<Button variant="outline" size="sm" onclick={onLoadTemplate} class="gap-1.5 px-2 sm:px-3">
 				<Upload class="h-4 w-4" />
-				<input type="file" accept=".json" class="hidden" onchange={onLoadTemplate} />
 				<span class="hidden sm:inline">Load</span>
-			</label>
+			</Button>
 			<Button size="sm" onclick={onSaveTemplate} class="gap-1.5 px-2 sm:px-3">
 				<Save class="h-4 w-4" />
 				<span class="hidden sm:inline">Save</span>
