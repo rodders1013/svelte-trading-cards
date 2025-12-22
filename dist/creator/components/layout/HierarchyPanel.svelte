@@ -147,11 +147,11 @@
 	}
 </script>
 
-<div class="flex h-full w-full flex-col gap-2">
+<div class="flex h-full w-full flex-col gap-2 overflow-hidden">
 	<!-- Layers -->
-	<Card.Root class="flex-1 overflow-hidden">
-		<Collapsible.Root open={expandedPanels.has('hierarchy')} onOpenChange={() => onTogglePanel('hierarchy')}>
-			<Collapsible.Trigger class="flex w-full items-center justify-between px-3 py-2 hover:bg-muted/50">
+	<Card.Root class="flex min-h-0 flex-1 flex-col overflow-hidden">
+		<Collapsible.Root open={expandedPanels.has('hierarchy')} onOpenChange={() => onTogglePanel('hierarchy')} class="flex min-h-0 flex-1 flex-col">
+			<Collapsible.Trigger class="flex w-full shrink-0 items-center justify-between px-3 py-2 hover:bg-muted/50">
 				<span class="flex items-center gap-2 text-sm font-medium">
 					<ChevronDown
 						class="h-3 w-3 shrink-0 transition-transform duration-200 {expandedPanels.has('hierarchy') ? '' : '-rotate-90'}"
@@ -162,7 +162,7 @@
 				<span class="rounded-full bg-muted px-1.5 py-0.5 text-xs text-muted-foreground">{containers.length}</span>
 			</Collapsible.Trigger>
 
-			<Collapsible.Content>
+			<Collapsible.Content class="min-h-0 flex-1 overflow-auto">
 					<div class="border-t px-1 py-1">
 						{#each [...containers].reverse() as container, i (container.id)}
 							{@const realIndex = containers.length - 1 - i}

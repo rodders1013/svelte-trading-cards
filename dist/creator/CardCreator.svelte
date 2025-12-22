@@ -1285,7 +1285,7 @@ import { extractFontsFromCard, loadGoogleFonts } from '../fonts';
 
 	<!-- Main Content - Desktop: Resizable 3-column layout -->
 	{#if isDesktop.current}
-		<div bind:this={paneGroupElement} class="flex-1">
+		<div bind:this={paneGroupElement} class="min-h-0 flex-1 overflow-hidden">
 		<Resizable.PaneGroup direction="horizontal" class="h-full" autoSaveId="card-creator-panels" bind:this={paneGroupApi}>
 			<!-- Left: Properties Panel (editing) -->
 			<Resizable.Pane
@@ -1293,7 +1293,7 @@ import { extractFontsFromCard, loadGoogleFonts } from '../fonts';
 				minSize={18}
 				maxSize={35}
 			>
-				<div class="h-full overflow-auto">
+				<div class="h-full overflow-hidden">
 					<PropertiesPanel
 						container={selectedContainer}
 						dataFields={currentDataFields}
@@ -1397,7 +1397,7 @@ import { extractFontsFromCard, loadGoogleFonts } from '../fonts';
 				minSize={15}
 				maxSize={40}
 			>
-				<div class="h-full overflow-auto">
+				<div class="h-full overflow-hidden">
 					<HierarchyPanel
 						{containers}
 						bind:selectedContainerId
