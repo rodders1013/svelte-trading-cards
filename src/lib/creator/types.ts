@@ -47,7 +47,10 @@ export interface ImageComponent {
 	type: 'image';
 	id: string;
 	visible: boolean;
+	/** Data field to get image URL from (e.g., 'imageUrl', 'coverArt') */
 	dataField: string;
+	/** Custom URL - used instead of dataField when provided */
+	customUrl?: string;
 	opacity: number;
 	preserveAspectRatio: string;
 	/** Shape to clip the image to (e.g., circle, star) */

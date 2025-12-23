@@ -1,6 +1,6 @@
 <script lang="ts">
 	import ComponentPanel from '../ComponentPanel.svelte';
-	import { FormSelect, FormSlider, FormGrid } from '../form';
+	import { FormSelect, FormSlider, FormGrid, FormInput } from '../form';
 	import ModifiersPanel from './ModifiersPanel.svelte';
 	import type { ImageComponent, DataFieldOption } from '../../types';
 	import type { FilterConfig, ImageTransformConfig } from '$lib/styling/filters';
@@ -116,11 +116,38 @@
 	{onMoveDown}
 	{onToggleVisibility}
 >
+	<!-- Image Source: Data Field OR Custom URL -->
 	<FormSelect
 		label="Data Field"
 		value={component.dataField}
-		onchange={(v) => onUpdate('dataField', v)}
+		onchange={(v) => {
+			onUpdate('dataField', v);
+			// Clear custom URL when selecting a data field
+			if (v && component.customUrl) {
+				onUpdate('customUrl', '');
+			}
+		}}
 		options={imageFields}
+	/>
+
+	<div class="flex items-center gap-2 my-1">
+		<div class="flex-1 border-t border-zinc-700"></div>
+		<span class="text-xs text-zinc-500">or</span>
+		<div class="flex-1 border-t border-zinc-700"></div>
+	</div>
+
+	<FormInput
+		label="Custom URL"
+		value={component.customUrl ?? ''}
+		type="url"
+		placeholder="https://..."
+		onchange={(v) => {
+			onUpdate('customUrl', v as string);
+			// Clear data field when entering a custom URL
+			if (v && component.dataField) {
+				onUpdate('dataField', '');
+			}
+		}}
 	/>
 
 	<FormGrid>

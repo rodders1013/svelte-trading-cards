@@ -178,7 +178,7 @@ interface ComponentBuildConfig {
 const componentBuildConfig: Partial<Record<ComponentItem['type'], ComponentBuildConfig>> = {
 	image: {
 		renderType: 'Image',
-		props: ['dataField', 'opacity', 'preserveAspectRatio', 'shapeSource', 'filter', 'transform']
+		props: ['dataField', { from: 'customUrl', to: 'imageUrl' }, 'opacity', 'preserveAspectRatio', 'shapeSource', 'filter', 'transform']
 	},
 	text: {
 		renderType: 'TextField',

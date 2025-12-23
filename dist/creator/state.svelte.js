@@ -132,7 +132,7 @@ export function getResizeCursor(handle) {
 const componentBuildConfig = {
     image: {
         renderType: 'Image',
-        props: ['dataField', 'opacity', 'preserveAspectRatio', 'shapeSource', 'filter', 'transform']
+        props: ['dataField', { from: 'customUrl', to: 'imageUrl' }, 'opacity', 'preserveAspectRatio', 'shapeSource', 'filter', 'transform']
     },
     text: {
         renderType: 'TextField',
