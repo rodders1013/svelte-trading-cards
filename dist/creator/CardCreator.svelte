@@ -1286,6 +1286,12 @@ import { extractFontsFromCard, loadGoogleFonts } from '../fonts';
 	function handleKeydown(e: KeyboardEvent) {
 		// Handle modifier shortcuts (Cmd/Ctrl + Key)
 		if (hasModifier(e)) {
+			// Skip clipboard shortcuts (c, v, x, a) when in text inputs to allow native copy/paste
+			const clipboardKeys = ['c', 'v', 'x', 'a'];
+			if (clipboardKeys.includes(e.key.toLowerCase()) && isInTextInput()) {
+				return; // Let the browser handle native copy/paste in inputs
+			}
+
 			for (const shortcut of modifierShortcuts) {
 				const keyMatches = Array.isArray(shortcut.key)
 					? shortcut.key.includes(e.key)
