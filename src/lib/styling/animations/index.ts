@@ -6,6 +6,7 @@ export type {
 	AnimationOrigin,
 	PulsePattern,
 	FloatStyle,
+	TraceMode,
 	AnimationConfig,
 	AnimationPreset
 } from './types.js';
@@ -17,6 +18,7 @@ export {
 	AnimationOrigin as AnimationOriginSchema,
 	PulsePattern as PulsePatternSchema,
 	FloatStyle as FloatStyleSchema,
+	TraceMode as TraceModeSchema,
 	AnimationConfigSchema
 } from './types.js';
 
@@ -30,6 +32,11 @@ export {
 	supportsDirection,
 	getAnimationOptions
 } from './presets.js';
+
+// Registry helpers
+export {
+	getAnimationMeta
+} from './registry.js';
 
 // CSS styles for SVG injection
 export {

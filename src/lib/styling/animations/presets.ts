@@ -1,4 +1,5 @@
 import type { AnimationType, AnimationPreset, AnimationEasing } from './types.js';
+import { ANIMATION_DEFINITIONS, getAnimationDefinition } from './registry.js';
 
 /**
  * Animation Presets
@@ -7,122 +8,20 @@ import type { AnimationType, AnimationPreset, AnimationEasing } from './types.js
  * and are stripped for static PNG export.
  */
 
-export const ANIMATION_PRESETS: Record<Exclude<AnimationType, 'none'>, AnimationPreset> = {
-	spin: {
-		name: 'spin',
-		label: 'Spin',
-		description: 'Continuous rotation',
-		keyframes: `
-			@keyframes tc-spin {
-				from { transform: rotate(0deg); }
-				to { transform: rotate(360deg); }
+export const ANIMATION_PRESETS: Record<Exclude<AnimationType, 'none'>, AnimationPreset> =
+	Object.fromEntries(
+		ANIMATION_DEFINITIONS.map((def) => [
+			def.id,
+			{
+				name: def.id,
+				label: def.label,
+				description: def.description,
+				keyframes: def.keyframes.map((kf) => `@keyframes ${kf.name} {${kf.css}}`).join('\n'),
+				defaultEasing: def.defaultEasing,
+				supportsDirection: def.supportsDirection
 			}
-			@keyframes tc-spin-reverse {
-				from { transform: rotate(360deg); }
-				to { transform: rotate(0deg); }
-			}
-		`,
-		defaultEasing: 'linear',
-		supportsDirection: true
-	},
-	pulse: {
-		name: 'pulse',
-		label: 'Pulse',
-		description: 'Scale up and down gently',
-		keyframes: `
-			@keyframes tc-pulse {
-				0%, 100% { transform: scale(1); }
-				50% { transform: scale(var(--tc-scale, 1.1)); }
-			}
-		`,
-		defaultEasing: 'ease-in-out',
-		supportsDirection: false
-	},
-	bounce: {
-		name: 'bounce',
-		label: 'Bounce',
-		description: 'Bouncy vertical movement',
-		keyframes: `
-			@keyframes tc-bounce {
-				0%, 100% { transform: translateY(0); }
-				50% { transform: translateY(-10%); }
-			}
-		`,
-		defaultEasing: 'ease-in-out',
-		supportsDirection: false
-	},
-	shake: {
-		name: 'shake',
-		label: 'Shake',
-		description: 'Quick horizontal shake',
-		keyframes: `
-			@keyframes tc-shake {
-				0%, 100% { transform: translateX(0); }
-				10%, 30%, 50%, 70%, 90% { transform: translateX(-2%); }
-				20%, 40%, 60%, 80% { transform: translateX(2%); }
-			}
-		`,
-		defaultEasing: 'ease-in-out',
-		supportsDirection: false
-	},
-	float: {
-		name: 'float',
-		label: 'Float',
-		description: 'Gentle floating motion',
-		keyframes: `
-			@keyframes tc-float {
-				0%, 100% { transform: translateY(0) rotate(0deg); }
-				25% { transform: translateY(-3%) rotate(1deg); }
-				75% { transform: translateY(3%) rotate(-1deg); }
-			}
-		`,
-		defaultEasing: 'ease-in-out',
-		supportsDirection: false
-	},
-	fade: {
-		name: 'fade',
-		label: 'Fade',
-		description: 'Pulsing opacity in and out',
-		keyframes: `
-			@keyframes tc-fade {
-				0%, 100% { opacity: 1; }
-				50% { opacity: 0.6; }
-			}
-		`,
-		defaultEasing: 'ease-in-out',
-		supportsDirection: false
-	},
-	ping: {
-		name: 'ping',
-		label: 'Ping',
-		description: 'Attention-grabbing ping',
-		keyframes: `
-			@keyframes tc-ping {
-				0% { transform: scale(1); opacity: 1; }
-				75%, 100% { transform: scale(1.5); opacity: 0; }
-			}
-		`,
-		defaultEasing: 'ease-out',
-		supportsDirection: false
-	},
-	trace: {
-		name: 'trace',
-		label: 'Trace',
-		description: 'Neon sign drawing effect (works on stroked elements)',
-		keyframes: `
-			@keyframes tc-trace {
-				0% { stroke-dashoffset: 2000; }
-				100% { stroke-dashoffset: 0; }
-			}
-			@keyframes tc-trace-reverse {
-				0% { stroke-dashoffset: 0; }
-				100% { stroke-dashoffset: 2000; }
-			}
-		`,
-		defaultEasing: 'linear',
-		supportsDirection: true
-	}
-};
+		])
+	) as Record<Exclude<AnimationType, 'none'>, AnimationPreset>;
 
 /**
  * Get all unique keyframes needed for animations
@@ -146,11 +45,9 @@ export function getKeyframes(type: AnimationType): string {
  */
 export function getAnimationName(type: AnimationType, direction: 'clockwise' | 'counterclockwise' = 'clockwise'): string {
 	if (type === 'none') return 'none';
-	if (type === 'spin' && direction === 'counterclockwise') {
-		return 'tc-spin-reverse';
-	}
-	if (type === 'trace' && direction === 'counterclockwise') {
-		return 'tc-trace-reverse';
+	const def = getAnimationDefinition(type);
+	if (def?.directionClassByDirection?.[direction]) {
+		return def.directionClassByDirection[direction] as string;
 	}
 	return `tc-${type}`;
 }

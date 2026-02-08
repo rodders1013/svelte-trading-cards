@@ -9,6 +9,7 @@
 	import BlendControls from './controls/BlendControls.svelte';
 	import HelpTooltip from './HelpTooltip.svelte';
 	import ShapePicker from '$lib/styling/shapes/ShapePicker.svelte';
+	import { Slider } from '$lib/creator/ui/slider';
 	import type { ShapeSource } from '$lib/styling/shapes';
 	import type { ContainerState } from '../types';
 	import type { AnimationConfig } from '$lib/styling/animations';
@@ -160,6 +161,23 @@
 				</div>
 			</div>
 		{/if}
+
+		<!-- Layer Opacity -->
+		<div>
+			<div class="flex items-center justify-between">
+				<span class="text-xs text-muted-foreground">Opacity</span>
+				<span class="text-xs text-muted-foreground">{Math.round(container.opacity * 100)}%</span>
+			</div>
+			<Slider
+				type="single"
+				class="mt-2"
+				value={container.opacity}
+				min={0}
+				max={1}
+				step={0.05}
+				onValueChange={(v: number) => onUpdate('opacity', v)}
+			/>
+		</div>
 		<!-- Note: When a clip shape is selected, it always clips (shape IS the mask) -->
 
 		<!-- Shape Section -->

@@ -101,6 +101,40 @@
 			vars.push(`--tc-float-rotation: ${animation.floatRotation}`);
 		}
 
+		if (animation.type === 'trace') {
+			const segmentPct = Math.min(30, Math.max(1, animation.traceSegmentPct ?? 4));
+			const segmentPx = Math.max(3, Math.round(segmentPct * 1.5));
+			const count = Math.max(1, animation.traceCount ?? 1);
+			let gapPx = Math.max(6, Math.round(segmentPx * 6));
+			let dashArray = `${segmentPx} ${gapPx}`;
+
+			if (animation.traceMode === 'multi-ball') {
+				const effectiveCount = Math.min(8, Math.max(2, count));
+				gapPx = Math.max(3, Math.round(segmentPx * (8 / effectiveCount)));
+				dashArray = `${segmentPx} ${gapPx}`;
+			}
+
+			if (animation.traceMode === 'line') {
+				const lineSegment = Math.max(segmentPx * 4, 12);
+				gapPx = Math.max(6, Math.round(lineSegment * 0.6));
+				dashArray = `${lineSegment} ${gapPx}`;
+			}
+
+			if (animation.traceMode === 'reveal') {
+				dashArray = `5000 5000`;
+			}
+
+			vars.push(`--tc-trace-dasharray: ${dashArray}`);
+			vars.push(`--tc-trace-offset: 5000`);
+			vars.push(`--tc-trace-linecap: round`);
+			if (animation.traceSize !== undefined) {
+				vars.push(`--tc-trace-width: ${animation.traceSize}`);
+			}
+			vars.push(`--tc-trace-opacity: ${animation.traceOpacity ?? 1}`);
+			vars.push(`--tc-trace-color: ${animation.traceColor ?? 'currentColor'}`);
+			vars.push(`--tc-trace-glow-color: ${animation.traceGlowColor ?? animation.traceColor ?? 'currentColor'}`);
+		}
+
 		// Add transform-origin
 		vars.push(`transform-origin: ${effectiveOrigin}`);
 
@@ -108,6 +142,8 @@
 	});
 
 	const isAnimated = $derived(animation && animation.type !== 'none');
+	const traceGlow = $derived(animation?.type === 'trace' ? animation.traceGlow ?? 3 : 3);
+
 </script>
 
 <!--
@@ -122,10 +158,12 @@
 	<!-- Trace: render solid content first, then larger traced version with glow -->
 	<defs>
 		<filter id="trace-glow-{uid}" x="-50%" y="-50%" width="200%" height="200%">
-			<feGaussianBlur stdDeviation="3" result="blur" />
+			<feGaussianBlur stdDeviation={traceGlow} result="blur" />
+			<feFlood flood-color="var(--tc-trace-glow-color, currentColor)" result="glowColor" />
+			<feComposite in="glowColor" in2="blur" operator="in" result="glow" />
 			<feMerge>
-				<feMergeNode in="blur" />
-				<feMergeNode in="blur" />
+				<feMergeNode in="glow" />
+				<feMergeNode in="glow" />
 				<feMergeNode in="SourceGraphic" />
 			</feMerge>
 		</filter>
@@ -134,8 +172,8 @@
 		{@render children()}
 	</g>
 	<g
-		class="tc-animated {animationClass}"
-		style="{styleVars}; transform: scale(1.05); transform-origin: {effectiveOrigin};"
+		class="{animationClass}"
+		style="{styleVars}; fill: none;"
 		filter="url(#trace-glow-{uid})"
 	>
 		{@render children()}

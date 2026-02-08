@@ -4,6 +4,7 @@
 	import {
 		FormSelect,
 		FormFontSelect,
+		FormInput,
 		FormColorPicker,
 		FormSlider,
 		FormCheckbox,
@@ -75,6 +76,28 @@
 
 	// Get fonts for current dataset (brand fonts first, then web-safe by category)
 	const fontOptions = $derived(getAllFontsForDataset(datasetId));
+	const fontWeights = [
+		{ value: 'normal', label: 'Normal' },
+		{ value: 'bold', label: 'Bold' }
+	];
+
+	const fontStyles = [
+		{ value: 'normal', label: 'Normal' },
+		{ value: 'italic', label: 'Italic' }
+	];
+
+	const textDecorations = [
+		{ value: 'none', label: 'None' },
+		{ value: 'underline', label: 'Underline' },
+		{ value: 'line-through', label: 'Strikethrough' }
+	];
+
+	const textTransforms = [
+		{ value: 'none', label: 'None' },
+		{ value: 'uppercase', label: 'Uppercase' },
+		{ value: 'lowercase', label: 'Lowercase' },
+		{ value: 'capitalize', label: 'Capitalize' }
+	];
 
 	function addRow() {
 		const newRow: StatRow = {
@@ -163,18 +186,11 @@
 		</div>
 	</div>
 
-	<FormGrid>
-		<FormColorPicker
-			label="Label Color"
-			value={component.labelColor}
-			onchange={(v) => onUpdate('labelColor', v)}
-		/>
-		<FormColorPicker
-			label="Value Color"
-			value={component.valueColor}
-			onchange={(v) => onUpdate('valueColor', v)}
-		/>
-	</FormGrid>
+	<FormColorPicker
+		label="Text Color"
+		value={component.textColor}
+		onchange={(v) => onUpdate('textColor', v)}
+	/>
 
 	<div class="flex gap-4">
 		<FormCheckbox
@@ -195,6 +211,58 @@
 		onchange={(v) => onUpdate('fontFamily', v)}
 		options={fontOptions}
 	/>
+
+	<div class="rounded border border-input p-2">
+		<label class="text-sm font-medium">Font Size Range</label>
+		<FormGrid class="mt-1">
+			<FormInput
+				label="Min Size"
+				type="number"
+				value={component.minFontSize}
+				onchange={(v) => onUpdate('minFontSize', v)}
+				min={6}
+				max={component.maxFontSize - 1}
+			/>
+			<FormInput
+				label="Max Size"
+				type="number"
+				value={component.maxFontSize}
+				onchange={(v) => onUpdate('maxFontSize', v)}
+				min={component.minFontSize + 1}
+				max={200}
+			/>
+		</FormGrid>
+	</div>
+
+	<FormGrid>
+		<FormSelect
+			label="Weight"
+			value={component.fontWeight}
+			onchange={(v) => onUpdate('fontWeight', v)}
+			options={fontWeights}
+		/>
+		<FormSelect
+			label="Style"
+			value={component.fontStyle ?? 'normal'}
+			onchange={(v) => onUpdate('fontStyle', v)}
+			options={fontStyles}
+		/>
+	</FormGrid>
+
+	<FormGrid>
+		<FormSelect
+			label="Decoration"
+			value={component.textDecoration ?? 'none'}
+			onchange={(v) => onUpdate('textDecoration', v)}
+			options={textDecorations}
+		/>
+		<FormSelect
+			label="Transform"
+			value={component.textTransform ?? 'none'}
+			onchange={(v) => onUpdate('textTransform', v)}
+			options={textTransforms}
+		/>
+	</FormGrid>
 
 	<FormSlider
 		label="Opacity"

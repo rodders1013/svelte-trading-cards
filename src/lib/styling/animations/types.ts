@@ -61,6 +61,15 @@ export const FloatStyle = z.enum([
 ]);
 export type FloatStyle = z.infer<typeof FloatStyle>;
 
+// Trace animation modes
+export const TraceMode = z.enum([
+	'ball', // Single glowing segment
+	'multi-ball', // Multiple glowing segments
+	'line', // Longer line segment
+	'reveal' // Stroke draw/reveal (legacy)
+]);
+export type TraceMode = z.infer<typeof TraceMode>;
+
 // Complete animation configuration
 export const AnimationConfigSchema = z.object({
 	type: AnimationType.default('none'),
@@ -72,6 +81,14 @@ export const AnimationConfigSchema = z.object({
 	floatStyle: FloatStyle.default('gentle'), // Style for float animation
 	floatDistance: z.number().min(1).max(15).default(3), // Float distance in percent
 	floatRotation: z.number().min(0).max(10).default(1), // Float rotation in degrees
+	traceMode: TraceMode.default('ball'),
+	traceSegmentPct: z.number().min(1).max(30).default(4), // Visible segment length as % of path
+	traceCount: z.number().min(1).max(8).default(1), // Number of balls (multi-ball)
+	traceSize: z.number().min(0.5).max(10).optional(), // Stroke width for trace overlay (defaults to inherit)
+	traceOpacity: z.number().min(0).max(1).default(1), // Opacity for trace overlay
+	traceColor: z.string().default('currentColor'), // Color for trace overlay
+	traceGlow: z.number().min(0).max(10).default(3), // Glow blur radius
+	traceGlowColor: z.string().default('currentColor'), // Glow color for trace overlay
 	easing: AnimationEasing.default('ease-in-out'),
 	delay: z.number().min(0).default(0), // Delay in seconds
 	iterationCount: z.union([z.number().min(1), z.literal('infinite')]).default('infinite'),
