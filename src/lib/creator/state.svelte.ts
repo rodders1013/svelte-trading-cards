@@ -191,7 +191,24 @@ const componentBuildConfig: Partial<Record<ComponentItem['type'], ComponentBuild
 	},
 	statpanel: {
 		renderType: 'StatPanel',
-		props: ['rows', 'labelColor', 'valueColor', 'divider', 'dividerColor', 'compact', 'fontFamily', 'labelFontSize', 'valueFontSize', 'barHeight', 'barBackgroundColor', 'barBorderRadius', 'opacity']
+		props: [
+			'rows',
+			'textColor',
+			'divider',
+			'dividerColor',
+			'compact',
+			'fontFamily',
+			'minFontSize',
+			'maxFontSize',
+			'fontWeight',
+			'fontStyle',
+			'textDecoration',
+			'textTransform',
+			'barHeight',
+			'barBackgroundColor',
+			'barBorderRadius',
+			'opacity'
+		]
 	},
 	divider: {
 		renderType: 'Divider',
@@ -401,7 +418,8 @@ export function buildTemplate(templateName: string, containers: ContainerState[]
 			height: container.height,
 			radius: !container.shapeSource ? container.radius : 0,
 			shapeSource: container.shapeSource,
-			clipContent: container.clipContent
+			clipContent: container.clipContent,
+			opacity: container.opacity
 		};
 
 		// Animation is now at the zone/group level
@@ -584,14 +602,17 @@ export function createStatPanelComponent(): StatPanelComponent {
 			{ labelPreset: 'DEFENSE', dataField: 'subtitle', showBar: true, barColor: '#3b82f6', barMax: 100 },
 			{ labelPreset: 'SPEED', dataField: 'category', showBar: true, barColor: '#22c55e', barMax: 100 }
 		],
-		labelColor: '#9ca3af',
-		valueColor: '#ffffff',
+		textColor: '#ffffff',
 		divider: true,
 		dividerColor: '#374151',
 		compact: false,
 		fontFamily: 'Arial, sans-serif',
-		labelFontSize: 12,
-		valueFontSize: 14,
+		minFontSize: 10,
+		maxFontSize: 16,
+		fontWeight: 'normal',
+		fontStyle: 'normal',
+		textDecoration: 'none',
+		textTransform: 'none',
 		barHeight: 6,
 		barBackgroundColor: '#1f2937',
 		barBorderRadius: 3,
@@ -756,6 +777,7 @@ export function createContainer(containerNumber: number): ContainerState {
 		// shapeSource undefined = rect
 		radius: 8,
 		clipContent: true,
+		opacity: 1,
 		components: []
 	};
 }

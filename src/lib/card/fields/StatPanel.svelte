@@ -36,14 +36,17 @@
 
 	export const StatPanelPropsSchema = z.object({
 		rows: z.array(StatRowSchema).default([]),
-		labelColor: z.string().default('#9ca3af'),
-		valueColor: z.string().default('#ffffff'),
+		textColor: z.string().default('#ffffff'),
 		divider: z.boolean().default(true),
 		dividerColor: z.string().default('#374151'),
 		compact: z.boolean().default(false),
 		fontFamily: z.string().default('Arial, sans-serif'),
-		labelFontSize: z.number().default(12),
-		valueFontSize: z.number().default(14),
+		minFontSize: z.number().default(10),
+		maxFontSize: z.number().default(16),
+		fontWeight: z.string().default('normal'),
+		fontStyle: z.enum(['normal', 'italic']).optional(),
+		textDecoration: z.enum(['none', 'underline', 'line-through']).optional(),
+		textTransform: z.enum(['none', 'uppercase', 'lowercase', 'capitalize']).optional(),
 		barHeight: z.number().default(6),
 		barBackgroundColor: z.string().default('#1f2937'),
 		barBorderRadius: z.number().default(3),
@@ -64,14 +67,17 @@
 
 	let {
 		rows = [],
-		labelColor = '#9ca3af',
-		valueColor = '#ffffff',
+		textColor = '#ffffff',
 		divider = true,
 		dividerColor = '#374151',
 		compact = false,
 		fontFamily = 'Arial, sans-serif',
-		labelFontSize = 12,
-		valueFontSize = 14,
+		minFontSize = 10,
+		maxFontSize = 16,
+		fontWeight = 'normal',
+		fontStyle = 'normal',
+		textDecoration = 'none',
+		textTransform = 'none',
 		barHeight = 6,
 		barBackgroundColor = '#1f2937',
 		barBorderRadius = 3,
@@ -132,8 +138,7 @@
 	}
 
 	// When holographic, use 'inherit' for fill colors
-	const effectiveLabelFill = $derived(holographic ? 'inherit' : labelColor);
-	const effectiveValueFill = $derived(holographic ? 'inherit' : valueColor);
+	const effectiveTextFill = $derived(holographic ? 'inherit' : textColor);
 </script>
 
 {#snippet statPanelContent()}
@@ -163,13 +168,16 @@
 				y={y}
 				width={labelWidth}
 				height={textHeight}
-				minSize={6}
-				maxSize={labelFontSize}
+				minSize={minFontSize}
+				maxSize={maxFontSize}
 				{fontFamily}
-				fontWeight="normal"
+				{fontWeight}
+				{fontStyle}
+				{textDecoration}
+				{textTransform}
 				horizontalAlign="left"
 				verticalAlign="center"
-				fill={effectiveLabelFill}
+				fill={effectiveTextFill}
 				singleLine={true}
 			/>
 
@@ -180,13 +188,16 @@
 				y={y}
 				width={valueWidth}
 				height={textHeight}
-				minSize={6}
-				maxSize={valueFontSize}
+				minSize={minFontSize}
+				maxSize={maxFontSize}
 				{fontFamily}
-				fontWeight="bold"
+				{fontWeight}
+				{fontStyle}
+				{textDecoration}
+				{textTransform}
 				horizontalAlign="right"
 				verticalAlign="center"
-				fill={effectiveValueFill}
+				fill={effectiveTextFill}
 				singleLine={true}
 			/>
 

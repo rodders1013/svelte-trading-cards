@@ -28,6 +28,7 @@
 		radius: z.number().default(0),
 		clipContent: z.boolean().default(true),
 		shapeSource: ShapeSourceSchema.optional(),
+		opacity: z.number().min(0).max(1).default(1),
 		animation: AnimationConfigSchema.optional(),
 		blendMode: BlendMode.optional()
 	});
@@ -50,6 +51,7 @@
 		radius = 0,
 		clipContent = true,
 		shapeSource,
+		opacity = 1,
 		animation,
 		blendMode,
 		children,
@@ -119,6 +121,7 @@
 	<g
 		clip-path={useNativeClip ? `url(#${clipId})` : undefined}
 		mask={useMask ? `url(#${maskId})` : undefined}
+		opacity={opacity}
 	>
 		{#if children}
 			{#each children as child (child.id)}

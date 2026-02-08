@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { getAnimationOptions } from '$lib/styling/animations';
+	import { getAnimationOptions, getAnimationMeta } from '$lib/styling/animations';
 	import type {
 		AnimationConfig,
 		AnimationType,
@@ -7,7 +7,8 @@
 		AnimationEasing,
 		AnimationOrigin,
 		PulsePattern,
-		FloatStyle
+		FloatStyle,
+		TraceMode
 	} from '$lib/styling/animations';
 	import * as Select from '$lib/creator/ui/select';
 	import { Checkbox } from '$lib/creator/ui/checkbox';
@@ -60,8 +61,14 @@
 		{ value: 'ease-in-out', label: 'Ease In-Out' }
 	];
 
-	// Animations that use transform-origin (scale/rotate based)
-	const transformAnimations: AnimationType[] = ['spin', 'pulse', 'bounce', 'ping'];
+	const traceModeOptions: { value: TraceMode; label: string }[] = [
+		{ value: 'ball', label: 'Ball' },
+		{ value: 'multi-ball', label: 'Multi-Ball' },
+		{ value: 'line', label: 'Line' },
+		{ value: 'reveal', label: 'Reveal' }
+	];
+
+	const currentMeta = $derived(getAnimationMeta(animation?.type ?? 'none'));
 
 	function handleTypeChange(type: string | undefined) {
 		if (!type || type === 'none') {
@@ -77,6 +84,14 @@
 				floatStyle: animation?.floatStyle ?? 'gentle',
 				floatDistance: animation?.floatDistance ?? 3,
 				floatRotation: animation?.floatRotation ?? 1,
+				traceMode: animation?.traceMode ?? 'ball',
+				traceSegmentPct: animation?.traceSegmentPct ?? 4,
+				traceCount: animation?.traceCount ?? 1,
+				traceSize: animation?.traceSize ?? undefined,
+				traceOpacity: animation?.traceOpacity ?? 1,
+				traceColor: animation?.traceColor ?? 'currentColor',
+				traceGlow: animation?.traceGlow ?? 3,
+				traceGlowColor: animation?.traceGlowColor ?? 'currentColor',
 				easing: animation?.easing ?? 'ease-in-out',
 				delay: animation?.delay ?? 0,
 				iterationCount: animation?.iterationCount ?? 'infinite',
@@ -127,7 +142,7 @@
 	});
 
 	// Check if current animation uses transform-origin
-	const showOrigin = $derived(animation && transformAnimations.includes(animation.type));
+	const showOrigin = $derived(animation && currentMeta.supportsOrigin);
 </script>
 
 <div class="rounded border border-input p-2">
@@ -164,7 +179,7 @@
 				/>
 			</div>
 
-			{#if animation.type === 'spin' || animation.type === 'trace'}
+			{#if currentMeta.supportsDirection}
 				<div>
 					<span class="text-sm text-muted-foreground">Direction</span>
 					<Select.Root type="single" value={animation.direction} onValueChange={(v) => v && updateAnimation('direction', v as AnimationDirection)}>
@@ -196,7 +211,7 @@
 				</div>
 			{/if}
 
-			{#if animation.type === 'pulse'}
+			{#if currentMeta.supportsPulsePattern}
 				<div>
 					<span class="text-sm text-muted-foreground">Pattern</span>
 					<Select.Root type="single" value={animation.pulsePattern} onValueChange={(v) => v && updateAnimation('pulsePattern', v as PulsePattern)}>
@@ -210,24 +225,26 @@
 						</Select.Content>
 					</Select.Root>
 				</div>
-				<div>
-					<div class="flex items-center justify-between">
-						<span class="text-sm text-muted-foreground">Scale</span>
-						<span class="text-sm text-muted-foreground">{Math.round((animation.scale - 1) * 100)}%</span>
+				{#if currentMeta.supportsScale}
+					<div>
+						<div class="flex items-center justify-between">
+							<span class="text-sm text-muted-foreground">Scale</span>
+							<span class="text-sm text-muted-foreground">{Math.round((animation.scale - 1) * 100)}%</span>
+						</div>
+						<Slider
+							type="single"
+							class="mt-2"
+							value={animation.scale}
+							min={1.05}
+							max={2}
+							step={0.05}
+							onValueChange={(v: number) => updateAnimation('scale', v)}
+						/>
 					</div>
-					<Slider
-						type="single"
-						class="mt-2"
-						value={animation.scale}
-						min={1.05}
-						max={2}
-						step={0.05}
-						onValueChange={(v: number) => updateAnimation('scale', v)}
-					/>
-				</div>
+				{/if}
 			{/if}
 
-			{#if animation.type === 'float'}
+			{#if currentMeta.supportsFloatStyle}
 				<div>
 					<span class="text-sm text-muted-foreground">Style</span>
 					<Select.Root type="single" value={animation.floatStyle} onValueChange={(v) => v && updateAnimation('floatStyle', v as FloatStyle)}>
@@ -241,22 +258,24 @@
 						</Select.Content>
 					</Select.Root>
 				</div>
-				<div>
-					<div class="flex items-center justify-between">
-						<span class="text-sm text-muted-foreground">Distance</span>
-						<span class="text-sm text-muted-foreground">{animation.floatDistance}%</span>
+				{#if currentMeta.supportsFloatDistance}
+					<div>
+						<div class="flex items-center justify-between">
+							<span class="text-sm text-muted-foreground">Distance</span>
+							<span class="text-sm text-muted-foreground">{animation.floatDistance}%</span>
+						</div>
+						<Slider
+							type="single"
+							class="mt-2"
+							value={animation.floatDistance}
+							min={1}
+							max={15}
+							step={1}
+							onValueChange={(v: number) => updateAnimation('floatDistance', v)}
+						/>
 					</div>
-					<Slider
-						type="single"
-						class="mt-2"
-						value={animation.floatDistance}
-						min={1}
-						max={15}
-						step={1}
-						onValueChange={(v: number) => updateAnimation('floatDistance', v)}
-					/>
-				</div>
-				{#if animation.floatStyle === 'gentle'}
+				{/if}
+				{#if currentMeta.supportsFloatRotation && animation.floatStyle === 'gentle'}
 					<div>
 						<div class="flex items-center justify-between">
 							<span class="text-sm text-muted-foreground">Rotation</span>
@@ -273,6 +292,150 @@
 						/>
 					</div>
 				{/if}
+			{/if}
+
+			{#if animation.type === 'trace'}
+				<div>
+					<span class="text-sm text-muted-foreground">Mode</span>
+					<Select.Root type="single" value={animation.traceMode} onValueChange={(v) => v && updateAnimation('traceMode', v as TraceMode)}>
+						<Select.Trigger class="mt-1 w-full">
+							{traceModeOptions.find((opt) => opt.value === animation.traceMode)?.label ?? 'Reveal'}
+						</Select.Trigger>
+						<Select.Content>
+							{#each traceModeOptions as opt (opt.value)}
+								<Select.Item value={opt.value} label={opt.label} />
+							{/each}
+						</Select.Content>
+					</Select.Root>
+				</div>
+				<div>
+					<div class="flex items-center justify-between">
+						<span class="text-sm text-muted-foreground">Segment</span>
+						<span class="text-sm text-muted-foreground">{animation.traceSegmentPct}%</span>
+					</div>
+					<Slider
+						type="single"
+						class="mt-2"
+						value={animation.traceSegmentPct}
+						min={1}
+						max={30}
+						step={1}
+						onValueChange={(v: number) => updateAnimation('traceSegmentPct', v)}
+					/>
+				</div>
+				{#if animation.traceMode === 'multi-ball'}
+					<div>
+						<div class="flex items-center justify-between">
+							<span class="text-sm text-muted-foreground">Count</span>
+							<span class="text-sm text-muted-foreground">{animation.traceCount}</span>
+						</div>
+						<Slider
+							type="single"
+							class="mt-2"
+							value={animation.traceCount}
+							min={2}
+							max={8}
+							step={1}
+							onValueChange={(v: number) => updateAnimation('traceCount', v)}
+						/>
+					</div>
+				{/if}
+				<div>
+					<div class="flex items-center justify-between">
+						<span class="text-sm text-muted-foreground">Size</span>
+						<span class="text-sm text-muted-foreground">
+							{animation.traceSize === undefined ? 'Auto' : `${animation.traceSize}px`}
+						</span>
+					</div>
+					<div class="mt-2 flex items-center gap-2">
+						<Checkbox
+							id="trace-size-auto"
+							checked={animation.traceSize === undefined}
+							onCheckedChange={(checked) => {
+								if (checked === true) {
+									updateAnimation('traceSize', undefined);
+								} else {
+									updateAnimation('traceSize', 2);
+								}
+							}}
+						/>
+						<Label for="trace-size-auto" class="text-xs text-muted-foreground">Match stroke</Label>
+					</div>
+					<Slider
+						type="single"
+						class="mt-2"
+						value={animation.traceSize ?? 2}
+						min={0.5}
+						max={10}
+						step={0.5}
+						disabled={animation.traceSize === undefined}
+						onValueChange={(v: number) => updateAnimation('traceSize', v)}
+					/>
+				</div>
+				<div>
+					<div class="flex items-center justify-between">
+						<span class="text-sm text-muted-foreground">Opacity</span>
+						<span class="text-sm text-muted-foreground">{Math.round(animation.traceOpacity * 100)}%</span>
+					</div>
+					<Slider
+						type="single"
+						class="mt-2"
+						value={animation.traceOpacity}
+						min={0}
+						max={1}
+						step={0.05}
+						onValueChange={(v: number) => updateAnimation('traceOpacity', v)}
+					/>
+				</div>
+				<div>
+					<span class="text-sm text-muted-foreground">Color</span>
+					<div class="mt-1 flex items-center gap-2">
+						<input
+							type="color"
+							class="h-8 w-12 rounded border border-input bg-transparent"
+							value={animation.traceColor}
+							oninput={(e) => updateAnimation('traceColor', (e.currentTarget as HTMLInputElement).value)}
+						/>
+						<input
+							type="text"
+							class="flex-1 rounded border border-input bg-background px-2 py-1 text-xs"
+							value={animation.traceColor}
+							oninput={(e) => updateAnimation('traceColor', (e.currentTarget as HTMLInputElement).value)}
+						/>
+					</div>
+				</div>
+				<div>
+					<span class="text-sm text-muted-foreground">Glow Color</span>
+					<div class="mt-1 flex items-center gap-2">
+						<input
+							type="color"
+							class="h-8 w-12 rounded border border-input bg-transparent"
+							value={animation.traceGlowColor}
+							oninput={(e) => updateAnimation('traceGlowColor', (e.currentTarget as HTMLInputElement).value)}
+						/>
+						<input
+							type="text"
+							class="flex-1 rounded border border-input bg-background px-2 py-1 text-xs"
+							value={animation.traceGlowColor}
+							oninput={(e) => updateAnimation('traceGlowColor', (e.currentTarget as HTMLInputElement).value)}
+						/>
+					</div>
+				</div>
+				<div>
+					<div class="flex items-center justify-between">
+						<span class="text-sm text-muted-foreground">Glow</span>
+						<span class="text-sm text-muted-foreground">{animation.traceGlow.toFixed(1)}</span>
+					</div>
+					<Slider
+						type="single"
+						class="mt-2"
+						value={animation.traceGlow}
+						min={0}
+						max={10}
+						step={0.5}
+						onValueChange={(v: number) => updateAnimation('traceGlow', v)}
+					/>
+				</div>
 			{/if}
 
 			<div>
