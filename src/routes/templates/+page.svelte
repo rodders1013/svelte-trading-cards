@@ -75,6 +75,7 @@
 		const params = new URLSearchParams({ template: template.slug });
 		const dataset = datasetFromGameKey(template.gameKey);
 		if (dataset) params.set('dataset', dataset);
+		if (template.gameKey) params.set('gameKey', template.gameKey);
 		return `/gallery?${params.toString()}`;
 	}
 
@@ -82,6 +83,7 @@
 		const params = new URLSearchParams({ template: template.slug });
 		const dataset = datasetFromGameKey(template.gameKey);
 		if (dataset) params.set('dataset', dataset);
+		if (template.gameKey) params.set('gameKey', template.gameKey);
 		return `/creator?${params.toString()}`;
 	}
 

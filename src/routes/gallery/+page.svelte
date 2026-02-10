@@ -54,6 +54,7 @@
 
 	// Data selection
 	let selectedDataset = $state<'xbox' | 'playstation' | 'steam'>('playstation');
+	let selectedGameTitle = $state<string | null>(null);
 
 	// Rarity selection
 	let selectedRarity = $state<Rarity>('rare');
@@ -63,7 +64,13 @@
 	let useDisplayEffects = $state(true);
 
 	const currentDataset = $derived(datasets[selectedDataset]);
-	const cards = $derived(currentDataset.cards as AnyCard[]);
+	const cards = $derived.by(() => {
+		const allCards = currentDataset.cards as AnyCard[];
+		if (!selectedGameTitle) return allCards;
+		const gameTitle = selectedGameTitle;
+		const match = allCards.find((card) => getCardTitle(card).toLowerCase() === gameTitle.toLowerCase());
+		return match ? [match] : allCards;
+	});
 
 	// Template state
 	let loadedTemplate = $state<CardTemplate | null>(null);
@@ -104,6 +111,18 @@
 		return card.category; // PlayStation
 	}
 
+	function splitGameKey(gameKey: string | null): { dataset: 'xbox' | 'playstation' | 'steam' | null; title: string | null } {
+		if (!gameKey) return { dataset: null, title: null };
+		const [left, ...rest] = gameKey.split(':');
+		if ((left === 'xbox' || left === 'playstation' || left === 'steam') && rest.length > 0) {
+			return { dataset: left, title: rest.join(':') };
+		}
+		if (left === 'xbox' || left === 'playstation' || left === 'steam') {
+			return { dataset: left, title: null };
+		}
+		return { dataset: null, title: gameKey };
+	}
+
 	// Load template from file
 	function loadTemplate(event: Event) {
 		const input = event.target as HTMLInputElement;
@@ -138,9 +157,17 @@
 		const params = new URLSearchParams(window.location.search);
 		const templateSlug = params.get('template');
 		const datasetParam = params.get('dataset');
+		const gameKeyParam = params.get('gameKey');
+		const parsedParamGame = splitGameKey(gameKeyParam);
 
 		if (datasetParam && ['xbox', 'playstation', 'steam'].includes(datasetParam)) {
 			selectedDataset = datasetParam as 'xbox' | 'playstation' | 'steam';
+		}
+		if (parsedParamGame.dataset) {
+			selectedDataset = parsedParamGame.dataset;
+		}
+		if (parsedParamGame.title) {
+			selectedGameTitle = parsedParamGame.title;
 		}
 
 		if (!templateSlug) return;
@@ -152,12 +179,16 @@
 			if (remote?.template) {
 				loadedTemplate = remote.template as CardTemplate;
 				templateName = remote.name ?? templateSlug;
+				const remoteGame = splitGameKey(typeof remote.gameKey === 'string' ? remote.gameKey : null);
 				if (
 					!datasetParam &&
-					typeof remote.gameKey === 'string' &&
-					['xbox', 'playstation', 'steam'].includes(remote.gameKey)
+					!parsedParamGame.dataset &&
+					remoteGame.dataset
 				) {
-					selectedDataset = remote.gameKey as 'xbox' | 'playstation' | 'steam';
+					selectedDataset = remoteGame.dataset;
+				}
+				if (!parsedParamGame.title && remoteGame.title) {
+					selectedGameTitle = remoteGame.title;
 				}
 			}
 		} catch {

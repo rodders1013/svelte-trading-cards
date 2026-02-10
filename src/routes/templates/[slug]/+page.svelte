@@ -56,6 +56,7 @@
 		const params = new URLSearchParams({ template: data.template.slug });
 		const dataset = splitGameKey(data.template.gameKey).dataset;
 		if (dataset) params.set('dataset', dataset);
+		if (data.template.gameKey) params.set('gameKey', data.template.gameKey);
 		return `/creator?${params.toString()}`;
 	}
 
@@ -63,6 +64,7 @@
 		const params = new URLSearchParams({ template: data.template.slug });
 		const dataset = splitGameKey(data.template.gameKey).dataset;
 		if (dataset) params.set('dataset', dataset);
+		if (data.template.gameKey) params.set('gameKey', data.template.gameKey);
 		return `/gallery?${params.toString()}`;
 	}
 

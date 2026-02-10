@@ -33,7 +33,7 @@
 		templateName = '',
 		hasDraft = false,
 		lastSaved = null as Date | null,
-		previewMode = $bindable<'fields' | 'data'>('fields'),
+		previewMode = $bindable<'fields' | 'data'>('data'),
 		datasets = [],
 		selectedDataset = $bindable(''),
 		selectedCardIndex = $bindable(0),
@@ -136,22 +136,22 @@
 			<span class="hidden text-xs text-muted-foreground lg:inline">Preview:</span>
 			<div class="flex">
 				<Button
-					variant={previewMode === 'fields' ? 'default' : 'outline'}
-					size="sm"
-					class="rounded-r-none px-2 sm:px-3"
-					onclick={() => (previewMode = 'fields')}
-					title="Show field placeholders"
-				>
-					Fields
-				</Button>
-				<Button
 					variant={previewMode === 'data' ? 'default' : 'outline'}
 					size="sm"
-					class="rounded-l-none border-l-0 px-2 sm:px-3"
+					class="rounded-r-none px-2 sm:px-3"
 					onclick={() => (previewMode = 'data')}
 					title="Show sample data"
 				>
 					Data
+				</Button>
+				<Button
+					variant={previewMode === 'fields' ? 'default' : 'outline'}
+					size="sm"
+					class="rounded-l-none border-l-0 px-2 sm:px-3"
+					onclick={() => (previewMode = 'fields')}
+					title="Show field placeholders"
+				>
+					Fields
 				</Button>
 			</div>
 		</div>

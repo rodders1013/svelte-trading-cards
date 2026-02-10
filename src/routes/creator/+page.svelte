@@ -85,6 +85,7 @@
 <CardCreator
 	datasets={creatorDatasets}
 	initialDataset={data.initialDataset}
+	initialCardIndex={data.initialCardIndex}
 	initialTemplate={data.initialTemplate as ContainerState[] | undefined}
 	initialTemplateName={data.initialTemplateName}
 	onSave={handleSave}

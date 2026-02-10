@@ -77,6 +77,8 @@ import { extractFontsFromCard, loadGoogleFonts } from '$lib/fonts';
 		datasets: Record<string, Dataset>;
 		/** Initial dataset to use */
 		initialDataset?: string;
+		/** Initial card index for selected dataset */
+		initialCardIndex?: number;
 		/** Initial template to load (editor state) */
 		initialTemplate?: ContainerState[];
 		/** Initial template name */
@@ -106,6 +108,7 @@ import { extractFontsFromCard, loadGoogleFonts } from '$lib/fonts';
 	let {
 		datasets,
 		initialDataset,
+		initialCardIndex = 0,
 		initialTemplate,
 		initialTemplateName = 'New Template',
 		isEditing = false,
@@ -148,7 +151,7 @@ import { extractFontsFromCard, loadGoogleFonts } from '$lib/fonts';
 	let templateGameKey = $state('');
 	let containers = $state<ContainerState[]>(initialTemplate ?? [createInitialCardBackground()]);
 	let selectedContainerId = $state<string | null>(containers[0]?.id ?? null);
-	let previewMode = $state<'fields' | 'data'>('fields');
+	let previewMode = $state<'fields' | 'data'>('data');
 
 	// Display settings (for Card component when viewing)
 	import type { Rarity } from '$lib/display';
@@ -175,8 +178,13 @@ import { extractFontsFromCard, loadGoogleFonts } from '$lib/fonts';
 
 	// Preview data
 	const datasetKeys = $derived(Object.keys(datasets));
-	let selectedDataset = $state(initialDataset ?? datasetKeys[0] ?? '');
-	let selectedCardIndex = $state(0);
+	const defaultDataset = Object.prototype.hasOwnProperty.call(datasets, 'playstation')
+		? 'playstation'
+		: (Object.keys(datasets)[0] ?? '');
+	let selectedDataset = $state(
+		initialDataset ?? defaultDataset
+	);
+	let selectedCardIndex = $state(initialCardIndex);
 	const currentDataset = $derived(datasets[selectedDataset]);
 	const currentCard = $derived(currentDataset?.cards[selectedCardIndex] as Record<string, unknown> | undefined);
 	const currentDataFields = $derived(currentDataset?.dataFields ?? []);
@@ -199,6 +207,12 @@ import { extractFontsFromCard, loadGoogleFonts } from '$lib/fonts';
 			name: getCardDisplayName(card as Record<string, unknown>)
 		})) ?? []
 	);
+
+	$effect(() => {
+		const maxIndex = Math.max((currentDataset?.cards.length ?? 1) - 1, 0);
+		if (selectedCardIndex < 0) selectedCardIndex = 0;
+		else if (selectedCardIndex > maxIndex) selectedCardIndex = maxIndex;
+	});
 	const templateGameOptions = $derived.by(() => {
 		const options: Array<{ value: string; label: string }> = [];
 		for (const key of datasetKeys) {
