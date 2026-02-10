@@ -84,7 +84,15 @@ import { extractFontsFromCard, loadGoogleFonts } from '$lib/fonts';
 		/** Whether we're editing an existing template (shows "Save as New" option) */
 		isEditing?: boolean;
 		/** Callback when template is saved */
-		onSave?: (data: { template: CardTemplate; editorState: ContainerState[]; name: string; saveAsNew: boolean }) => void;
+		onSave?: (data: {
+			template: CardTemplate;
+			editorState: ContainerState[];
+			name: string;
+			username: string;
+			scope: 'universal' | 'game';
+			gameKey?: string;
+			saveAsNew: boolean;
+		}) => void;
 		/** Callback when template changes */
 		onChange?: (data: { template: CardTemplate; editorState: ContainerState[] }) => void;
 		/** Custom load template handler - if provided, called instead of file picker */
@@ -135,6 +143,9 @@ import { extractFontsFromCard, loadGoogleFonts } from '$lib/fonts';
 
 	// Template state
 	let templateName = $state(initialTemplateName);
+	let templateUsername = $state('anonymous');
+	let templateScope = $state<'universal' | 'game'>('universal');
+	let templateGameKey = $state('');
 	let containers = $state<ContainerState[]>(initialTemplate ?? [createInitialCardBackground()]);
 	let selectedContainerId = $state<string | null>(containers[0]?.id ?? null);
 	let previewMode = $state<'fields' | 'data'>('fields');
@@ -1100,13 +1111,19 @@ import { extractFontsFromCard, loadGoogleFonts } from '$lib/fonts';
 		showSaveDialog = true;
 	}
 
-	function handleSave(name: string) {
+	function handleSave(name: string, username: string, scope: 'universal' | 'game', gameKey?: string) {
 		templateName = name;
+		templateUsername = username;
+		templateScope = scope;
+		templateGameKey = scope === 'game' ? (gameKey ?? '') : '';
 		if (onSave) {
 			onSave({
 				template,
 				editorState: containers,
 				name,
+				username,
+				scope,
+				gameKey,
 				saveAsNew: false
 			});
 		} else {
@@ -1116,14 +1133,20 @@ import { extractFontsFromCard, loadGoogleFonts } from '$lib/fonts';
 		clearDraft();
 	}
 
-	function handleSaveAsNew(name: string) {
+	function handleSaveAsNew(name: string, username: string, scope: 'universal' | 'game', gameKey?: string) {
 		templateName = name;
+		templateUsername = username;
+		templateScope = scope;
+		templateGameKey = scope === 'game' ? (gameKey ?? '') : '';
 		currentIsEditing = false; // Now editing the new template
 		if (onSave) {
 			onSave({
 				template,
 				editorState: containers,
 				name,
+				username,
+				scope,
+				gameKey,
 				saveAsNew: true
 			});
 		} else {
@@ -1804,6 +1827,9 @@ import { extractFontsFromCard, loadGoogleFonts } from '$lib/fonts';
 <SaveDialog
 	bind:open={showSaveDialog}
 	bind:templateName
+	bind:username={templateUsername}
+	bind:scope={templateScope}
+	bind:gameKey={templateGameKey}
 	isEditing={currentIsEditing}
 	onSave={handleSave}
 	onSaveAsNew={handleSaveAsNew}

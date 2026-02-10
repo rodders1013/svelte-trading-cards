@@ -10,6 +10,9 @@
 	let {
 		open = $bindable(false),
 		templateName = $bindable(''),
+		username = $bindable(''),
+		scope = $bindable<'universal' | 'game'>('universal'),
+		gameKey = $bindable(''),
 		isEditing = false,
 		onSave,
 		onSaveAsNew,
@@ -17,30 +20,47 @@
 	}: {
 		open: boolean;
 		templateName: string;
+		username: string;
+		scope: 'universal' | 'game';
+		gameKey: string;
 		isEditing?: boolean;
-		onSave: (name: string) => void;
-		onSaveAsNew: (name: string) => void;
+		onSave: (name: string, username: string, scope: 'universal' | 'game', gameKey?: string) => void;
+		onSaveAsNew: (name: string, username: string, scope: 'universal' | 'game', gameKey?: string) => void;
 		onDownload: (name: string) => void;
 	} = $props();
 
 	let nameInput = $state('');
+	let usernameInput = $state('');
 
 	// Reset name input when dialog opens
 	$effect(() => {
 		if (open) {
 			nameInput = templateName || 'New Template';
+			usernameInput = username || '';
 		}
 	});
 
 	function handleSave() {
-		if (!nameInput.trim()) return;
-		onSave(nameInput.trim());
+		if (!nameInput.trim() || !usernameInput.trim()) return;
+		username = usernameInput.trim();
+		onSave(
+			nameInput.trim(),
+			username,
+			scope,
+			scope === 'game' ? gameKey.trim() || undefined : undefined
+		);
 		open = false;
 	}
 
 	function handleSaveAsNew() {
-		if (!nameInput.trim()) return;
-		onSaveAsNew(nameInput.trim());
+		if (!nameInput.trim() || !usernameInput.trim()) return;
+		username = usernameInput.trim();
+		onSaveAsNew(
+			nameInput.trim(),
+			username,
+			scope,
+			scope === 'game' ? gameKey.trim() || undefined : undefined
+		);
 		open = false;
 	}
 
@@ -81,6 +101,35 @@
 					autofocus
 				/>
 			</div>
+			<div class="space-y-2">
+				<Label for="template-username">Username</Label>
+				<Input
+					id="template-username"
+					bind:value={usernameInput}
+					placeholder="Your display name"
+				/>
+			</div>
+			<div class="space-y-2">
+				<Label for="template-scope">Template Scope</Label>
+				<select
+					id="template-scope"
+					class="w-full rounded border border-input bg-background px-3 py-2 text-sm"
+					bind:value={scope}
+				>
+					<option value="universal">Universal (all datasets)</option>
+					<option value="game">Game-specific</option>
+				</select>
+			</div>
+			{#if scope === 'game'}
+				<div class="space-y-2">
+					<Label for="template-game-key">Game / Dataset Key</Label>
+					<Input
+						id="template-game-key"
+						bind:value={gameKey}
+						placeholder="playstation, xbox, steam, etc"
+					/>
+				</div>
+			{/if}
 		</div>
 
 		<div class="rounded-md border border-input bg-muted/20 p-3">

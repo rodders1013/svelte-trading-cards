@@ -585,6 +585,7 @@ Run the template table migration:
 
 ```bash
 psql "$DATABASE_URL" -f project-files/migrations/001_templates.sql
+psql "$DATABASE_URL" -f project-files/migrations/002_template_metadata.sql
 ```
 
 Template APIs:

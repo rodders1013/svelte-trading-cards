@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { onMount } from 'svelte';
 	import {
 		CardCanvas,
 		registerComponent,
@@ -132,6 +133,37 @@
 		loadedTemplate = null;
 		templateName = 'No template loaded';
 	}
+
+	onMount(async () => {
+		const params = new URLSearchParams(window.location.search);
+		const templateSlug = params.get('template');
+		const datasetParam = params.get('dataset');
+
+		if (datasetParam && ['xbox', 'playstation', 'steam'].includes(datasetParam)) {
+			selectedDataset = datasetParam as 'xbox' | 'playstation' | 'steam';
+		}
+
+		if (!templateSlug) return;
+
+		try {
+			const response = await fetch(`/api/templates/${templateSlug}`);
+			if (!response.ok) return;
+			const remote = await response.json();
+			if (remote?.template) {
+				loadedTemplate = remote.template as CardTemplate;
+				templateName = remote.name ?? templateSlug;
+				if (
+					!datasetParam &&
+					typeof remote.gameKey === 'string' &&
+					['xbox', 'playstation', 'steam'].includes(remote.gameKey)
+				) {
+					selectedDataset = remote.gameKey as 'xbox' | 'playstation' | 'steam';
+				}
+			}
+		} catch {
+			// Keep manual JSON loading flow as fallback.
+		}
+	});
 
 	// Get SVG element by card ID from DOM
 	function getSvgElement(cardId: string): SVGSVGElement | null {

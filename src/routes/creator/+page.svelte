@@ -1,7 +1,11 @@
 <script lang="ts">
+	import type { PageData } from './$types';
 	import { CardCreator } from '$lib/creator';
+	import type { ContainerState } from '$lib/creator';
 	import { FontLoader } from '$lib/fonts';
 	import { datasets } from '$lib/demo';
+
+	let { data }: { data: PageData } = $props();
 
 	// Convert datasets to the format expected by CardCreator
 	const creatorDatasets = Object.fromEntries(
@@ -16,11 +20,23 @@
 		])
 	);
 
-	async function handleSave(data: { template: unknown; editorState: unknown; name: string }) {
+	async function handleSave(payloadData: {
+		template: unknown;
+		editorState: unknown;
+		name: string;
+		username: string;
+		scope: 'universal' | 'game';
+		gameKey?: string;
+		saveAsNew?: boolean;
+	}) {
 		const payload = {
-			name: data.name,
+			name: payloadData.name,
 			description: 'Created in card creator',
-			template: data.template,
+			username: payloadData.username,
+			scope: payloadData.scope,
+			gameKey: payloadData.gameKey,
+			template: payloadData.template,
+			editorState: payloadData.editorState,
 			isPublic: true,
 			tags: ['creator']
 		};
@@ -42,17 +58,20 @@
 			// Fallback behavior: download as JSON
 			const savedTemplate = {
 				id: `template-${Date.now()}`,
-				name: data.name,
+				name: payloadData.name,
 				createdAt: new Date().toISOString(),
 				updatedAt: new Date().toISOString(),
-				template: data.template,
-				editorState: data.editorState
+				username: payloadData.username,
+				scope: payloadData.scope,
+				gameKey: payloadData.gameKey,
+				template: payloadData.template,
+				editorState: payloadData.editorState
 			};
 			const blob = new Blob([JSON.stringify(savedTemplate, null, '\t')], { type: 'application/json' });
 			const url = URL.createObjectURL(blob);
 			const a = document.createElement('a');
 			a.href = url;
-			a.download = `${data.name.toLowerCase().replace(/\s+/g, '-')}.json`;
+			a.download = `${payloadData.name.toLowerCase().replace(/\s+/g, '-')}.json`;
 			a.click();
 			URL.revokeObjectURL(url);
 			alert('Database save unavailable, downloaded JSON instead.');
@@ -65,6 +84,8 @@
 
 <CardCreator
 	datasets={creatorDatasets}
-	initialDataset="xbox"
+	initialDataset={data.initialDataset}
+	initialTemplate={data.initialTemplate as ContainerState[] | undefined}
+	initialTemplateName={data.initialTemplateName}
 	onSave={handleSave}
 />
