@@ -44,8 +44,8 @@
 <Dialog.Root bind:open={show}>
 	<Dialog.Content class="max-w-md">
 		<Dialog.Header>
-			<Dialog.Title>Export Card</Dialog.Title>
-			<Dialog.Description>Choose format and bleed options for your card.</Dialog.Description>
+			<Dialog.Title>Download Card</Dialog.Title>
+			<Dialog.Description>Choose format and print options for your card.</Dialog.Description>
 		</Dialog.Header>
 
 		<div class="space-y-4 py-4">
@@ -58,14 +58,14 @@
 						onclick={() => format = 'png'}
 					>
 						<FileImage class="h-5 w-5" />
-						PNG
+						PNG (Client)
 					</button>
 					<button
 						class="flex items-center justify-center gap-2 rounded-lg border-2 px-4 py-3 text-sm font-medium transition-colors {format === 'svg' ? 'border-primary bg-primary/10 text-primary' : 'border-border hover:border-muted-foreground/50'}"
 						onclick={() => format = 'svg'}
 					>
 						<FileCode class="h-5 w-5" />
-						SVG
+						SVG (Client)
 					</button>
 				</div>
 			</div>
@@ -114,7 +114,7 @@
 			<Button variant="outline" onclick={() => show = false}>Cancel</Button>
 			<Button onclick={handleExport} class="gap-2">
 				<Download class="h-4 w-4" />
-				Export {format.toUpperCase()}
+				Download {format.toUpperCase()}
 			</Button>
 		</Dialog.Footer>
 	</Dialog.Content>

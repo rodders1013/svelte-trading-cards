@@ -5,19 +5,22 @@
 	import { Label } from '$lib/creator/ui/label';
 	import Save from '@lucide/svelte/icons/save';
 	import FilePlus from '@lucide/svelte/icons/file-plus';
+	import Download from '@lucide/svelte/icons/download';
 
 	let {
 		open = $bindable(false),
 		templateName = $bindable(''),
 		isEditing = false,
 		onSave,
-		onSaveAsNew
+		onSaveAsNew,
+		onDownload
 	}: {
 		open: boolean;
 		templateName: string;
 		isEditing?: boolean;
 		onSave: (name: string) => void;
 		onSaveAsNew: (name: string) => void;
+		onDownload: (name: string) => void;
 	} = $props();
 
 	let nameInput = $state('');
@@ -41,6 +44,11 @@
 		open = false;
 	}
 
+	function handleDownload() {
+		if (!nameInput.trim()) return;
+		onDownload(nameInput.trim());
+	}
+
 	function handleKeydown(e: KeyboardEvent) {
 		if (e.key === 'Enter') {
 			e.preventDefault();
@@ -55,9 +63,9 @@
 			<Dialog.Title>Save Template</Dialog.Title>
 			<Dialog.Description>
 				{#if isEditing}
-					Update the existing template or save as a new one
+					Update this template or save a new community version
 				{:else}
-					Enter a name for your template
+					Publish to community and/or download a JSON backup
 				{/if}
 			</Dialog.Description>
 		</Dialog.Header>
@@ -75,15 +83,28 @@
 			</div>
 		</div>
 
+		<div class="rounded-md border border-input bg-muted/20 p-3">
+			<div class="flex items-start justify-between gap-2">
+				<div>
+					<p class="text-sm font-medium">Backup</p>
+					<p class="text-xs text-muted-foreground">Download template JSON so you always keep a local copy.</p>
+				</div>
+				<Button variant="outline" onclick={handleDownload} class="gap-2">
+					<Download class="h-4 w-4" />
+					Download JSON
+				</Button>
+			</div>
+		</div>
+
 		<Dialog.Footer class="flex-col gap-2 sm:flex-row">
 			{#if isEditing}
 				<Button variant="outline" onclick={handleSaveAsNew} class="w-full gap-2 sm:w-auto">
 					<FilePlus class="h-4 w-4" />
-					Save as New
+					Save as New Community Template
 				</Button>
 				<Button onclick={handleSave} class="w-full gap-2 sm:w-auto">
 					<Save class="h-4 w-4" />
-					Update
+					Update Community Template
 				</Button>
 			{:else}
 				<Button variant="outline" onclick={() => open = false} class="w-full sm:w-auto">
@@ -91,7 +112,7 @@
 				</Button>
 				<Button onclick={handleSave} class="w-full gap-2 sm:w-auto">
 					<Save class="h-4 w-4" />
-					Save
+					Save to Community
 				</Button>
 			{/if}
 		</Dialog.Footer>

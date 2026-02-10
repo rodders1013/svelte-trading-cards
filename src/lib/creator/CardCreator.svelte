@@ -1807,4 +1807,5 @@ import { extractFontsFromCard, loadGoogleFonts } from '$lib/fonts';
 	isEditing={currentIsEditing}
 	onSave={handleSave}
 	onSaveAsNew={handleSaveAsNew}
+	onDownload={downloadTemplate}
 />

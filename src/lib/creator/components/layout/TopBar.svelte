@@ -90,12 +90,12 @@
 			</Button>
 			<Button size="sm" onclick={onSaveTemplate} class="gap-1.5 px-2 sm:px-3">
 				<Save class="h-4 w-4" />
-				<span class="hidden sm:inline">Save</span>
+				<span class="hidden sm:inline">Save Template</span>
 			</Button>
 			{#if onExport}
 				<Button size="sm" variant="outline" onclick={onExport} class="gap-1.5 px-2 sm:px-3">
 					<Download class="h-4 w-4" />
-					<span class="hidden sm:inline">Export</span>
+					<span class="hidden sm:inline">Download</span>
 				</Button>
 			{/if}
 		</div>
