@@ -136,11 +136,11 @@
 		</div>
 	</div>
 
-	<div class="grid gap-4 lg:grid-cols-[380px_minmax(0,700px)] lg:justify-start">
+	<div class="grid gap-4 xl:grid-cols-[560px_minmax(0,520px)] xl:justify-start">
 		<div class="rounded border border-input bg-card p-4">
 			<h2 class="mb-2 text-sm font-medium">Preview Card</h2>
 			<div
-				class="mx-auto w-[260px] rounded border border-input bg-muted/10 p-2 [&_svg]:h-auto [&_svg]:w-full"
+				class="mx-auto w-full max-w-[520px] rounded border border-input bg-muted/10 p-2 [&_svg]:h-auto [&_svg]:w-full"
 			>
 				<CardCanvas
 					template={data.template.template as CardTemplate}
