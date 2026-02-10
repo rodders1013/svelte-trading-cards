@@ -199,6 +199,21 @@ import { extractFontsFromCard, loadGoogleFonts } from '$lib/fonts';
 			name: getCardDisplayName(card as Record<string, unknown>)
 		})) ?? []
 	);
+	const templateGameOptions = $derived.by(() => {
+		const options: Array<{ value: string; label: string }> = [];
+		for (const key of datasetKeys) {
+			const dataset = datasets[key];
+			for (const card of dataset.cards) {
+				const title = getCardDisplayName(card as Record<string, unknown>);
+				const value = `${key}:${title}`;
+				options.push({
+					value,
+					label: `${dataset.name} - ${title}`
+				});
+			}
+		}
+		return options;
+	});
 
 	// Field remapping state
 	let showRemapDialog = $state(false);
@@ -1108,6 +1123,12 @@ import { extractFontsFromCard, loadGoogleFonts } from '$lib/fonts';
 	// =============================================================================
 
 	function openSaveDialog() {
+		if (templateScope === 'game' && !templateGameKey) {
+			const activeCardName = currentCard ? getCardDisplayName(currentCard) : '';
+			const activeValue = activeCardName ? `${selectedDataset}:${activeCardName}` : '';
+			const hasActive = activeValue && templateGameOptions.some(option => option.value === activeValue);
+			templateGameKey = hasActive ? activeValue : (templateGameOptions[0]?.value ?? '');
+		}
 		showSaveDialog = true;
 	}
 
@@ -1830,6 +1851,7 @@ import { extractFontsFromCard, loadGoogleFonts } from '$lib/fonts';
 	bind:username={templateUsername}
 	bind:scope={templateScope}
 	bind:gameKey={templateGameKey}
+	gameOptions={templateGameOptions}
 	isEditing={currentIsEditing}
 	onSave={handleSave}
 	onSaveAsNew={handleSaveAsNew}

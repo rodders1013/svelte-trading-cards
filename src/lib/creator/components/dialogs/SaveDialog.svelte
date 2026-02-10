@@ -13,6 +13,7 @@
 		username = $bindable(''),
 		scope = $bindable<'universal' | 'game'>('universal'),
 		gameKey = $bindable(''),
+		gameOptions = [],
 		isEditing = false,
 		onSave,
 		onSaveAsNew,
@@ -23,6 +24,7 @@
 		username: string;
 		scope: 'universal' | 'game';
 		gameKey: string;
+		gameOptions: Array<{ value: string; label: string }>;
 		isEditing?: boolean;
 		onSave: (name: string, username: string, scope: 'universal' | 'game', gameKey?: string) => void;
 		onSaveAsNew: (name: string, username: string, scope: 'universal' | 'game', gameKey?: string) => void;
@@ -37,11 +39,21 @@
 		if (open) {
 			nameInput = templateName || 'New Template';
 			usernameInput = username || '';
+			if (scope === 'game' && !gameKey && gameOptions.length > 0) {
+				gameKey = gameOptions[0].value;
+			}
+		}
+	});
+
+	$effect(() => {
+		if (open && scope === 'game' && !gameKey && gameOptions.length > 0) {
+			gameKey = gameOptions[0].value;
 		}
 	});
 
 	function handleSave() {
 		if (!nameInput.trim() || !usernameInput.trim()) return;
+		if (scope === 'game' && !gameKey.trim()) return;
 		username = usernameInput.trim();
 		onSave(
 			nameInput.trim(),
@@ -54,6 +66,7 @@
 
 	function handleSaveAsNew() {
 		if (!nameInput.trim() || !usernameInput.trim()) return;
+		if (scope === 'game' && !gameKey.trim()) return;
 		username = usernameInput.trim();
 		onSaveAsNew(
 			nameInput.trim(),
@@ -123,11 +136,16 @@
 			{#if scope === 'game'}
 				<div class="space-y-2">
 					<Label for="template-game-key">Game / Dataset Key</Label>
-					<Input
+					<select
 						id="template-game-key"
+						class="w-full rounded border border-input bg-background px-3 py-2 text-sm"
 						bind:value={gameKey}
-						placeholder="playstation, xbox, steam, etc"
-					/>
+					>
+						<option value="">Select game</option>
+						{#each gameOptions as option (option.value)}
+							<option value={option.value}>{option.label}</option>
+						{/each}
+					</select>
 				</div>
 			{/if}
 		</div>

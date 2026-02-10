@@ -9,7 +9,8 @@
 	const navItems = [
 		{ href: '/', label: 'Home' },
 		{ href: '/creator', label: 'Creator' },
-		{ href: '/gallery', label: 'Gallery' }
+		{ href: '/gallery', label: 'Gallery' },
+		{ href: '/templates', label: 'Templates' }
 	];
 </script>
 

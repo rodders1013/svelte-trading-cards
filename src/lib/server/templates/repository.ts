@@ -84,6 +84,7 @@ export interface TemplateSummary {
 	username: string;
 	scope: TemplateScope;
 	gameKey: string | null;
+	template: CardTemplate;
 	tags: string[];
 	previewImageUrl: string | null;
 	updatedAt: string;
@@ -130,6 +131,7 @@ function toTemplateSummary(row: Record<string, unknown>): TemplateSummary {
 		username: row.username ? String(row.username) : 'anonymous',
 		scope: row.scope === 'game' ? 'game' : 'universal',
 		gameKey: row.game_key ? String(row.game_key) : null,
+		template: parseTemplateJson(row.template_json),
 		tags: Array.isArray(row.tags) ? row.tags.map(String) : [],
 		previewImageUrl: row.preview_image_url ? String(row.preview_image_url) : null,
 		createdAt: new Date(String(row.created_at)).toISOString(),
@@ -205,6 +207,7 @@ function baseTemplateSummarySelection() {
 			username,
 			scope,
 			game_key,
+			template_json,
 			preview_image_url,
 			tags,
 			created_at,
