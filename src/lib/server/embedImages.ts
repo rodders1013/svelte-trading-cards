@@ -6,6 +6,10 @@
  */
 
 import sharp from 'sharp';
+import {
+	isExternalImagesEnabled,
+	stripExternalImageReferences
+} from '$lib/security/externalImages.js';
 
 export interface EmbedOptions {
 	/** Maximum concurrent image fetches. Defaults to 3 */
@@ -165,6 +169,10 @@ async function processWithConcurrency<T, R>(
  * ```
  */
 export async function embedImages(svgString: string, options: EmbedOptions = {}): Promise<string> {
+	if (!isExternalImagesEnabled()) {
+		return stripExternalImageReferences(svgString);
+	}
+
 	const { concurrency = 3, timeout = 10000, throwOnError = false } = options;
 
 	const imageMatches = findImageReferences(svgString);

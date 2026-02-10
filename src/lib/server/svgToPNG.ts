@@ -5,7 +5,7 @@
  * server-side SVG rendering.
  */
 
-import { CARD_WIDTH, CARD_HEIGHT } from '../types/CardTemplate.js';
+import { CARD_WIDTH } from '../types/CardTemplate.js';
 
 /** Maximum SVG string size (5MB) */
 const MAX_SVG_SIZE = 5 * 1024 * 1024;
@@ -16,8 +16,6 @@ const MAX_GROUP_COUNT = 1000;
 export interface PNGOptions {
 	/** Output width in pixels. Defaults to CARD_WIDTH (750) */
 	width?: number;
-	/** Output height in pixels. Defaults to CARD_HEIGHT (1050) */
-	height?: number;
 	/** Background color (CSS color string). Defaults to transparent */
 	backgroundColor?: string;
 	/** Skip size/complexity validation (use with caution) */
@@ -85,7 +83,7 @@ export interface PNGResult {
  * ```
  */
 export async function svgToPNG(svgString: string, options: PNGOptions = {}): Promise<PNGResult> {
-	const { width = CARD_WIDTH, height = CARD_HEIGHT, backgroundColor, skipValidation = false } = options;
+	const { width = CARD_WIDTH, backgroundColor, skipValidation = false } = options;
 
 	// Validate SVG size and complexity (unless explicitly skipped)
 	if (!skipValidation) {

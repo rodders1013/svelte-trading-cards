@@ -100,6 +100,12 @@ export type { DownloadOptions } from './export/index.js';
 // Utilities
 export { FitText } from './utils/index.js';
 
+// External image policy
+export {
+	setExternalImagesEnabled,
+	isExternalImagesEnabled
+} from './security/externalImages.js';
+
 // Presets (Dataset-based label system)
 export {
 	// Helper functions

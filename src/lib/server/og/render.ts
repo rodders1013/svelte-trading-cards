@@ -114,7 +114,7 @@ export async function renderOGImage(
 	// Convert to PNG (scale by rendering at higher resolution)
 	const outputWidth = width * scale;
 	const outputHeight = height * scale;
-	const result = await svgToPNG(svgWithImages, { width: outputWidth, height: outputHeight });
+	const result = await svgToPNG(svgWithImages, { width: outputWidth });
 
 	return {
 		buffer: result.buffer,

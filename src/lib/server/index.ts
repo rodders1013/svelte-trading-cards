@@ -48,6 +48,12 @@ export type {
 	Position
 } from './og/index.js';
 
+// External image policy controls
+export {
+	setExternalImagesEnabled,
+	isExternalImagesEnabled
+} from '../security/externalImages.js';
+
 // Re-export types and constants for convenience
 export type { CardTemplate, CardData, ContainerContext } from '../types/index.js';
 export { CARD_WIDTH, CARD_HEIGHT, CARD_RADIUS } from '../types/CardTemplate.js';

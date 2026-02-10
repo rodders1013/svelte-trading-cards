@@ -150,7 +150,13 @@ The `CardCreator` component is a full-featured template designer you can embed i
 <button onclick={() => downloadPNGClient(svgElement)}>Download PNG</button>
 ```
 
-**Note:** Client-side PNG export automatically embeds external images as base64 before rendering to canvas, avoiding CORS issues.
+**Note:** External image URLs are disabled by default. Enable explicitly only when your backend image safety pipeline is ready:
+
+```typescript
+import { setExternalImagesEnabled } from 'svelte-trading-cards';
+
+setExternalImagesEnabled(true);
+```
 
 ### 4. Export with Bleed (for Print)
 
@@ -574,7 +580,7 @@ const svgWithImages = await embedImages(svg);  // Embeds external images as base
 const { buffer } = await svgToPNG(svgWithImages);
 ```
 
-**Note:** Server-side export uses `sharp` to convert WebP images to PNG (resvg-js doesn't support WebP). This is handled automatically by `embedImages()`.
+**Note:** Server-side export uses `sharp` to convert WebP images to PNG (resvg-js doesn't support WebP). When external images are enabled, this is handled automatically by `embedImages()`.
 
 ### SVG Validation
 
