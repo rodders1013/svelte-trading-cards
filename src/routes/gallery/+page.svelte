@@ -64,13 +64,7 @@
 	let useDisplayEffects = $state(true);
 
 	const currentDataset = $derived(datasets[selectedDataset]);
-	const cards = $derived.by(() => {
-		const allCards = currentDataset.cards as AnyCard[];
-		if (!selectedGameTitle) return allCards;
-		const gameTitle = selectedGameTitle;
-		const match = allCards.find((card) => getCardTitle(card).toLowerCase() === gameTitle.toLowerCase());
-		return match ? [match] : allCards;
-	});
+	const cards = $derived(currentDataset.cards as AnyCard[]);
 
 	// Template state
 	let loadedTemplate = $state<CardTemplate | null>(null);
@@ -109,6 +103,11 @@
 		if ('genre' in card) return card.genre; // Xbox
 		if ('tags' in card) return card.tags[0] ?? 'Game'; // Steam
 		return card.category; // PlayStation
+	}
+
+	function isTemplateSourceCard(card: AnyCard): boolean {
+		if (!selectedGameTitle) return false;
+		return getCardTitle(card).toLowerCase() === selectedGameTitle.toLowerCase();
 	}
 
 	function splitGameKey(gameKey: string | null): { dataset: 'xbox' | 'playstation' | 'steam' | null; title: string | null } {
@@ -346,7 +345,9 @@
 		<!-- Cards Grid -->
 		<div class="grid gap-8 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
 			{#each cards as card (card.id)}
-				<UICard.Root class="card-wrapper overflow-visible">
+				<UICard.Root
+					class="card-wrapper overflow-visible {isTemplateSourceCard(card) ? 'border-blue-500 ring-2 ring-blue-500/30' : ''}"
+				>
 					<!-- Extra padding to allow room for scale/tilt effects -->
 					<div class="p-4" data-card-id={card.id}>
 						<div class="aspect-[750/1050]">
@@ -366,6 +367,9 @@
 						<div>
 							<h3 class="font-semibold">{getCardTitle(card)}</h3>
 							<p class="text-xs text-muted-foreground">{getCardPlayerId(card)}</p>
+							{#if isTemplateSourceCard(card)}
+								<p class="text-[11px] font-medium text-blue-500">Template source game</p>
+							{/if}
 						</div>
 
 						<div class="flex flex-wrap gap-2">
