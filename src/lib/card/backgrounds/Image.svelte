@@ -77,8 +77,7 @@
 	import { getShapeRenderData } from '$lib/styling/shapes/shapeUtils.js';
 	import { hasActiveFilters } from '$lib/styling/filters/types.js';
 	import {
-		isExternalImageUrl,
-		isExternalImagesEnabled
+		isAllowedExternalImageUrl
 	} from '$lib/security/externalImages.js';
 
 	let {
@@ -122,7 +121,7 @@
 
 	const displayImageUrl = $derived.by(() => {
 		if (!resolvedImageUrl) return undefined;
-		if (!isExternalImagesEnabled() && isExternalImageUrl(resolvedImageUrl)) {
+		if (!isAllowedExternalImageUrl(resolvedImageUrl)) {
 			return undefined;
 		}
 		return resolvedImageUrl;

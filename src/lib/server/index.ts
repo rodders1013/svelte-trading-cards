@@ -51,7 +51,9 @@ export type {
 // External image policy controls
 export {
 	setExternalImagesEnabled,
-	isExternalImagesEnabled
+	isExternalImagesEnabled,
+	setExternalImageAllowlist,
+	getExternalImageAllowlist
 } from '../security/externalImages.js';
 
 // Re-export types and constants for convenience

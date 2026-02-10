@@ -103,7 +103,9 @@ export { FitText } from './utils/index.js';
 // External image policy
 export {
 	setExternalImagesEnabled,
-	isExternalImagesEnabled
+	isExternalImagesEnabled,
+	setExternalImageAllowlist,
+	getExternalImageAllowlist
 } from './security/externalImages.js';
 
 // Presets (Dataset-based label system)

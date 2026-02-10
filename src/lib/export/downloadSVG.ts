@@ -7,6 +7,7 @@
 
 import { CARD_WIDTH, CARD_HEIGHT } from '../types/CardTemplate.js';
 import {
+	isAllowedExternalImageUrl,
 	isExternalImagesEnabled,
 	stripExternalImageReferences
 } from '$lib/security/externalImages.js';
@@ -43,7 +44,9 @@ async function embedImagesClient(svgString: string): Promise<string> {
 	if (matches.length === 0) return svgString;
 
 	// Deduplicate URLs
-	const uniqueUrls = [...new Set(matches.map((m) => m[1]))];
+	const uniqueUrls = [...new Set(matches.map((m) => m[1]).filter((url) => isAllowedExternalImageUrl(url)))];
+
+	if (uniqueUrls.length === 0) return svgString;
 
 	// Fetch all images in parallel
 	const urlToDataUri = new Map<string, string>();
@@ -360,9 +363,8 @@ export async function svgToPNGClient(svgElement: SVGSVGElement, scale = 1, bleed
 
 	// Serialize and embed external images as base64 to avoid CORS tainting
 	let svgString = serializeSVG(svgToRender, true);
-	if (isExternalImagesEnabled()) {
-		svgString = await embedImagesClient(svgString);
-	} else {
+	svgString = await embedImagesClient(svgString);
+	if (!isExternalImagesEnabled()) {
 		svgString = stripExternalImageReferences(svgString);
 	}
 

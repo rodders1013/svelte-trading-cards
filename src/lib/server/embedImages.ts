@@ -7,6 +7,7 @@
 
 import sharp from 'sharp';
 import {
+	isAllowedExternalImageUrl,
 	isExternalImagesEnabled,
 	stripExternalImageReferences
 } from '$lib/security/externalImages.js';
@@ -169,9 +170,7 @@ async function processWithConcurrency<T, R>(
  * ```
  */
 export async function embedImages(svgString: string, options: EmbedOptions = {}): Promise<string> {
-	if (!isExternalImagesEnabled()) {
-		return stripExternalImageReferences(svgString);
-	}
+	const externalImagesEnabled = isExternalImagesEnabled();
 
 	const { concurrency = 3, timeout = 10000, throwOnError = false } = options;
 
@@ -181,8 +180,13 @@ export async function embedImages(svgString: string, options: EmbedOptions = {})
 		return svgString;
 	}
 
+	const allowedMatches = imageMatches.filter((match) => isAllowedExternalImageUrl(match.url));
+	if (allowedMatches.length === 0) {
+		return externalImagesEnabled ? svgString : stripExternalImageReferences(svgString);
+	}
+
 	// Deduplicate URLs
-	const uniqueUrls = [...new Set(imageMatches.map((m) => m.url))];
+	const uniqueUrls = [...new Set(allowedMatches.map((m) => m.url))];
 
 	// Fetch all unique images with concurrency limit
 	const urlToDataUri = new Map<string, string>();
@@ -209,7 +213,7 @@ export async function embedImages(svgString: string, options: EmbedOptions = {})
 		result = result.replace(new RegExp(escapedUrl, 'g'), dataUri);
 	}
 
-	return result;
+	return externalImagesEnabled ? result : stripExternalImageReferences(result);
 }
 
 /**
