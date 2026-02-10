@@ -466,6 +466,7 @@
 				</p>
 				<div class="mt-6 flex gap-4">
 					<Button href="/creator">Go to Creator</Button>
+					<Button variant="outline" href="/templates">Go to Templates</Button>
 					<label class="inline-flex h-9 cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-background px-4 text-sm font-medium shadow-xs hover:bg-accent hover:text-accent-foreground">
 						<input type="file" accept=".json" class="hidden" onchange={loadTemplate} />
 						Load Template JSON
