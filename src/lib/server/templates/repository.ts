@@ -39,12 +39,16 @@ export interface StoredTemplate {
 }
 
 function toStoredTemplate(row: Record<string, unknown>, includeEditToken = false): StoredTemplate {
+	const rawTemplate = row.template_json;
+	const parsedTemplate =
+		typeof rawTemplate === 'string' ? JSON.parse(rawTemplate) : rawTemplate;
+
 	return {
 		id: String(row.id),
 		slug: String(row.slug),
 		name: String(row.name),
 		description: row.description ? String(row.description) : null,
-		template: CardTemplateSchema.parse(row.template_json),
+		template: CardTemplateSchema.parse(parsedTemplate),
 		previewImageUrl: row.preview_image_url ? String(row.preview_image_url) : null,
 		tags: Array.isArray(row.tags) ? row.tags.map(String) : [],
 		isPublic: Boolean(row.is_public),
