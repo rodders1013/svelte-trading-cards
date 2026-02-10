@@ -11,7 +11,7 @@
 		</p>
 	</div>
 
-	<div class="grid gap-6 md:grid-cols-2">
+	<div class="grid gap-6 md:grid-cols-3">
 		<Card.Root>
 			<Card.Header>
 				<Card.Title>Creator</Card.Title>
@@ -43,6 +43,23 @@
 			</Card.Content>
 			<Card.Footer>
 				<Button href="/gallery">Open Gallery</Button>
+			</Card.Footer>
+		</Card.Root>
+
+		<Card.Root>
+			<Card.Header>
+				<Card.Title>Templates</Card.Title>
+				<Card.Description>Browse shared templates stored in Postgres</Card.Description>
+			</Card.Header>
+			<Card.Content>
+				<ul class="list-inside list-disc space-y-1 text-sm text-muted-foreground">
+					<li>View public template library</li>
+					<li>Open template JSON by slug</li>
+					<li>Foundation for creator save-to-cloud</li>
+				</ul>
+			</Card.Content>
+			<Card.Footer>
+				<Button href="/templates">Open Templates</Button>
 			</Card.Footer>
 		</Card.Root>
 	</div>

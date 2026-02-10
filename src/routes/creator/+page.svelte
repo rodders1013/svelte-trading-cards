@@ -16,23 +16,47 @@
 		])
 	);
 
-	function handleSave(data: { template: unknown; editorState: unknown; name: string }) {
-		// Default behavior: download as JSON
-		const savedTemplate = {
-			id: `template-${Date.now()}`,
+	async function handleSave(data: { template: unknown; editorState: unknown; name: string }) {
+		const payload = {
 			name: data.name,
-			createdAt: new Date().toISOString(),
-			updatedAt: new Date().toISOString(),
+			description: 'Created in card creator',
 			template: data.template,
-			editorState: data.editorState
+			isPublic: true,
+			tags: ['creator']
 		};
-		const blob = new Blob([JSON.stringify(savedTemplate, null, '\t')], { type: 'application/json' });
-		const url = URL.createObjectURL(blob);
-		const a = document.createElement('a');
-		a.href = url;
-		a.download = `${data.name.toLowerCase().replace(/\s+/g, '-')}.json`;
-		a.click();
-		URL.revokeObjectURL(url);
+
+		try {
+			const response = await fetch('/api/templates', {
+				method: 'POST',
+				headers: { 'content-type': 'application/json' },
+				body: JSON.stringify(payload)
+			});
+
+			if (!response.ok) throw new Error('template save failed');
+			const created = await response.json();
+			if (created.editToken && created.slug) {
+				localStorage.setItem(`template-edit-token:${created.slug}`, created.editToken);
+			}
+			alert(`Saved template "${created.name}" to shared library.`);
+		} catch {
+			// Fallback behavior: download as JSON
+			const savedTemplate = {
+				id: `template-${Date.now()}`,
+				name: data.name,
+				createdAt: new Date().toISOString(),
+				updatedAt: new Date().toISOString(),
+				template: data.template,
+				editorState: data.editorState
+			};
+			const blob = new Blob([JSON.stringify(savedTemplate, null, '\t')], { type: 'application/json' });
+			const url = URL.createObjectURL(blob);
+			const a = document.createElement('a');
+			a.href = url;
+			a.download = `${data.name.toLowerCase().replace(/\s+/g, '-')}.json`;
+			a.click();
+			URL.revokeObjectURL(url);
+			alert('Database save unavailable, downloaded JSON instead.');
+		}
 	}
 </script>
 

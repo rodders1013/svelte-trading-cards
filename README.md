@@ -568,7 +568,32 @@ npm run build        # Build library
 
 - `/` - Demo gallery
 - `/creator` - Visual template creator
+- `/templates` - Public template library (database-backed)
 - `/test/text-fitting` - Text fitting test page
+
+### Hosted App MVP (Railway)
+
+This repo can run as a hostable app while still shipping the library.
+
+Required environment variable:
+
+```bash
+DATABASE_URL=postgres://...
+```
+
+Run the template table migration:
+
+```bash
+psql "$DATABASE_URL" -f project-files/migrations/001_templates.sql
+```
+
+Template APIs:
+
+- `GET /api/templates` - list public templates
+- `POST /api/templates` - create template (returns `editToken`)
+- `GET /api/templates/[slug]` - get one public template
+- `PATCH /api/templates/[slug]` - update template (`x-edit-token` required)
+- `DELETE /api/templates/[slug]` - delete template (`x-edit-token` required)
 
 ## Server-Side Export
 
