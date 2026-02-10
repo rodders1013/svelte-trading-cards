@@ -88,11 +88,13 @@
 		</div>
 	</div>
 
-	<div class="grid gap-4 lg:grid-cols-[320px_1fr]">
+	<div class="grid gap-4 lg:grid-cols-[260px_1fr]">
 		<div class="rounded border border-input bg-card p-4">
 			<h2 class="mb-2 text-sm font-medium">Preview Card</h2>
-			<div class="mx-auto flex max-w-[260px] justify-center overflow-hidden rounded border border-input bg-muted/10 p-2">
-				<CardCanvas template={data.template.template} data={resolvePreviewData()} width={180} height={252} />
+			<div
+				class="mx-auto w-[160px] rounded border border-input bg-muted/10 p-1 [&_svg]:h-auto [&_svg]:w-full"
+			>
+				<CardCanvas template={data.template.template} data={resolvePreviewData()} />
 			</div>
 		</div>
 

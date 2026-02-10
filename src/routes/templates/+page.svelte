@@ -183,14 +183,11 @@
 			<div class="grid gap-3 md:grid-cols-2">
 				{#each data.templates as template (template.slug)}
 					<div class="rounded border border-input bg-card p-4">
-						<div class="grid gap-3 sm:grid-cols-[120px_1fr]">
-							<div class="flex items-start justify-center overflow-hidden rounded border border-input bg-muted/10 p-2">
-								<CardCanvas
-									template={template.template}
-									data={resolvePreviewData(template)}
-									width={96}
-									height={134}
-								/>
+						<div class="grid gap-3 sm:grid-cols-[96px_1fr]">
+							<div
+								class="flex items-start justify-center rounded border border-input bg-muted/10 p-1 [&_svg]:h-auto [&_svg]:w-full"
+							>
+								<CardCanvas template={template.template} data={resolvePreviewData(template)} />
 							</div>
 							<div>
 								<div class="flex items-start justify-between gap-3">
