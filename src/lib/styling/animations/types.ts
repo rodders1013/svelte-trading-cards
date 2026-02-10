@@ -17,7 +17,8 @@ export const AnimationType = z.enum([
 	'float',
 	'fade',
 	'ping',
-	'trace'
+	'trace',
+	'glint'
 ]);
 export type AnimationType = z.infer<typeof AnimationType>;
 
@@ -89,6 +90,12 @@ export const AnimationConfigSchema = z.object({
 	traceColor: z.string().default('currentColor'), // Color for trace overlay
 	traceGlow: z.number().min(0).max(10).default(3), // Glow blur radius
 	traceGlowColor: z.string().default('currentColor'), // Glow color for trace overlay
+	glintBandPct: z.number().min(2).max(40).default(12), // Width of the moving highlight band
+	glintSize: z.number().min(0.5).max(10).optional(), // Stroke width for glint overlay (defaults to inherit)
+	glintOpacity: z.number().min(0).max(1).default(0.9), // Opacity for glint overlay
+	glintColor: z.string().default('#ffffff'), // Highlight color
+	glintGlow: z.number().min(0).max(10).default(2), // Glow blur radius
+	glintGlowColor: z.string().default('#ffffff'), // Glow color
 	easing: AnimationEasing.default('ease-in-out'),
 	delay: z.number().min(0).default(0), // Delay in seconds
 	iterationCount: z.union([z.number().min(1), z.literal('infinite')]).default('infinite'),

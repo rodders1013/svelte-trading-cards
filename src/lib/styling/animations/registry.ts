@@ -384,6 +384,50 @@ export const ANIMATION_DEFINITIONS: AnimationDefinition[] = [
 		ui: {
 			supportsDirection: true
 		}
+	},
+	{
+		id: 'glint',
+		label: 'Glint',
+		description: 'Traveling diagonal highlight sweep',
+		defaultEasing: 'linear',
+		supportsDirection: true,
+		directionClassByDirection: {
+			clockwise: 'tc-glint-band',
+			counterclockwise: 'tc-glint-band-reverse'
+		},
+		keyframes: [
+			{
+				name: 'tc-glint-band',
+				css: `
+				0% { x: -1.2; }
+				100% { x: 2.2; }
+			`
+			},
+			{
+				name: 'tc-glint-band-reverse',
+				css: `
+				0% { x: 2.2; }
+				100% { x: -1.2; }
+			`
+			}
+		],
+		classes: [
+			{
+				className: 'tc-glint-band',
+				keyframe: 'tc-glint-band',
+				defaultDuration: '4s',
+				defaultEasing: 'linear'
+			},
+			{
+				className: 'tc-glint-band-reverse',
+				keyframe: 'tc-glint-band-reverse',
+				defaultDuration: '4s',
+				defaultEasing: 'linear'
+			}
+		],
+		ui: {
+			supportsDirection: true
+		}
 	}
 ];
 

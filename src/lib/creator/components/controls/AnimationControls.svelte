@@ -88,15 +88,21 @@
 				traceSegmentPct: animation?.traceSegmentPct ?? 4,
 				traceCount: animation?.traceCount ?? 1,
 				traceSize: animation?.traceSize ?? undefined,
-				traceOpacity: animation?.traceOpacity ?? 1,
-				traceColor: animation?.traceColor ?? 'currentColor',
-				traceGlow: animation?.traceGlow ?? 3,
-				traceGlowColor: animation?.traceGlowColor ?? 'currentColor',
-				easing: animation?.easing ?? 'ease-in-out',
-				delay: animation?.delay ?? 0,
-				iterationCount: animation?.iterationCount ?? 'infinite',
-				paused: animation?.paused ?? false
-			};
+					traceOpacity: animation?.traceOpacity ?? 1,
+					traceColor: animation?.traceColor ?? 'currentColor',
+					traceGlow: animation?.traceGlow ?? 3,
+					traceGlowColor: animation?.traceGlowColor ?? 'currentColor',
+					glintBandPct: animation?.glintBandPct ?? 12,
+					glintSize: animation?.glintSize ?? undefined,
+					glintOpacity: animation?.glintOpacity ?? 0.9,
+					glintColor: animation?.glintColor ?? '#ffffff',
+					glintGlow: animation?.glintGlow ?? 2,
+					glintGlowColor: animation?.glintGlowColor ?? '#ffffff',
+					easing: animation?.easing ?? 'ease-in-out',
+					delay: animation?.delay ?? 0,
+					iterationCount: animation?.iterationCount ?? 'infinite',
+					paused: animation?.paused ?? false
+				};
 		}
 	}
 
@@ -294,12 +300,12 @@
 				{/if}
 			{/if}
 
-			{#if animation.type === 'trace'}
-				<div>
-					<span class="text-sm text-muted-foreground">Mode</span>
-					<Select.Root type="single" value={animation.traceMode} onValueChange={(v) => v && updateAnimation('traceMode', v as TraceMode)}>
+				{#if animation.type === 'trace'}
+					<div>
+						<span class="text-sm text-muted-foreground">Mode</span>
+						<Select.Root type="single" value={animation.traceMode} onValueChange={(v) => v && updateAnimation('traceMode', v as TraceMode)}>
 						<Select.Trigger class="mt-1 w-full">
-							{traceModeOptions.find((opt) => opt.value === animation.traceMode)?.label ?? 'Reveal'}
+							{traceModeOptions.find((opt) => opt.value === (animation?.traceMode ?? 'reveal'))?.label ?? 'Reveal'}
 						</Select.Trigger>
 						<Select.Content>
 							{#each traceModeOptions as opt (opt.value)}
@@ -323,11 +329,11 @@
 						onValueChange={(v: number) => updateAnimation('traceSegmentPct', v)}
 					/>
 				</div>
-				{#if animation.traceMode === 'multi-ball'}
-					<div>
-						<div class="flex items-center justify-between">
-							<span class="text-sm text-muted-foreground">Count</span>
-							<span class="text-sm text-muted-foreground">{animation.traceCount}</span>
+					{#if animation.traceMode === 'multi-ball'}
+						<div>
+							<div class="flex items-center justify-between">
+								<span class="text-sm text-muted-foreground">Count</span>
+								<span class="text-sm text-muted-foreground">{animation.traceCount}</span>
 						</div>
 						<Slider
 							type="single"
@@ -337,12 +343,12 @@
 							max={8}
 							step={1}
 							onValueChange={(v: number) => updateAnimation('traceCount', v)}
-						/>
-					</div>
-				{/if}
-				<div>
-					<div class="flex items-center justify-between">
-						<span class="text-sm text-muted-foreground">Size</span>
+							/>
+						</div>
+					{/if}
+					<div>
+						<div class="flex items-center justify-between">
+							<span class="text-sm text-muted-foreground">Size</span>
 						<span class="text-sm text-muted-foreground">
 							{animation.traceSize === undefined ? 'Auto' : `${animation.traceSize}px`}
 						</span>
@@ -435,8 +441,122 @@
 						step={0.5}
 						onValueChange={(v: number) => updateAnimation('traceGlow', v)}
 					/>
-				</div>
-			{/if}
+					</div>
+				{/if}
+
+				{#if animation.type === 'glint'}
+					<div>
+						<div class="flex items-center justify-between">
+							<span class="text-sm text-muted-foreground">Band Width</span>
+							<span class="text-sm text-muted-foreground">{animation.glintBandPct}%</span>
+						</div>
+						<Slider
+							type="single"
+							class="mt-2"
+							value={animation.glintBandPct}
+							min={2}
+							max={40}
+							step={1}
+							onValueChange={(v: number) => updateAnimation('glintBandPct', v)}
+						/>
+					</div>
+					<div>
+						<div class="flex items-center justify-between">
+							<span class="text-sm text-muted-foreground">Size</span>
+							<span class="text-sm text-muted-foreground">
+								{animation.glintSize === undefined ? 'Auto' : `${animation.glintSize}px`}
+							</span>
+						</div>
+						<div class="mt-2 flex items-center gap-2">
+							<Checkbox
+								id="glint-size-auto"
+								checked={animation.glintSize === undefined}
+								onCheckedChange={(checked) => {
+									if (checked === true) {
+										updateAnimation('glintSize', undefined);
+									} else {
+										updateAnimation('glintSize', 2);
+									}
+								}}
+							/>
+							<Label for="glint-size-auto" class="text-xs text-muted-foreground">Match stroke</Label>
+						</div>
+						<Slider
+							type="single"
+							class="mt-2"
+							value={animation.glintSize ?? 2}
+							min={0.5}
+							max={10}
+							step={0.5}
+							disabled={animation.glintSize === undefined}
+							onValueChange={(v: number) => updateAnimation('glintSize', v)}
+						/>
+					</div>
+					<div>
+						<div class="flex items-center justify-between">
+							<span class="text-sm text-muted-foreground">Opacity</span>
+							<span class="text-sm text-muted-foreground">{Math.round(animation.glintOpacity * 100)}%</span>
+						</div>
+						<Slider
+							type="single"
+							class="mt-2"
+							value={animation.glintOpacity}
+							min={0}
+							max={1}
+							step={0.05}
+							onValueChange={(v: number) => updateAnimation('glintOpacity', v)}
+						/>
+					</div>
+					<div>
+						<span class="text-sm text-muted-foreground">Color</span>
+						<div class="mt-1 flex items-center gap-2">
+							<input
+								type="color"
+								class="h-8 w-12 rounded border border-input bg-transparent"
+								value={animation.glintColor}
+								oninput={(e) => updateAnimation('glintColor', (e.currentTarget as HTMLInputElement).value)}
+							/>
+							<input
+								type="text"
+								class="flex-1 rounded border border-input bg-background px-2 py-1 text-xs"
+								value={animation.glintColor}
+								oninput={(e) => updateAnimation('glintColor', (e.currentTarget as HTMLInputElement).value)}
+							/>
+						</div>
+					</div>
+					<div>
+						<span class="text-sm text-muted-foreground">Glow Color</span>
+						<div class="mt-1 flex items-center gap-2">
+							<input
+								type="color"
+								class="h-8 w-12 rounded border border-input bg-transparent"
+								value={animation.glintGlowColor}
+								oninput={(e) => updateAnimation('glintGlowColor', (e.currentTarget as HTMLInputElement).value)}
+							/>
+							<input
+								type="text"
+								class="flex-1 rounded border border-input bg-background px-2 py-1 text-xs"
+								value={animation.glintGlowColor}
+								oninput={(e) => updateAnimation('glintGlowColor', (e.currentTarget as HTMLInputElement).value)}
+							/>
+						</div>
+					</div>
+					<div>
+						<div class="flex items-center justify-between">
+							<span class="text-sm text-muted-foreground">Glow</span>
+							<span class="text-sm text-muted-foreground">{animation.glintGlow.toFixed(1)}</span>
+						</div>
+						<Slider
+							type="single"
+							class="mt-2"
+							value={animation.glintGlow}
+							min={0}
+							max={10}
+							step={0.5}
+							onValueChange={(v: number) => updateAnimation('glintGlow', v)}
+						/>
+					</div>
+				{/if}
 
 			<div>
 				<span class="text-sm text-muted-foreground">Easing</span>
