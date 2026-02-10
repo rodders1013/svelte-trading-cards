@@ -1,11 +1,16 @@
 <script lang="ts">
 	import { CardCanvas } from '$lib';
+	import type { CardTemplate } from '$lib/types';
 	import { datasets, type AnyCard } from '$lib/demo';
 	import { registerPreviewComponents } from '$lib/demo/registerPreviewComponents.js';
+	import ExportDialog from '$lib/creator/components/dialogs/ExportDialog.svelte';
+	import { downloadSVG, downloadPNGClient } from '$lib/export/downloadSVG.js';
 
 	registerPreviewComponents();
 
 	let { data } = $props();
+	let showExportDialog = $state(false);
+	let previewSvgElement = $state<SVGSVGElement | null>(null);
 
 	type DatasetKey = 'xbox' | 'playstation' | 'steam';
 
@@ -65,6 +70,34 @@
 		const parts = splitGameKey(data.template.gameKey);
 		return parts.title ?? parts.dataset ?? null;
 	}
+
+	async function handleExport(options: { format: 'svg' | 'png'; bleedMm: number; scale: number }) {
+		if (previewSvgElement === null) {
+			alert('Cannot export: Preview not ready');
+			return;
+		}
+
+		const filename = data.template.name.toLowerCase().replace(/\s+/g, '-') || 'template-card';
+
+		if (options.format === 'svg') {
+			downloadSVG(previewSvgElement, {
+				filename,
+				bleedMm: options.bleedMm
+			});
+			return;
+		}
+
+		try {
+			await downloadPNGClient(previewSvgElement, {
+				filename,
+				scale: options.scale,
+				bleedMm: options.bleedMm
+			});
+		} catch (error) {
+			console.error('Export failed:', error);
+			alert('Export failed. Please try again.');
+		}
+	}
 </script>
 
 <div class="mx-auto max-w-7xl space-y-4 p-6">
@@ -84,6 +117,15 @@
 		<div class="flex items-center gap-2">
 			<a href={creatorHref()} class="rounded border border-input px-2 py-1 text-xs hover:bg-accent/20">Use in Creator</a>
 			<a href={galleryHref()} class="rounded border border-input px-2 py-1 text-xs hover:bg-accent/20">View in Gallery</a>
+			<button
+				type="button"
+				class="rounded border border-input px-2 py-1 text-xs hover:bg-accent/20"
+				onclick={() => {
+					showExportDialog = true;
+				}}
+			>
+				Download Card
+			</button>
 			<a
 				href={`/api/templates/${data.template.slug}`}
 				class="rounded border border-input px-2 py-1 text-xs hover:bg-accent/20"
@@ -100,7 +142,11 @@
 			<div
 				class="mx-auto w-[200px] rounded border border-input bg-muted/10 p-1 [&_svg]:h-auto [&_svg]:w-full"
 			>
-				<CardCanvas template={data.template.template} data={resolvePreviewData()} />
+				<CardCanvas
+					template={data.template.template as CardTemplate}
+					data={resolvePreviewData()}
+					bind:svgElement={previewSvgElement}
+				/>
 			</div>
 		</div>
 
@@ -114,3 +160,5 @@
 		</div>
 	</div>
 </div>
+
+<ExportDialog bind:show={showExportDialog} onExport={handleExport} />
