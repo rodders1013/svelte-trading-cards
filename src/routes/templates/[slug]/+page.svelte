@@ -84,15 +84,21 @@
 		<div class="flex items-center gap-2">
 			<a href={creatorHref()} class="rounded border border-input px-2 py-1 text-xs hover:bg-accent/20">Use in Creator</a>
 			<a href={galleryHref()} class="rounded border border-input px-2 py-1 text-xs hover:bg-accent/20">View in Gallery</a>
+			<a
+				href={`/api/templates/${data.template.slug}`}
+				class="rounded border border-input px-2 py-1 text-xs hover:bg-accent/20"
+			>
+				Download JSON
+			</a>
 			<a href="/templates" class="text-sm text-primary underline">Back to templates</a>
 		</div>
 	</div>
 
-	<div class="grid gap-4 lg:grid-cols-[260px_1fr]">
+	<div class="grid gap-4 lg:grid-cols-[320px_minmax(0,760px)] lg:justify-start">
 		<div class="rounded border border-input bg-card p-4">
 			<h2 class="mb-2 text-sm font-medium">Preview Card</h2>
 			<div
-				class="mx-auto w-[160px] rounded border border-input bg-muted/10 p-1 [&_svg]:h-auto [&_svg]:w-full"
+				class="mx-auto w-[200px] rounded border border-input bg-muted/10 p-1 [&_svg]:h-auto [&_svg]:w-full"
 			>
 				<CardCanvas template={data.template.template} data={resolvePreviewData()} />
 			</div>
