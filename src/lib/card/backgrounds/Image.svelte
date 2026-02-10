@@ -76,6 +76,10 @@
 	import HolographicWrapper from '$lib/styling/HolographicWrapper.svelte';
 	import { getShapeRenderData } from '$lib/styling/shapes/shapeUtils.js';
 	import { hasActiveFilters } from '$lib/styling/filters/types.js';
+	import {
+		isExternalImageUrl,
+		isExternalImagesEnabled
+	} from '$lib/security/externalImages.js';
 
 	let {
 		imageUrl,
@@ -114,6 +118,14 @@
 			if (typeof value === 'string') return value;
 		}
 		return imageUrl;
+	});
+
+	const displayImageUrl = $derived.by(() => {
+		if (!resolvedImageUrl) return undefined;
+		if (!isExternalImagesEnabled() && isExternalImageUrl(resolvedImageUrl)) {
+			return undefined;
+		}
+		return resolvedImageUrl;
 	});
 
 	// Determine clipping mode
@@ -181,7 +193,7 @@
 		{#if imgData.transform}
 			<g transform={imgData.transform}>
 				<image
-					href={resolvedImageUrl}
+					href={displayImageUrl}
 					x={imgData.x}
 					y={imgData.y}
 					width={imgData.w}
@@ -192,7 +204,7 @@
 			</g>
 		{:else}
 			<image
-				href={resolvedImageUrl}
+				href={displayImageUrl}
 				x={imgData.x}
 				y={imgData.y}
 				width={imgData.w}
@@ -204,7 +216,7 @@
 	</g>
 {/snippet}
 
-{#if resolvedImageUrl}
+{#if displayImageUrl}
 	<defs>
 		<!-- Clip path: rounded rect or simple rect for container bounds -->
 		<clipPath id={clipId}>

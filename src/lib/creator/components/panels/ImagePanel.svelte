@@ -11,6 +11,7 @@
 	import FlipHorizontal from '@lucide/svelte/icons/flip-horizontal';
 	import FlipVertical from '@lucide/svelte/icons/flip-vertical';
 	import HelpTooltip from '../HelpTooltip.svelte';
+	import { isExternalImagesEnabled } from '$lib/security/externalImages.js';
 
 	let {
 		component,
@@ -46,6 +47,8 @@
 		{ value: 'xMidYMid meet', label: 'Contain (fit)' },
 		{ value: 'none', label: 'Stretch' }
 	];
+
+	const externalImagesEnabled = isExternalImagesEnabled();
 
 	// Transform section state
 	let showTransform = $state(false);
@@ -136,19 +139,35 @@
 		<div class="flex-1 border-t border-zinc-700"></div>
 	</div>
 
-	<FormInput
-		label="Custom URL"
-		value={component.customUrl ?? ''}
-		type="url"
-		placeholder="https://..."
-		onchange={(v) => {
-			onUpdate('customUrl', v as string);
-			// Clear data field when entering a custom URL
-			if (v && component.dataField) {
-				onUpdate('dataField', '');
-			}
-		}}
-	/>
+	{#if externalImagesEnabled}
+		<FormInput
+			label="Custom URL"
+			value={component.customUrl ?? ''}
+			type="url"
+			placeholder="https://..."
+			onchange={(v) => {
+				onUpdate('customUrl', v as string);
+				// Clear data field when entering a custom URL
+				if (v && component.dataField) {
+					onUpdate('dataField', '');
+				}
+			}}
+		/>
+	{:else}
+		<div>
+			<div class="mb-0.5 text-xs text-muted-foreground">Custom URL</div>
+			<input
+				type="url"
+				value={component.customUrl ?? ''}
+				disabled
+				placeholder="External images disabled"
+				class="h-8 w-full rounded border border-input bg-muted px-3 text-sm text-muted-foreground disabled:cursor-not-allowed disabled:opacity-60"
+			/>
+			<p class="mt-1 text-[11px] text-muted-foreground">
+				Disabled until backend image safety checks are enabled.
+			</p>
+		</div>
+	{/if}
 
 	<FormGrid>
 		<FormSelect

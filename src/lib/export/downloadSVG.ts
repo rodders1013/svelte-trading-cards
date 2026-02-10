@@ -6,6 +6,10 @@
  */
 
 import { CARD_WIDTH, CARD_HEIGHT } from '../types/CardTemplate.js';
+import {
+	isExternalImagesEnabled,
+	stripExternalImageReferences
+} from '$lib/security/externalImages.js';
 
 /**
  * Fetches an image and converts it to a base64 data URI (client-side).
@@ -254,7 +258,10 @@ export function serializeSVG(svgElement: SVGSVGElement, includeDeclaration = tru
  * @returns A data URL containing the SVG
  */
 export function svgToDataURL(svgElement: SVGSVGElement): string {
-	const svgString = serializeSVG(svgElement, true);
+	let svgString = serializeSVG(svgElement, true);
+	if (!isExternalImagesEnabled()) {
+		svgString = stripExternalImageReferences(svgString);
+	}
 	const encoded = encodeURIComponent(svgString);
 	return `data:image/svg+xml;charset=utf-8,${encoded}`;
 }
@@ -266,7 +273,10 @@ export function svgToDataURL(svgElement: SVGSVGElement): string {
  * @returns A Blob containing the SVG
  */
 export function svgToBlob(svgElement: SVGSVGElement): Blob {
-	const svgString = serializeSVG(svgElement, true);
+	let svgString = serializeSVG(svgElement, true);
+	if (!isExternalImagesEnabled()) {
+		svgString = stripExternalImageReferences(svgString);
+	}
 	return new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' });
 }
 
@@ -350,7 +360,11 @@ export async function svgToPNGClient(svgElement: SVGSVGElement, scale = 1, bleed
 
 	// Serialize and embed external images as base64 to avoid CORS tainting
 	let svgString = serializeSVG(svgToRender, true);
-	svgString = await embedImagesClient(svgString);
+	if (isExternalImagesEnabled()) {
+		svgString = await embedImagesClient(svgString);
+	} else {
+		svgString = stripExternalImageReferences(svgString);
+	}
 
 	const svgBlob = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' });
 	const url = URL.createObjectURL(svgBlob);
