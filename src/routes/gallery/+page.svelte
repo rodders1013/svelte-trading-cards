@@ -105,6 +105,45 @@
 		return card.category; // PlayStation
 	}
 
+	const FIELD_ALIAS_GROUPS: string[][] = [
+		['gameName', 'title', 'appName', 'name'],
+		['gamertag', 'psnId', 'steamUsername', 'username', 'playerId'],
+		['coverArt', 'boxArt', 'headerImage', 'image', 'imageUrl'],
+		['achievements', 'trophies', 'achievementsUnlocked'],
+		['genre', 'category'],
+		['lastPlayed', 'lastSynced', 'lastPlayedTimestamp'],
+		['features', 'modes', 'dlc', 'highlights', 'tags', 'platforms']
+	];
+
+	function buildRenderableData(card: AnyCard): Record<string, unknown> {
+		const output: Record<string, unknown> = { ...(card as Record<string, unknown>) };
+
+		for (const group of FIELD_ALIAS_GROUPS) {
+			const sourceValue = group
+				.map((key) => output[key])
+				.find((value) =>
+					value !== undefined &&
+					value !== null &&
+					!(typeof value === 'string' && value.trim() === '')
+				);
+
+			if (sourceValue === undefined) continue;
+
+			for (const key of group) {
+				const current = output[key];
+				if (
+					current === undefined ||
+					current === null ||
+					(typeof current === 'string' && current.trim() === '')
+				) {
+					output[key] = sourceValue;
+				}
+			}
+		}
+
+		return output;
+	}
+
 	function isTemplateSourceCard(card: AnyCard): boolean {
 		if (!selectedGameTitle) return false;
 		return getCardTitle(card).toLowerCase() === selectedGameTitle.toLowerCase();
@@ -354,12 +393,12 @@
 							{#if useDisplayEffects}
 								<DisplayCard
 									{template}
-									data={card}
+									data={buildRenderableData(card)}
 									rarity={selectedRarity}
 									disabled={false}
 								/>
 							{:else}
-								<CardCanvas {template} data={card} />
+								<CardCanvas {template} data={buildRenderableData(card)} />
 							{/if}
 						</div>
 					</div>
