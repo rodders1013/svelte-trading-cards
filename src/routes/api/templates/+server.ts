@@ -3,6 +3,8 @@ import type { RequestHandler } from './$types';
 import { ZodError } from 'zod';
 import { createTemplate, listPublicTemplates } from '$lib/server/templates/repository.js';
 import { isDatabaseConfigured } from '$lib/server/db.js';
+import { enforceRateLimit } from '$lib/server/rateLimit.js';
+import { enforceContentLengthLimit } from '$lib/server/requestLimits.js';
 
 function getListOptions(url: URL) {
 	const limitParam = Number(url.searchParams.get('limit') ?? 24);
@@ -27,13 +29,16 @@ export const GET: RequestHandler = async ({ url }) => {
 	return json(result);
 };
 
-export const POST: RequestHandler = async ({ request }) => {
+export const POST: RequestHandler = async (event) => {
 	if (!isDatabaseConfigured()) {
 		throw error(500, 'DATABASE_URL is not configured');
 	}
 
+	enforceRateLimit(event, 'templates:create', 30, 60_000);
+	enforceContentLengthLimit(event.request, 600_000);
+
 	try {
-		const payload = await request.json();
+		const payload = await event.request.json();
 		const created = await createTemplate(payload);
 		return json(created, { status: 201 });
 	} catch (err) {

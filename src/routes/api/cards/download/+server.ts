@@ -1,15 +1,23 @@
-import { json, error } from '@sveltejs/kit';
+import { error } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { svgToPNG } from '$lib/server';
 import { embedImages, hasExternalImages } from '$lib/server/embedImages';
 import { sanitizeFilename } from '$lib/export/downloadSVG.js';
+import { enforceRateLimit } from '$lib/server/rateLimit.js';
+import { enforceContentLengthLimit } from '$lib/server/requestLimits.js';
 
-export const POST: RequestHandler = async ({ request }) => {
+export const POST: RequestHandler = async (event) => {
 	try {
-		const { svg, filename = 'card' } = await request.json();
+		enforceRateLimit(event, 'cards:download-png', 20, 60_000);
+		enforceContentLengthLimit(event.request, 1_200_000);
+
+		const { svg, filename = 'card' } = await event.request.json();
 
 		if (!svg || typeof svg !== 'string') {
 			throw error(400, 'SVG string is required');
+		}
+		if (svg.length > 1_000_000) {
+			throw error(413, 'SVG is too large');
 		}
 
 		// Sanitize filename to prevent header injection
